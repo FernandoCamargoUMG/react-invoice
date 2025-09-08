@@ -1,0 +1,164 @@
+/* Usuario conectado flotante */
+.user-info-floating {
+    position: fixed;
+    display: flex;
+    align-items: center;
+    background: rgba(34,36,58,0.97);
+    color: #fff;
+    padding: 1em 1.7em 1em 1.2em;
+    border-radius: 18px;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.18);
+    font-size: 1.13em;
+    z-index: 999;
+    gap: 0.7em;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    min-width: 220px;
+    min-height: 54px;
+}
+.user-info-bottom-right {
+    right: 24px;
+    bottom: 24px;
+    left: auto;
+}
+.user-info-bottom-left {
+  left: 54px;
+  bottom: 24px;
+  right: auto;
+}
+html, body {
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background: none !important;
+}
+.dashboard-hamburger-layout {
+    width: 100vw;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    background: none;
+    overflow: hidden;
+}
+
+.hamburger-btn {
+    position: fixed;
+    top: 24px;
+    left: 24px;
+    background: #222;
+    border: none;
+    color: #fff;
+    border-radius: 50%;
+    padding: 0.6em 0.7em;
+    cursor: pointer;
+    z-index: 201;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    transition: background 0.2s;
+}
+.hamburger-btn:hover {
+    background: #646cff;
+}
+
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: -260px;
+    width: 240px;
+    height: 100vh;
+    background: #23243a;
+    color: #fff;
+    box-shadow: 2px 0 16px rgba(0,0,0,0.18);
+    padding: 2em 1.2em 1em 1.2em;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5em;
+    z-index: 300;
+    transition: left 0.3s cubic-bezier(.4,0,.2,1);
+}
+.sidebar.open {
+    left: 0;
+}
+.close-btn {
+    position: absolute;
+    top: 18px;
+    right: 18px;
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 1.2em;
+    cursor: pointer;
+}
+.sidebar h2 {
+    margin-bottom: 1.2em;
+    color: #fff;
+    font-size: 1.3em;
+    text-align: left;
+}
+.sidebar-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2em;
+}
+.sidebar-menu a {
+    display: flex;
+    align-items: center;
+    gap: 0.7em;
+    background: #646cff;
+    color: #fff;
+    padding: 0.8em 1em;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 1.08em;
+    transition: background 0.2s;
+}
+.sidebar-menu a:hover {
+    background: #535bf2;
+}
+.sidebar-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0,0,0,0.25);
+    z-index: 150;
+}
+.dashboard-main-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        box-sizing: border-box;
+        z-index: 1;
+        text-align: center;
+        margin: 0;
+        padding: 2.5em 2em;
+        min-width: 350px;
+        max-width: 650px;
+        width: 100%;
+        background: rgba(24, 26, 32, 0.65);
+        border-radius: 22px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+        border: 1.5px solid rgba(255,255,255,0.13);
+        backdrop-filter: blur(10px);
+        animation: fadeInGlass 0.7s cubic-bezier(.4,0,.2,1);
+}
+
+@keyframes fadeInGlass {
+    from { opacity: 0; transform: scale(0.97); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.dashboard-main-content h1 {
+    font-size: 2.5em;
+    margin-bottom: 0.7em;
+    font-weight: 700;
+}
+.dashboard-main-content p {
+    font-size: 1.2em;
+    color: #bdbdbd;
+}
