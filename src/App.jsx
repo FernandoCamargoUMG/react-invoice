@@ -23,7 +23,14 @@ function App() {
 
   return (
     <Router>
-      <div style={{ position: 'fixed', top: 20, right: 20, zIndex: 300 }}>
+      <div style={{ position: 'fixed', top: 20, right: 20, zIndex: 300, display: 'flex', gap: '10px' }}>
+        <button
+          onClick={() => window.location.href = '/'}
+          className="logout-btn"
+          style={{ background: '#22223b', color: 'white', border: 'none', borderRadius: '6px', padding: '8px 16px', cursor: 'pointer' }}
+        >
+          Inicio
+        </button>
         <button onClick={handleLogout} className="logout-btn">
           Cerrar sesión
         </button>
