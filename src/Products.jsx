@@ -38,7 +38,7 @@ const Products = () => {
 	const [page, setPage] = useState(0);
 	const [rowsPerPage, setRowsPerPage] = useState(5);
 	const [openModal, setOpenModal] = useState(false);
-	const [newProduct, setNewProduct] = useState({ name: '', price: '', description: '' });
+	const [newProduct, setNewProduct] = useState({ name: '', price: '', description: '', stock: '' });
 	const [successMsg, setSuccessMsg] = useState('');
 
 	const fetchProducts = async () => {
@@ -109,7 +109,7 @@ const Products = () => {
 					setOpenModal(false);
 					setEditMode(false);
 					setEditId(null);
-					setNewProduct({ name: '', price: '', description: '' });
+					setNewProduct({ name: '', price: '', description: '', stock: '' });
 				}}>
 					<DialogTitle>{editMode ? 'Editar producto' : 'Agregar producto'}</DialogTitle>
 					<DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, minWidth: 320 }}>
@@ -130,13 +130,19 @@ const Products = () => {
 							value={newProduct.description}
 							onChange={e => setNewProduct({ ...newProduct, description: e.target.value })}
 						/>
+						<TextField
+							label="Stock"
+							type="number"
+							value={newProduct.stock}
+							onChange={e => setNewProduct({ ...newProduct, stock: e.target.value })}
+						/>
 					</DialogContent>
 					<DialogActions>
 						<Button onClick={() => {
 							setOpenModal(false);
 							setEditMode(false);
 							setEditId(null);
-							setNewProduct({ name: '', price: '', description: '' });
+							setNewProduct({ name: '', price: '', description: '', stock: '' });
 						}} color="secondary">Cancelar</Button>
 						<Button
 							variant="contained"
@@ -169,7 +175,7 @@ const Products = () => {
 										setOpenModal(false);
 										setEditMode(false);
 										setEditId(null);
-										setNewProduct({ name: '', price: '', description: '' });
+										setNewProduct({ name: '', price: '', description: '', stock: '' });
 										setShowTable(true);
 										setSuccessMsg(editMode ? 'Producto editado correctamente' : 'Producto guardado correctamente');
 										setTimeout(() => setSuccessMsg(''), 3000);
@@ -217,6 +223,7 @@ const Products = () => {
 									<TableCell><b>Nombre</b></TableCell>
 									<TableCell><b>Precio</b></TableCell>
 									<TableCell><b>Descripción</b></TableCell>
+									<TableCell><b>Stock</b></TableCell>
 									<TableCell align="center"><b>Acciones</b></TableCell>
 								</TableRow>
 							</TableHead>
@@ -231,11 +238,12 @@ const Products = () => {
 											<TableCell>{p.name}</TableCell>
 											<TableCell>{p.price}</TableCell>
 											<TableCell>{p.description}</TableCell>
+											<TableCell>{p.stock}</TableCell>
 											<TableCell align="center">
 												<IconButton color="primary" size="small" onClick={() => {
 													setEditMode(true);
 													setEditId(p.id);
-													setNewProduct({ name: p.name, price: p.price, description: p.description });
+													setNewProduct({ name: p.name, price: p.price, description: p.description, stock: p.stock });
 													setOpenModal(true);
 												}}>
 													<EditIcon />
@@ -251,7 +259,7 @@ const Products = () => {
 									))
 								) : (
 									<TableRow>
-										<TableCell colSpan={4} align="center" sx={{ color: 'gray', fontStyle: 'italic', py: 6 }}>
+										<TableCell colSpan={5} align="center" sx={{ color: 'gray', fontStyle: 'italic', py: 6 }}>
 											No hay productos que coincidan con la búsqueda.<br />
 											{products.length === 0 && 'No hay productos aún, agrega uno para comenzar.'}
 										</TableCell>

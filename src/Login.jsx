@@ -22,7 +22,7 @@ const Login = () => {
             if (response.ok && data.access_token && data.refresh_token) {
                 localStorage.setItem("access_token", data.access_token);
                 localStorage.setItem("refresh_token", data.refresh_token);
-                // Guardar usuario en sessionStorage (ajusta los nombres de las propiedades si es necesario)
+                // Guardar usuario en sessionStorage y user_id en localStorage
                 if (data.user && data.user.id && data.user.name && data.user.email) {
                     sessionStorage.setItem(
                         "user",
@@ -32,6 +32,7 @@ const Login = () => {
                             email: data.user.email,
                         })
                     );
+                    localStorage.setItem("user_id", data.user.id); // <-- para facturas y otras operaciones
                 }
                 // Redirigir al dashboard o página principal
                 window.location.href = "/";
