@@ -56,25 +56,26 @@ const Dashboard = () => {
                 const products = productsData.data || [];
                 const invoices = invoicesData.data || [];
 
-                // Usar UTC para evitar problemas de zona horaria
+                // Comparar fechas directamente sin conversión de zona horaria
                 const today = new Date();
-                const todayUTC = `${today.getUTCFullYear()}-${String(today.getUTCMonth() + 1).padStart(2, '0')}-${String(today.getUTCDate()).padStart(2, '0')}`;
+                const todayISO = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
                 
                 console.log('=== DEBUG VENTAS HOY (CORREGIDO) ===');
-                console.log('Fecha de hoy UTC:', todayUTC);
+                console.log('Fecha de hoy ISO:', todayISO);
                 console.log('Total facturas:', invoices.length);
                 
                 const ventasHoy = invoices
                     .filter(invoice => {
                         const isPaid = invoice.status === 'paid';
-                        const invoiceDateUTC = invoice.invoice_date ? invoice.invoice_date.split('T')[0] : null;
-                        const isToday = invoiceDateUTC === todayUTC;
+                        // Extraer solo la fecha de la cadena ISO sin conversión de zona horaria
+                        const invoiceDateISO = invoice.invoice_date ? invoice.invoice_date.split('T')[0] : null;
+                        const isToday = invoiceDateISO === todayISO;
                         
                         console.log(`Factura #${invoice.id}:`, {
                             status: invoice.status,
                             invoice_date: invoice.invoice_date,
-                            fecha_UTC: invoiceDateUTC,
-                            hoy_UTC: todayUTC,
+                            fecha_ISO: invoiceDateISO,
+                            hoy_ISO: todayISO,
                             es_hoy: isToday,
                             total: invoice.total,
                             es_pagada: isPaid
@@ -125,15 +126,16 @@ const Dashboard = () => {
                     const products = productsData.data || [];
                     const invoices = invoicesData.data || [];
 
-                    // Usar UTC para evitar problemas de zona horaria
+                    // Comparar fechas directamente sin conversión de zona horaria
                     const today = new Date();
-                    const todayUTC = `${today.getUTCFullYear()}-${String(today.getUTCMonth() + 1).padStart(2, '0')}-${String(today.getUTCDate()).padStart(2, '0')}`;
+                    const todayISO = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
                     
                     const ventasHoy = invoices
                         .filter(invoice => {
                             const isPaid = invoice.status === 'paid';
-                            const invoiceDateUTC = invoice.invoice_date ? invoice.invoice_date.split('T')[0] : null;
-                            const isToday = invoiceDateUTC === todayUTC;
+                            // Extraer solo la fecha de la cadena ISO sin conversión
+                            const invoiceDateISO = invoice.invoice_date ? invoice.invoice_date.split('T')[0] : null;
+                            const isToday = invoiceDateISO === todayISO;
                             return isPaid && isToday;
                         })
                         .reduce((sum, invoice) => sum + parseFloat(invoice.total || 0), 0);
