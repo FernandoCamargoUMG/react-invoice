@@ -66,7 +66,7 @@ const ModulesMenu = () => {
         {
             category: 'Sistema',
             items: [
-                { name: 'Configuración', icon: <SettingsIcon />, path: '/settings', color: '#6A4C93', disabled: true },
+                { name: 'Configuración', icon: <SettingsIcon />, path: '/settings', color: '#6A4C93' },
                 { name: 'Respaldos', icon: <BackupIcon />, path: '/backup', color: '#B794F6', disabled: true },
                 { name: 'Seguridad', icon: <SecurityIcon />, path: '/security', color: '#8B5FBF', disabled: true },
                 { name: 'Ayuda', icon: <HelpIcon />, path: '/help', color: '#6A4C93', disabled: true }

@@ -7,6 +7,7 @@ import Users from './pages/Users';
 import Customers from './pages/Customers';
 import Products from './pages/Products';
 import Invoices from './pages/Invoices';
+import Settings from './pages/Settings';
 
 function App() {
   const accessToken = localStorage.getItem('access_token');
@@ -23,6 +24,7 @@ function App() {
         <Route path="/customers" element={<Customers />} />
         <Route path="/products" element={<Products />} />
         <Route path="/invoices" element={<Invoices />} />
+        <Route path="/settings" element={<Settings />} />
       </Routes>
     </Router>
   );

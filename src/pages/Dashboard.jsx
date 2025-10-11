@@ -228,13 +228,13 @@ const Dashboard = () => {
                                     mb: 0.5,
                                     fontSize: { xs: '1.8rem', md: '2.2rem' }
                                 }}>
-                                    Dashboard Empresarial
+                                    Sistema ERP
                                 </Typography>
                                 <Typography variant="body1" color="text.secondary" sx={{ 
                                     fontSize: '1.1rem',
                                     fontWeight: '500'
                                 }}>
-                                    Sistema de Gestión Integral ERP
+                                    Dashboard
                                 </Typography>
                             </Box>
                         </Box>

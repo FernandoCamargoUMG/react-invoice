@@ -55,7 +55,7 @@ const GlobalSettings = () => {
                     }
                 }}
             >
-                CONFIGURACIÓN
+                Configurar Moneda
             </Button>
             
             <Menu
@@ -96,7 +96,7 @@ const GlobalSettings = () => {
             >
                 <Box sx={{ px: 2, py: 1 }}>
                     <Typography variant="subtitle2" color="text.secondary">
-                        Configuraciones Globales
+                        Selección de Moneda
                     </Typography>
                 </Box>
                 

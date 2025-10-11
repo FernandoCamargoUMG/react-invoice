@@ -93,6 +93,14 @@ const QuickActions = () => {
             icon: <PaymentIcon />,
             description: 'Gestionar pagos',
             disabled: true
+        },
+        {
+            id: 'settings',
+            title: 'Configuración',
+            action: () => navigate('/settings'),
+            color: 'linear-gradient(45deg, #6A4C93 30%, #8B5FBF 90%)',
+            icon: <SettingsIcon />,
+            description: 'Configurar el sistema'
         }
     ];
 
