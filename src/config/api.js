@@ -73,52 +73,125 @@ export const getAuthHeaders = () => {
     };
 };
 
-// Helper para peticiones GET con autenticación
-export const apiGet = async (endpoint) => {
-    const response = await fetch(buildUrl(endpoint), {
-        method: 'GET',
-        headers: getAuthHeaders()
-    });
-    return response;
-};
+// Función para refrescar el token
+export const refreshToken = async () => {
+    const refresh_token = localStorage.getItem('refresh_token');
+    if (!refresh_token) {
+        throw new Error('No refresh token available');
+    }
 
-// Helper para peticiones POST con autenticación
-export const apiPost = async (endpoint, data) => {
-    const response = await fetch(buildUrl(endpoint), {
+    console.log('🔄 Refrescando token...');
+    const response = await fetch(buildUrl(API_CONFIG.ENDPOINTS.REFRESH), {
         method: 'POST',
-        headers: getAuthHeaders(),
-        body: JSON.stringify(data)
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ refresh_token })
     });
+
+    if (response.ok) {
+        const data = await response.json();
+        localStorage.setItem('access_token', data.access_token);
+        if (data.refresh_token) {
+            localStorage.setItem('refresh_token', data.refresh_token);
+        }
+        console.log('✅ Token refrescado exitosamente');
+        return data.access_token;
+    } else {
+        console.log('❌ Refresh token expirado, redirigiendo al login');
+        // Si el refresh token también expiró, limpiar todo y redirigir al login
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
+        localStorage.removeItem('user_id');
+        sessionStorage.removeItem('user');
+        window.location.href = '/';
+        throw new Error('Refresh token expired');
+    }
+};
+
+// Variable para evitar múltiples refreshes simultáneos
+let isRefreshing = false;
+let refreshPromise = null;
+
+// Helper para hacer peticiones con manejo automático de refresh token
+export const apiRequest = async (endpoint, options = {}) => {
+    let response = await fetch(buildUrl(endpoint), {
+        ...options,
+        headers: {
+            ...getAuthHeaders(),
+            ...options.headers
+        }
+    });
+
+    // Si recibimos 401 (Unauthorized), intentar refrescar el token
+    if (response.status === 401) {
+        try {
+            // Evitar múltiples refreshes simultáneos
+            if (isRefreshing) {
+                await refreshPromise;
+            } else {
+                isRefreshing = true;
+                refreshPromise = refreshToken();
+                await refreshPromise;
+                isRefreshing = false;
+                refreshPromise = null;
+            }
+            
+            // Reintentar la petición con el nuevo token
+            response = await fetch(buildUrl(endpoint), {
+                ...options,
+                headers: {
+                    ...getAuthHeaders(),
+                    ...options.headers
+                }
+            });
+        } catch (error) {
+            console.error('❌ Error refreshing token:', error);
+            isRefreshing = false;
+            refreshPromise = null;
+            return response; // Devolver la respuesta 401 original
+        }
+    }
+
     return response;
 };
 
-// Helper para peticiones PUT con autenticación
+// Helper para peticiones GET con autenticación y refresh automático
+export const apiGet = async (endpoint) => {
+    return await apiRequest(endpoint, {
+        method: 'GET'
+    });
+};
+
+// Helper para peticiones POST con autenticación y refresh automático
+export const apiPost = async (endpoint, data) => {
+    return await apiRequest(endpoint, {
+        method: 'POST',
+        body: JSON.stringify(data)
+    });
+};
+
+// Helper para peticiones PUT con autenticación y refresh automático
 export const apiPut = async (endpoint, data) => {
-    const response = await fetch(buildUrl(endpoint), {
+    return await apiRequest(endpoint, {
         method: 'PUT',
-        headers: getAuthHeaders(),
         body: JSON.stringify(data)
     });
-    return response;
 };
 
-// Helper para peticiones PATCH con autenticación
+// Helper para peticiones PATCH con autenticación y refresh automático
 export const apiPatch = async (endpoint, data) => {
-    const response = await fetch(buildUrl(endpoint), {
+    return await apiRequest(endpoint, {
         method: 'PATCH',
-        headers: getAuthHeaders(),
         body: JSON.stringify(data)
     });
-    return response;
 };
 
-// Helper para peticiones DELETE con autenticación
+// Helper para peticiones DELETE con autenticación y refresh automático
 export const apiDelete = async (endpoint) => {
-    const response = await fetch(buildUrl(endpoint), {
-        method: 'DELETE',
-        headers: getAuthHeaders()
+    return await apiRequest(endpoint, {
+        method: 'DELETE'
     });
-    return response;
 };
 
 export { API_CONFIG };

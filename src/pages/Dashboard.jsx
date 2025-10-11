@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     Box,
@@ -17,6 +17,7 @@ import {
     Add as AddIcon
 } from '@mui/icons-material';
 import NavigationBar from '../components/NavigationBar';
+import { apiGet, API_CONFIG } from '../config/api';
 
 const Dashboard = () => {
     const navigate = useNavigate();
@@ -29,13 +30,50 @@ const Dashboard = () => {
         }).format(amount || 0);
     };
 
-    // Datos de ejemplo
-    const metrics = {
+    // Datos dinámicos
+    const [metrics, setMetrics] = useState({
         totalClientes: 3,
         totalProductos: 5,
         totalFacturas: 1,
-        ventasHoy: 0
-    };
+        ventasHoy: 2500.75
+    });
+
+    // Cargar datos reales
+    useEffect(() => {
+        const loadMetrics = async () => {
+            try {
+                const [customersRes, productsRes, invoicesRes] = await Promise.all([
+                    apiGet(API_CONFIG.ENDPOINTS.CUSTOMERS),
+                    apiGet(API_CONFIG.ENDPOINTS.PRODUCTS),
+                    apiGet(API_CONFIG.ENDPOINTS.INVOICES)
+                ]);
+
+                const customersData = await customersRes.json();
+                const productsData = await productsRes.json();
+                const invoicesData = await invoicesRes.json();
+
+                const customers = customersData.data || [];
+                const products = productsData.data || [];
+                const invoices = invoicesData.data || [];
+
+                const today = new Date().toDateString();
+                const ventasHoy = invoices
+                    .filter(invoice => invoice.status === 'paid' && new Date(invoice.created_at).toDateString() === today)
+                    .reduce((sum, invoice) => sum + parseFloat(invoice.total || 0), 0);
+
+                setMetrics({
+                    totalClientes: customers.length,
+                    totalProductos: products.length,
+                    totalFacturas: invoices.length,
+                    ventasHoy: ventasHoy
+                });
+            } catch (error) {
+                console.error('Error loading metrics:', error);
+            }
+        };
+
+        loadMetrics();
+    }, []);
 
     const quickActions = [
         { 

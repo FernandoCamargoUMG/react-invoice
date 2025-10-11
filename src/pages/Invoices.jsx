@@ -56,6 +56,20 @@ import GlobalSettings from '../components/GlobalSettings';
 const Invoices = () => {
     const { formatAmount } = useCurrency();
     const [invoices, setInvoices] = useState([]);
+    
+    // Helper para formatear fechas
+    const formatDate = (dateString) => {
+        if (!dateString) return 'N/A';
+        try {
+            return new Date(dateString).toLocaleDateString('es-ES', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit'
+            });
+        } catch {
+            return 'N/A';
+        }
+    };
     const [customers, setCustomers] = useState([]);
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -144,7 +158,7 @@ const Invoices = () => {
     // Marcar factura como pagada
     const handleMarkAsPaid = async (id) => {
         try {
-            const response = await apiPatch(API_CONFIG.ENDPOINTS.INVOICE_STATUS.replace(':id', id), {
+            const response = await apiPatch(API_CONFIG.ENDPOINTS.INVOICE_STATUS(id), {
                 status: 'paid'
             });
             
@@ -166,7 +180,7 @@ const Invoices = () => {
             setEditId(invoice.id);
             setInvoiceHeader({
                 customer_id: invoice.customer_id,
-                date: invoice.date,
+                date: invoice.created_at ? invoice.created_at.split('T')[0] : new Date().toISOString().split('T')[0],
                 due_date: invoice.due_date || '',
                 status: invoice.status,
                 notes: invoice.notes || ''
@@ -267,7 +281,6 @@ const Invoices = () => {
         switch (status) {
             case 'paid': return 'success';
             case 'pending': return 'warning';
-            case 'overdue': return 'error';
             default: return 'default';
         }
     };
@@ -276,7 +289,6 @@ const Invoices = () => {
         switch (status) {
             case 'paid': return 'Pagada';
             case 'pending': return 'Pendiente';
-            case 'overdue': return 'Vencida';
             default: return status;
         }
     };
@@ -691,7 +703,6 @@ const Invoices = () => {
                                             <MenuItem value="all">Todos los estados</MenuItem>
                                             <MenuItem value="pending">Pendientes</MenuItem>
                                             <MenuItem value="paid">Pagadas</MenuItem>
-                                            <MenuItem value="overdue">Vencidas</MenuItem>
                                         </Select>
                                     </FormControl>
                                 </Grid>
@@ -753,7 +764,9 @@ const Invoices = () => {
                                                         </Box>
                                                     </Box>
                                                 </TableCell>
-                                                <TableCell>{invoice.date}</TableCell>
+                                                <TableCell>
+                                                    {formatDate(invoice.created_at)}
+                                                </TableCell>
                                                 <TableCell>
                                                     <Chip
                                                         label={getStatusText(invoice.status)}
@@ -770,46 +783,58 @@ const Invoices = () => {
                                                 <TableCell>
                                                     <Box sx={{ display: 'flex', gap: 1 }}>
                                                         {invoice.status === 'pending' && (
-                                                            <IconButton
-                                                                onClick={() => handleMarkAsPaid(invoice.id)}
-                                                                sx={{
-                                                                    background: 'linear-gradient(45deg, #4CAF50, #45A049)',
-                                                                    color: 'white',
-                                                                    '&:hover': {
-                                                                        background: 'linear-gradient(45deg, #45A049, #388E3C)',
-                                                                        transform: 'scale(1.1)'
-                                                                    }
-                                                                }}
-                                                            >
-                                                                <PaymentIcon />
-                                                            </IconButton>
+                                                            <>
+                                                                <IconButton
+                                                                    onClick={() => handleMarkAsPaid(invoice.id)}
+                                                                    sx={{
+                                                                        background: 'linear-gradient(45deg, #4CAF50, #45A049)',
+                                                                        color: 'white',
+                                                                        '&:hover': {
+                                                                            background: 'linear-gradient(45deg, #45A049, #388E3C)',
+                                                                            transform: 'scale(1.1)'
+                                                                        }
+                                                                    }}
+                                                                >
+                                                                    <PaymentIcon />
+                                                                </IconButton>
+                                                                <IconButton
+                                                                    onClick={() => handleOpenDialog(invoice)}
+                                                                    sx={{
+                                                                        background: 'linear-gradient(45deg, #2196F3, #1976D2)',
+                                                                        color: 'white',
+                                                                        '&:hover': {
+                                                                            background: 'linear-gradient(45deg, #1976D2, #1565C0)',
+                                                                            transform: 'scale(1.1)'
+                                                                        }
+                                                                    }}
+                                                                >
+                                                                    <EditIcon />
+                                                                </IconButton>
+                                                                <IconButton
+                                                                    onClick={() => handleDeleteInvoice(invoice.id)}
+                                                                    sx={{
+                                                                        background: 'linear-gradient(45deg, #f44336, #d32f2f)',
+                                                                        color: 'white',
+                                                                        '&:hover': {
+                                                                            background: 'linear-gradient(45deg, #d32f2f, #c62828)',
+                                                                            transform: 'scale(1.1)'
+                                                                        }
+                                                                    }}
+                                                                >
+                                                                    <DeleteIcon />
+                                                                </IconButton>
+                                                            </>
                                                         )}
-                                                        <IconButton
-                                                            onClick={() => handleOpenDialog(invoice)}
-                                                            sx={{
-                                                                background: 'linear-gradient(45deg, #2196F3, #1976D2)',
-                                                                color: 'white',
-                                                                '&:hover': {
-                                                                    background: 'linear-gradient(45deg, #1976D2, #1565C0)',
-                                                                    transform: 'scale(1.1)'
-                                                                }
-                                                            }}
-                                                        >
-                                                            <EditIcon />
-                                                        </IconButton>
-                                                        <IconButton
-                                                            onClick={() => handleDeleteInvoice(invoice.id)}
-                                                            sx={{
-                                                                background: 'linear-gradient(45deg, #f44336, #d32f2f)',
-                                                                color: 'white',
-                                                                '&:hover': {
-                                                                    background: 'linear-gradient(45deg, #d32f2f, #c62828)',
-                                                                    transform: 'scale(1.1)'
-                                                                }
-                                                            }}
-                                                        >
-                                                            <DeleteIcon />
-                                                        </IconButton>
+                                                        {invoice.status === 'paid' && (
+                                                            <Typography variant="body2" color="text.secondary" sx={{ 
+                                                                fontStyle: 'italic',
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                gap: 1
+                                                            }}>
+                                                                🔒 Factura pagada
+                                                            </Typography>
+                                                        )}
                                                     </Box>
                                                 </TableCell>
                                             </TableRow>

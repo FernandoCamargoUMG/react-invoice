@@ -427,17 +427,19 @@ const InvoiceModal = ({
                                     <Select
                                         value={invoiceHeader.status}
                                         onChange={(e) => setInvoiceHeader({ ...invoiceHeader, status: e.target.value })}
+                                        disabled={editMode}
                                         displayEmpty
                                         sx={{
-                                            backgroundColor: 'white',
+                                            backgroundColor: editMode ? '#f5f5f5' : 'white',
                                             borderRadius: 3,
-                                            border: '1px solid #e2e8f0',
+                                            border: editMode ? '1px solid #d0d0d0' : '1px solid #e2e8f0',
+                                            opacity: editMode ? 0.6 : 1,
                                             '&:hover': {
-                                                border: '1px solid #cbd5e0'
+                                                border: editMode ? '1px solid #d0d0d0' : '1px solid #cbd5e0'
                                             },
                                             '&.Mui-focused': {
-                                                border: '2px solid #3b82f6',
-                                                boxShadow: '0 0 0 3px rgba(59, 130, 246, 0.1)'
+                                                border: editMode ? '1px solid #d0d0d0' : '2px solid #3b82f6',
+                                                boxShadow: editMode ? 'none' : '0 0 0 3px rgba(59, 130, 246, 0.1)'
                                             },
                                             '& fieldset': { border: 'none' }
                                         }}
@@ -456,20 +458,6 @@ const InvoiceModal = ({
                                                 ⏳ Pendiente
                                             </Box>
                                         </MenuItem>
-                                        <MenuItem value="processing" sx={{ 
-                                            padding: '12px 16px',
-                                            '&:hover': { backgroundColor: '#dbeafe' }
-                                        }}>
-                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                                                <Box sx={{ 
-                                                    width: 8, 
-                                                    height: 8, 
-                                                    borderRadius: '50%', 
-                                                    backgroundColor: '#3b82f6' 
-                                                }} />
-                                                💼 Procesando
-                                            </Box>
-                                        </MenuItem>
                                         <MenuItem value="paid" sx={{ 
                                             padding: '12px 16px',
                                             '&:hover': { backgroundColor: '#dcfce7' }
@@ -484,21 +472,18 @@ const InvoiceModal = ({
                                                 ✅ Pagado
                                             </Box>
                                         </MenuItem>
-                                        <MenuItem value="overdue" sx={{ 
-                                            padding: '12px 16px',
-                                            '&:hover': { backgroundColor: '#fee2e2' }
-                                        }}>
-                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                                                <Box sx={{ 
-                                                    width: 8, 
-                                                    height: 8, 
-                                                    borderRadius: '50%', 
-                                                    backgroundColor: '#ef4444' 
-                                                }} />
-                                                ⚠️ Vencido
-                                            </Box>
-                                        </MenuItem>
                                     </Select>
+                                    {editMode && (
+                                        <Typography variant="caption" color="text.secondary" sx={{ 
+                                            mt: 1, 
+                                            fontStyle: 'italic',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: 1
+                                        }}>
+                                            🔒 El estado no se puede cambiar al editar facturas
+                                        </Typography>
+                                    )}
                                 </FormControl>
                             </Box>
                         </Grid>
