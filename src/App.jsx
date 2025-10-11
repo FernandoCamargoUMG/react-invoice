@@ -1,21 +1,16 @@
 //import { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.css';
-import Login from './Login';
-import Dashboard from './Dashboard';
-import Users from './Users';
-import Customers from './Customers';
-import Products from './Products';
-import Invoices from './Invoices';
+import Login from './pages/Login';
+import Dashboard from './pages/Dashboard';
+import GlobalSettings from './components/GlobalSettings';
+import Users from './pages/Users';
+import Customers from './pages/Customers';
+import Products from './pages/Products';
+import Invoices from './pages/Invoices';
 
 function App() {
   const accessToken = localStorage.getItem('access_token');
-
-  const handleLogout = () => {
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('refresh_token');
-    window.location.href = '/';
-  };
 
   if (!accessToken) {
     return <Login />;
@@ -23,17 +18,14 @@ function App() {
 
   return (
     <Router>
-      <div style={{ position: 'fixed', top: 20, right: 20, zIndex: 300, display: 'flex', gap: '10px' }}>
-        <button
-          onClick={() => window.location.href = '/'}
-          className="logout-btn"
-          style={{ background: '#22223b', color: 'white', border: 'none', borderRadius: '6px', padding: '8px 16px', cursor: 'pointer' }}
-        >
-          Inicio
-        </button>
-        <button onClick={handleLogout} className="logout-btn">
-          Cerrar sesión
-        </button>
+      {/* Solo mantenemos GlobalSettings en la esquina superior */}
+      <div style={{ 
+        position: 'fixed', 
+        top: 20, 
+        right: 20, 
+        zIndex: 1000
+      }}>
+        <GlobalSettings />
       </div>
       <Routes>
         <Route path="/" element={<Dashboard />} />
