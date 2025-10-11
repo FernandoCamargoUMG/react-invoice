@@ -38,8 +38,8 @@ const GlobalSettings = () => {
                 aria-haspopup="true"
                 aria-expanded={open ? 'true' : undefined}
                 sx={{
-                    borderColor: '#667eea',
-                    color: '#667eea',
+                    borderColor: '#8B5FBF',
+                    color: '#8B5FBF',
                     background: 'rgba(255, 255, 255, 0.95)',
                     backdropFilter: 'blur(10px)',
                     borderRadius: 2,
@@ -48,8 +48,8 @@ const GlobalSettings = () => {
                     py: 1,
                     boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
                     '&:hover': {
-                        borderColor: '#764ba2',
-                        background: 'rgba(102, 126, 234, 0.1)',
+                        borderColor: '#6A4C93',
+                        background: 'rgba(139, 95, 191, 0.1)',
                         transform: 'translateY(-2px)',
                         boxShadow: '0 6px 20px rgba(0,0,0,0.15)'
                     }

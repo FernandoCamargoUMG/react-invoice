@@ -18,6 +18,9 @@ import {
     Logout as LogoutIcon,
     Settings as SettingsIcon
 } from '@mui/icons-material';
+import GlobalSettings from '../components/GlobalSettings';
+import ModulesMenu from '../components/ModulesMenu';
+import QuickActions from '../components/QuickActions';
 import NavigationBar from '../components/NavigationBar';
 import { apiGet, API_CONFIG } from '../config/api';
 
@@ -168,28 +171,7 @@ const Dashboard = () => {
         return () => window.removeEventListener('focus', handleFocus);
     }, []);
 
-    const quickActions = [
-        { 
-            title: 'Nueva Factura', 
-            action: () => navigate('/invoices'), 
-            color: 'linear-gradient(45deg, #4C6EF5 30%, #667EEA 90%)'
-        },
-        { 
-            title: 'Nuevo Producto', 
-            action: () => navigate('/products'), 
-            color: 'linear-gradient(45deg, #8B5FBF 30%, #B794F6 90%)'
-        },
-        { 
-            title: 'Nuevo Cliente', 
-            action: () => navigate('/customers'), 
-            color: 'linear-gradient(45deg, #6A4C93 30%, #8B5FBF 90%)'
-        },
-        { 
-            title: 'Ver Usuarios', 
-            action: () => navigate('/users'), 
-            color: 'linear-gradient(45deg, #553C9A 30%, #6A4C93 90%)'
-        }
-    ];
+    // Definición de quickActions movida al componente QuickActions
 
     return (
         <Box sx={{ 
@@ -362,45 +344,50 @@ const Dashboard = () => {
                                 </Box>
                             </Box>
                             
-                            {/* Botón de Logout */}
-                            <Button
-                                variant="contained"
-                                startIcon={<LogoutIcon sx={{ fontSize: '1.3rem' }} />}
-                                onClick={() => {
-                                    // Limpiar todo el localStorage
-                                    localStorage.clear();
-                                    
-                                    // Limpiar también sessionStorage
-                                    sessionStorage.clear();
-                                    
-                                    // Forzar recarga completa de la página
-                                    window.location.href = '/login';
-                                }}
-                                sx={{
-                                    background: 'linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%)',
-                                    borderRadius: 4,
-                                    px: 4,
-                                    py: 2,
-                                    fontSize: '1.1rem',
-                                    fontWeight: 'bold',
-                                    textTransform: 'none',
-                                    minWidth: 140,
-                                    boxShadow: '0 8px 25px rgba(255, 107, 107, 0.4)',
-                                    border: '2px solid rgba(255, 255, 255, 0.2)',
-                                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                                    '&:hover': {
-                                        background: 'linear-gradient(135deg, #ee5a24 0%, #d63031 100%)',
-                                        transform: 'translateY(-3px) scale(1.02)',
-                                        boxShadow: '0 12px 35px rgba(238, 90, 36, 0.5)',
-                                        border: '2px solid rgba(255, 255, 255, 0.3)'
-                                    },
-                                    '&:active': {
-                                        transform: 'translateY(-1px) scale(0.98)'
-                                    }
-                                }}
-                            >
-                                🚪 Cerrar Sesión
-                            </Button>
+                            {/* Botones de Módulos, Configuración y Logout */}
+                            <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+                                <ModulesMenu />
+                                <GlobalSettings />
+                                
+                                <Button
+                                    variant="contained"
+                                    startIcon={<LogoutIcon sx={{ fontSize: '1.3rem' }} />}
+                                    onClick={() => {
+                                        // Limpiar todo el localStorage
+                                        localStorage.clear();
+                                        
+                                        // Limpiar también sessionStorage
+                                        sessionStorage.clear();
+                                        
+                                        // Forzar recarga completa de la página
+                                        window.location.href = '/login';
+                                    }}
+                                    sx={{
+                                        background: 'linear-gradient(135deg, #c44569 0%, #b83d52 100%)',
+                                        borderRadius: 4,
+                                        px: 4,
+                                        py: 2,
+                                        fontSize: '1.1rem',
+                                        fontWeight: 'bold',
+                                        textTransform: 'none',
+                                        minWidth: 140,
+                                        boxShadow: '0 8px 25px rgba(196, 69, 105, 0.4)',
+                                        border: '2px solid rgba(255, 255, 255, 0.2)',
+                                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                                        '&:hover': {
+                                            background: 'linear-gradient(135deg, #a0345a 0%, #8b2f47 100%)',
+                                            transform: 'translateY(-3px) scale(1.02)',
+                                            boxShadow: '0 12px 35px rgba(160, 52, 90, 0.5)',
+                                            border: '2px solid rgba(255, 255, 255, 0.3)'
+                                        },
+                                        '&:active': {
+                                            transform: 'translateY(-1px) scale(0.98)'
+                                        }
+                                    }}
+                                >
+                                    🚪 Cerrar Sesión
+                                </Button>
+                            </Box>
                         </Box>
                     </Box>
                 </Paper>
@@ -569,58 +556,10 @@ const Dashboard = () => {
                         </Grid>
                     </Grid>
 
-                    {/* Quick Actions */}
-                    <Paper sx={{
-                        p: 4,
-                        background: 'rgba(255,255,255,0.95)',
-                        backdropFilter: 'blur(20px)',
-                        border: '1px solid rgba(255,255,255,0.2)',
-                        borderRadius: 3,
-                        boxShadow: '0 8px 32px rgba(0,0,0,0.1)'
-                    }}>
-                        <Typography variant="h5" sx={{ 
-                            mb: 3, 
-                            fontWeight: 'bold',
-                            background: 'linear-gradient(45deg, #667eea, #764ba2)',
-                            backgroundClip: 'text',
-                            WebkitBackgroundClip: 'text',
-                            color: 'transparent'
-                        }}>
-                            🚀 Acciones Rápidas
-                        </Typography>
-                        
-                        <Grid container spacing={3}>
-                            {quickActions.map((action, index) => (
-                                <Grid item xs={12} sm={6} md={3} key={index}>
-                                    <Button
-                                        fullWidth
-                                        variant="contained"
-                                        onClick={action.action}
-                                        sx={{
-                                            background: action.color,
-                                            color: 'white',
-                                            py: 2,
-                                            fontSize: '1rem',
-                                            fontWeight: '600',
-                                            borderRadius: 2,
-                                            textTransform: 'none',
-                                            boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
-                                            '&:hover': {
-                                                transform: 'translateY(-3px)',
-                                                boxShadow: '0 8px 30px rgba(0,0,0,0.25)'
-                                            },
-                                            transition: 'all 0.3s ease'
-                                        }}
-                                    >
-                                        <AddIcon sx={{ mr: 1 }} />
-                                        {action.title}
-                                    </Button>
-                                </Grid>
-                            ))}
-                        </Grid>
-                    </Paper>
+                    {/* Quick Actions Personalizables */}
+                    <QuickActions />
 
-                    {/* Recent Activity */}
+                    {/* Actividad Reciente - Comentado temporalmente
                     <Paper sx={{
                         p: 4,
                         background: 'rgba(255,255,255,0.95)',
@@ -632,7 +571,7 @@ const Dashboard = () => {
                         <Typography variant="h5" sx={{ 
                             mb: 3, 
                             fontWeight: 'bold',
-                            background: 'linear-gradient(45deg, #667eea, #764ba2)',
+                            background: 'linear-gradient(45deg, #8B5FBF, #6A4C93)',
                             backgroundClip: 'text',
                             WebkitBackgroundClip: 'text',
                             color: 'transparent'
@@ -646,6 +585,7 @@ const Dashboard = () => {
                             </Typography>
                         </Box>
                     </Paper>
+                    */}
                 </Box>
             </Box>
         </Box>

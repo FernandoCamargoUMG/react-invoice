@@ -54,7 +54,7 @@ const NavigationBar = ({
                     variant="h5"
                     sx={{
                         fontWeight: 'bold',
-                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                        background: 'linear-gradient(135deg, #8B5FBF 0%, #6A4C93 100%)',
                         backgroundClip: 'text',
                         WebkitBackgroundClip: 'text',
                         WebkitTextFillColor: 'transparent',
@@ -76,9 +76,9 @@ const NavigationBar = ({
                             onClick={onBack || defaultHandlers.back}
                             startIcon={<ArrowBackIcon />}
                             sx={{
-                                color: '#667eea',
-                                borderColor: 'rgba(102, 126, 234, 0.3)',
-                                background: 'rgba(102, 126, 234, 0.05)',
+                                color: '#8B5FBF',
+                                borderColor: 'rgba(139, 95, 191, 0.3)',
+                                background: 'rgba(139, 95, 191, 0.05)',
                                 backdropFilter: 'blur(10px)',
                                 borderRadius: 2,
                                 px: { xs: 2, md: 3 },
@@ -88,11 +88,11 @@ const NavigationBar = ({
                                 textTransform: 'none',
                                 minWidth: { xs: 'auto', md: '100px' },
                                 '&:hover': {
-                                    borderColor: 'rgba(102, 126, 234, 0.5)',
-                                    background: 'rgba(102, 126, 234, 0.1)',
-                                    color: '#5a6fd8',
+                                    borderColor: 'rgba(139, 95, 191, 0.5)',
+                                    background: 'rgba(139, 95, 191, 0.1)',
+                                    color: '#6A4C93',
                                     transform: 'translateY(-2px)',
-                                    boxShadow: '0 4px 16px rgba(102, 126, 234, 0.2)'
+                                    boxShadow: '0 4px 16px rgba(139, 95, 191, 0.2)'
                                 },
                                 transition: 'all 0.3s ease'
                             }}
@@ -138,9 +138,9 @@ const NavigationBar = ({
                             onClick={onLogout || defaultHandlers.logout}
                             startIcon={<LogoutIcon />}
                             sx={{
-                                color: '#ff6b6b',
-                                borderColor: 'rgba(255, 107, 107, 0.3)',
-                                background: 'rgba(255, 107, 107, 0.05)',
+                                color: '#c44569',
+                                borderColor: 'rgba(196, 69, 105, 0.3)',
+                                background: 'rgba(196, 69, 105, 0.05)',
                                 backdropFilter: 'blur(10px)',
                                 borderRadius: 2,
                                 px: { xs: 2, md: 3 },
@@ -150,11 +150,11 @@ const NavigationBar = ({
                                 textTransform: 'none',
                                 minWidth: { xs: 'auto', md: '120px' },
                                 '&:hover': {
-                                    borderColor: 'rgba(255, 107, 107, 0.5)',
-                                    background: 'rgba(255, 107, 107, 0.1)',
-                                    color: '#ee5a24',
+                                    borderColor: 'rgba(196, 69, 105, 0.5)',
+                                    background: 'rgba(196, 69, 105, 0.1)',
+                                    color: '#a0345a',
                                     transform: 'translateY(-2px)',
-                                    boxShadow: '0 4px 16px rgba(255, 107, 107, 0.2)'
+                                    boxShadow: '0 4px 16px rgba(196, 69, 105, 0.2)'
                                 },
                                 transition: 'all 0.3s ease'
                             }}
@@ -168,7 +168,7 @@ const NavigationBar = ({
             {/* Divider decorativo */}
             <Divider 
                 sx={{ 
-                    background: 'linear-gradient(90deg, transparent 0%, rgba(102, 126, 234, 0.3) 50%, transparent 100%)',
+                    background: 'linear-gradient(90deg, transparent 0%, rgba(139, 95, 191, 0.3) 50%, transparent 100%)',
                     height: '2px',
                     border: 'none'
                 }} 
