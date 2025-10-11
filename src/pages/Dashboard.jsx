@@ -56,10 +56,41 @@ const Dashboard = () => {
                 const products = productsData.data || [];
                 const invoices = invoicesData.data || [];
 
-                const today = new Date().toDateString();
+                // Usar UTC para evitar problemas de zona horaria
+                const today = new Date();
+                const todayUTC = `${today.getUTCFullYear()}-${String(today.getUTCMonth() + 1).padStart(2, '0')}-${String(today.getUTCDate()).padStart(2, '0')}`;
+                
+                console.log('=== DEBUG VENTAS HOY (CORREGIDO) ===');
+                console.log('Fecha de hoy UTC:', todayUTC);
+                console.log('Total facturas:', invoices.length);
+                
                 const ventasHoy = invoices
-                    .filter(invoice => invoice.status === 'paid' && new Date(invoice.created_at).toDateString() === today)
+                    .filter(invoice => {
+                        const isPaid = invoice.status === 'paid';
+                        const invoiceDateUTC = invoice.invoice_date ? invoice.invoice_date.split('T')[0] : null;
+                        const isToday = invoiceDateUTC === todayUTC;
+                        
+                        console.log(`Factura #${invoice.id}:`, {
+                            status: invoice.status,
+                            invoice_date: invoice.invoice_date,
+                            fecha_UTC: invoiceDateUTC,
+                            hoy_UTC: todayUTC,
+                            es_hoy: isToday,
+                            total: invoice.total,
+                            es_pagada: isPaid
+                        });
+                        
+                        const shouldInclude = isPaid && isToday;
+                        if (shouldInclude) {
+                            console.log(`✅ Incluida factura #${invoice.id}: Q${invoice.total}`);
+                        }
+                        
+                        return shouldInclude;
+                    })
                     .reduce((sum, invoice) => sum + parseFloat(invoice.total || 0), 0);
+                    
+                console.log('Ventas Hoy calculadas:', ventasHoy);
+                console.log('=== FIN DEBUG ===');
 
                 setMetrics({
                     totalClientes: customers.length,
@@ -73,6 +104,55 @@ const Dashboard = () => {
         };
 
         loadMetrics();
+    }, []);
+
+    // Refrescar datos cuando se enfoca la ventana
+    useEffect(() => {
+        const handleFocus = () => {
+            const loadMetrics = async () => {
+                try {
+                    const [customersRes, productsRes, invoicesRes] = await Promise.all([
+                        apiGet(API_CONFIG.ENDPOINTS.CUSTOMERS),
+                        apiGet(API_CONFIG.ENDPOINTS.PRODUCTS),
+                        apiGet(API_CONFIG.ENDPOINTS.INVOICES)
+                    ]);
+
+                    const customersData = await customersRes.json();
+                    const productsData = await productsRes.json();
+                    const invoicesData = await invoicesRes.json();
+
+                    const customers = customersData.data || [];
+                    const products = productsData.data || [];
+                    const invoices = invoicesData.data || [];
+
+                    // Usar UTC para evitar problemas de zona horaria
+                    const today = new Date();
+                    const todayUTC = `${today.getUTCFullYear()}-${String(today.getUTCMonth() + 1).padStart(2, '0')}-${String(today.getUTCDate()).padStart(2, '0')}`;
+                    
+                    const ventasHoy = invoices
+                        .filter(invoice => {
+                            const isPaid = invoice.status === 'paid';
+                            const invoiceDateUTC = invoice.invoice_date ? invoice.invoice_date.split('T')[0] : null;
+                            const isToday = invoiceDateUTC === todayUTC;
+                            return isPaid && isToday;
+                        })
+                        .reduce((sum, invoice) => sum + parseFloat(invoice.total || 0), 0);
+
+                    setMetrics({
+                        totalClientes: customers.length,
+                        totalProductos: products.length,
+                        totalFacturas: invoices.length,
+                        ventasHoy: ventasHoy
+                    });
+                } catch (error) {
+                    console.error('Error loading metrics:', error);
+                }
+            };
+            loadMetrics();
+        };
+
+        window.addEventListener('focus', handleFocus);
+        return () => window.removeEventListener('focus', handleFocus);
     }, []);
 
     const quickActions = [

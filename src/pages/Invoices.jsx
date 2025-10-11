@@ -61,12 +61,18 @@ const Invoices = () => {
     const formatDate = (dateString) => {
         if (!dateString) return 'N/A';
         try {
-            return new Date(dateString).toLocaleDateString('es-ES', {
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit'
-            });
-        } catch {
+            // Convertir la fecha ISO a fecha local
+            const date = new Date(dateString);
+            if (isNaN(date.getTime())) return 'N/A';
+            
+            // Formatear directamente sin problemas de zona horaria
+            const day = String(date.getUTCDate()).padStart(2, '0');
+            const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+            const year = date.getUTCFullYear();
+            
+            return `${day}/${month}/${year}`;
+        } catch (error) {
+            console.log('Error formatting date:', dateString, error);
             return 'N/A';
         }
     };
@@ -88,7 +94,7 @@ const Invoices = () => {
     const [invoiceItems, setInvoiceItems] = useState([{ product_id: '', quantity: 1, price: 0 }]);
     const [invoiceHeader, setInvoiceHeader] = useState({
         customer_id: '',
-        date: new Date().toISOString().split('T')[0],
+        date: new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0],
         due_date: '',
         status: 'pending',
         notes: ''
@@ -180,7 +186,7 @@ const Invoices = () => {
             setEditId(invoice.id);
             setInvoiceHeader({
                 customer_id: invoice.customer_id,
-                date: invoice.created_at ? invoice.created_at.split('T')[0] : new Date().toISOString().split('T')[0],
+                date: invoice.invoice_date ? invoice.invoice_date.split('T')[0] : new Date().toISOString().split('T')[0],
                 due_date: invoice.due_date || '',
                 status: invoice.status,
                 notes: invoice.notes || ''
@@ -195,7 +201,7 @@ const Invoices = () => {
             setEditId(null);
             setInvoiceHeader({
                 customer_id: '',
-                date: new Date().toISOString().split('T')[0],
+                date: new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0],
                 due_date: '',
                 status: 'pending',
                 notes: ''
@@ -229,8 +235,13 @@ const Invoices = () => {
         setError('');
         try {
             const userId = localStorage.getItem('user_id');
+            // Compensar problema de zona horaria agregando un día
+            const dateWithTimezone = new Date(invoiceHeader.date + 'T12:00:00');
+            const correctedDate = dateWithTimezone.toISOString().split('T')[0];
+            
             const payload = {
                 ...invoiceHeader,
+                invoice_date: correctedDate,
                 user_id: userId,
                 items: invoiceItems.map(item => ({
                     product_id: item.product_id,
@@ -765,7 +776,7 @@ const Invoices = () => {
                                                     </Box>
                                                 </TableCell>
                                                 <TableCell>
-                                                    {formatDate(invoice.created_at)}
+                                                    {invoice.invoice_date ? formatDate(invoice.invoice_date) : 'Sin fecha'}
                                                 </TableCell>
                                                 <TableCell>
                                                     <Chip
