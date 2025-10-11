@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import {
     IconButton,
+    Button,
     Menu,
     MenuItem,
     Typography,
@@ -29,17 +30,33 @@ const GlobalSettings = () => {
 
     return (
         <>
-            <IconButton
+            <Button
+                variant="outlined"
+                startIcon={<SettingsIcon />}
                 onClick={handleClick}
-                size="small"
-                sx={{ ml: 2 }}
                 aria-controls={open ? 'settings-menu' : undefined}
                 aria-haspopup="true"
                 aria-expanded={open ? 'true' : undefined}
-                title="Configuraciones"
+                sx={{
+                    borderColor: '#667eea',
+                    color: '#667eea',
+                    background: 'rgba(255, 255, 255, 0.95)',
+                    backdropFilter: 'blur(10px)',
+                    borderRadius: 2,
+                    fontWeight: 'bold',
+                    px: 2,
+                    py: 1,
+                    boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
+                    '&:hover': {
+                        borderColor: '#764ba2',
+                        background: 'rgba(102, 126, 234, 0.1)',
+                        transform: 'translateY(-2px)',
+                        boxShadow: '0 6px 20px rgba(0,0,0,0.15)'
+                    }
+                }}
             >
-                <SettingsIcon />
-            </IconButton>
+                CONFIGURACIÓN
+            </Button>
             
             <Menu
                 anchorEl={anchorEl}

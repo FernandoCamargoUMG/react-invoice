@@ -40,6 +40,8 @@ import {
     ExitToApp as LogoutIcon
 } from '@mui/icons-material';
 import { apiGet, apiPost, apiPut, apiDelete, API_CONFIG } from '../config/api';
+import { useCurrency } from '../utils/currency';
+import GlobalSettings from '../components/GlobalSettings';
 
 // Categorías de productos
 const categories = [
@@ -54,15 +56,8 @@ const categories = [
     'Otros'
 ];
 
-// Formatear moneda
-const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('es-CO', {
-        style: 'currency',
-        currency: 'COP'
-    }).format(amount);
-};
-
 const Products = () => {
+    const { formatAmount } = useCurrency();
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(false);
     const [open, setOpen] = useState(false);
@@ -308,6 +303,7 @@ const Products = () => {
                     >
                         Inicio
                     </Button>
+                    <GlobalSettings />
                     <Button
                         variant="outlined"
                         onClick={handleLogout}
@@ -351,7 +347,7 @@ const Products = () => {
                         },
                         { 
                             title: 'Valor Inventario', 
-                            value: formatCurrency(stats.totalValue), 
+                            value: formatAmount(stats.totalValue), 
                             gradient: 'linear-gradient(135deg, #4CAF50, #45A049)',
                             emoji: '💰'
                         },
@@ -522,7 +518,7 @@ const Products = () => {
                                             <TableCell>{product.name}</TableCell>
                                             <TableCell>{product.description || 'Sin descripción'}</TableCell>
                                             <TableCell sx={{ fontWeight: 'bold', color: '#4CAF50' }}>
-                                                {formatCurrency(parseFloat(product.price) || 0)}
+                                                {formatAmount(parseFloat(product.price) || 0)}
                                             </TableCell>
                                             <TableCell>
                                                 <Chip label={product.category || product.type || 'Producto'} size="small" color="primary" />

@@ -5,6 +5,7 @@ import {
     Home as HomeIcon,
     ExitToApp as LogoutIcon
 } from '@mui/icons-material';
+import GlobalSettings from './GlobalSettings';
 
 const NavigationBar = ({ 
     title = "Sistema de Gestión", 
@@ -128,6 +129,8 @@ const NavigationBar = ({
                             Inicio
                         </Button>
                     )}
+
+                    <GlobalSettings />
 
                     {showLogoutButton && (
                         <Button

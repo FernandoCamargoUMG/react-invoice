@@ -41,6 +41,7 @@ import {
     ExitToApp as LogoutIcon
 } from '@mui/icons-material';
 import { apiGet, apiPost, apiPut, apiDelete, API_CONFIG } from '../config/api';
+import GlobalSettings from '../components/GlobalSettings';
 
 const Customers = () => {
     const [customers, setCustomers] = useState([]);
@@ -266,6 +267,7 @@ const Customers = () => {
                     >
                         Inicio
                     </Button>
+                    <GlobalSettings />
                     <Button
                         variant="outlined"
                         onClick={handleLogout}

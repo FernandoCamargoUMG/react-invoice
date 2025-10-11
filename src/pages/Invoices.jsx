@@ -51,6 +51,7 @@ import {
 import { apiGet, apiPost, apiPut, apiDelete, apiPatch, API_CONFIG } from '../config/api';
 import { useCurrency } from '../utils/currency';
 import InvoiceModal from '../components/modals/InvoiceModal';
+import GlobalSettings from '../components/GlobalSettings';
 
 const Invoices = () => {
     const { formatAmount } = useCurrency();
@@ -378,6 +379,7 @@ const Invoices = () => {
                         >
                             INICIO
                         </Button>
+                        <GlobalSettings />
                         <Button
                             variant="outlined"
                             startIcon={<LogoutIcon />}
