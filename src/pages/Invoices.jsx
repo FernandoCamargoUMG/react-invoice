@@ -393,27 +393,7 @@ const Invoices = () => {
                         >
                             CERRAR SESIÓN
                         </Button>
-                        {!showTable && (
-                            <Button
-                                variant="outlined"
-                                startIcon={<RefreshIcon />}
-                                onClick={fetchInvoices}
-                                disabled={loading}
-                                sx={{
-                                    borderRadius: 3,
-                                    px: 3,
-                                    py: 1.5,
-                                    color: '#667eea',
-                                    border: '2px solid #667eea',
-                                    fontWeight: 'bold',
-                                    '&:hover': {
-                                        background: 'rgba(102, 126, 234, 0.1)'
-                                    }
-                                }}
-                            >
-                                {loading ? <CircularProgress size={20} /> : 'Cargar Facturas'}
-                            </Button>
-                        )}
+
                         <Button
                             variant="contained"
                             startIcon={<AddIcon />}
@@ -475,9 +455,53 @@ const Invoices = () => {
                     </Alert>
                 )}
 
-                {showTable && (
-                    <>
-                        {/* Estadísticas */}
+                {/* Barra de botones de acción */}
+                <Box sx={{ 
+                    display: 'flex', 
+                    gap: 2, 
+                    mb: 3,
+                    flexWrap: 'wrap'
+                }}>
+                    <Button
+                        variant="contained"
+                        startIcon={<RefreshIcon />}
+                        onClick={fetchInvoices}
+                        disabled={loading}
+                        sx={{
+                            background: 'linear-gradient(45deg, #667eea, #764ba2)',
+                            borderRadius: 3,
+                            px: 3,
+                            py: 1.5,
+                            fontWeight: 'bold',
+                            '&:hover': {
+                                background: 'linear-gradient(45deg, #5a6fd8, #6a4190)',
+                                transform: 'translateY(-2px)'
+                            }
+                        }}
+                    >
+                        {loading ? <CircularProgress size={20} sx={{ color: 'white' }} /> : 'CARGAR FACTURAS'}
+                    </Button>
+                    <Button
+                        variant="contained"
+                        startIcon={<AddIcon />}
+                        onClick={() => handleOpenDialog()}
+                        sx={{
+                            background: 'linear-gradient(45deg, #4CAF50, #45A049)',
+                            borderRadius: 3,
+                            px: 3,
+                            py: 1.5,
+                            fontWeight: 'bold',
+                            '&:hover': {
+                                background: 'linear-gradient(45deg, #45A049, #388E3C)',
+                                transform: 'translateY(-2px)'
+                            }
+                        }}
+                    >
+                        NUEVA FACTURA
+                    </Button>
+                </Box>
+
+                {/* Estadísticas */}
                         <Grid container spacing={3}>
                             {[
                                 { title: 'Total Facturas', value: stats.total, icon: <ReceiptIcon />, gradient: 'linear-gradient(135deg, #2196F3, #1976D2)' },
@@ -730,47 +754,6 @@ const Invoices = () => {
                                 }}
                             />
                         </Paper>
-                    </>
-                )}
-
-                {/* Mensaje inicial si no se han cargado las facturas */}
-                {!showTable && !loading && (
-                    <Paper sx={{
-                        background: 'linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.8) 100%)',
-                        backdropFilter: 'blur(20px)',
-                        borderRadius: 4,
-                        p: 6,
-                        textAlign: 'center',
-                        border: '1px solid rgba(255, 255, 255, 0.3)',
-                        boxShadow: '0 8px 32px rgba(31, 38, 135, 0.2)'
-                    }}>
-                        <ReceiptIcon sx={{ fontSize: 80, color: '#667eea', mb: 2 }} />
-                        <Typography variant="h5" sx={{ mb: 2, fontWeight: 'bold', color: '#667eea' }}>
-                            Gestión de Facturas
-                        </Typography>
-                        <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-                            Haz clic en "Cargar Facturas" para ver todas las facturas del sistema
-                        </Typography>
-                        <Button
-                            variant="contained"
-                            startIcon={<RefreshIcon />}
-                            onClick={fetchInvoices}
-                            sx={{
-                                background: 'linear-gradient(45deg, #667eea, #764ba2)',
-                                borderRadius: 3,
-                                px: 4,
-                                py: 1.5,
-                                fontWeight: 'bold',
-                                '&:hover': {
-                                    background: 'linear-gradient(45deg, #5a6fd8, #6a4190)',
-                                    transform: 'translateY(-2px)'
-                                }
-                            }}
-                        >
-                            Cargar Facturas
-                        </Button>
-                    </Paper>
-                )}
             </Box>
 
             {/* FAB para móvil */}
