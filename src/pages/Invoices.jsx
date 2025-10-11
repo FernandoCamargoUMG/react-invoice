@@ -455,53 +455,128 @@ const Invoices = () => {
                     </Alert>
                 )}
 
-                {/* Barra de botones de acción */}
-                <Box sx={{ 
-                    display: 'flex', 
-                    gap: 2, 
-                    mb: 3,
-                    flexWrap: 'wrap'
-                }}>
-                    <Button
-                        variant="contained"
-                        startIcon={<RefreshIcon />}
-                        onClick={fetchInvoices}
-                        disabled={loading}
-                        sx={{
-                            background: 'linear-gradient(45deg, #667eea, #764ba2)',
-                            borderRadius: 3,
-                            px: 3,
-                            py: 1.5,
-                            fontWeight: 'bold',
-                            '&:hover': {
-                                background: 'linear-gradient(45deg, #5a6fd8, #6a4190)',
-                                transform: 'translateY(-2px)'
-                            }
-                        }}
-                    >
-                        {loading ? <CircularProgress size={20} sx={{ color: 'white' }} /> : 'CARGAR FACTURAS'}
-                    </Button>
-                    <Button
-                        variant="contained"
-                        startIcon={<AddIcon />}
-                        onClick={() => handleOpenDialog()}
-                        sx={{
-                            background: 'linear-gradient(45deg, #4CAF50, #45A049)',
-                            borderRadius: 3,
-                            px: 3,
-                            py: 1.5,
-                            fontWeight: 'bold',
-                            '&:hover': {
-                                background: 'linear-gradient(45deg, #45A049, #388E3C)',
-                                transform: 'translateY(-2px)'
-                            }
-                        }}
-                    >
-                        NUEVA FACTURA
-                    </Button>
-                </Box>
+                {!showTable && (
+                    <>
+                        {/* Tarjetas de Estadísticas */}
+                        <Grid container spacing={3}>
+                            {[
+                                { title: 'Total Facturas', value: stats.total, icon: <ReceiptIcon />, color: '#2196F3' },
+                                { title: 'Pendientes', value: stats.pending, icon: <ReceiptIcon />, color: '#ff9800' },
+                                { title: 'Pagadas', value: stats.paid, icon: <ReceiptIcon />, color: '#4CAF50' },
+                                { title: 'Total Ingresos', value: formatAmount(stats.totalAmount), icon: <MoneyIcon />, color: '#9C27B0' }
+                            ].map((stat, index) => (
+                                <Grid item xs={12} sm={6} md={3} key={index}>
+                                    <Paper sx={{
+                                        background: 'rgba(255, 255, 255, 0.9)',
+                                        backdropFilter: 'blur(20px)',
+                                        borderRadius: 4,
+                                        p: 3,
+                                        textAlign: 'center',
+                                        border: '2px solid rgba(255, 255, 255, 0.2)',
+                                        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+                                        transition: 'all 0.3s ease',
+                                        '&:hover': {
+                                            transform: 'translateY(-8px)',
+                                            boxShadow: '0 12px 40px rgba(0, 0, 0, 0.15)'
+                                        }
+                                    }}>
+                                        <Box sx={{
+                                            width: 70,
+                                            height: 70,
+                                            borderRadius: '50%',
+                                            backgroundColor: stat.color,
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            mx: 'auto',
+                                            mb: 2,
+                                            color: 'white',
+                                            fontSize: '2rem',
+                                            boxShadow: `0 4px 15px ${stat.color}40`
+                                        }}>
+                                            {stat.icon}
+                                        </Box>
+                                        <Typography variant="h4" sx={{ 
+                                            fontWeight: 'bold', 
+                                            color: stat.color,
+                                            mb: 1,
+                                            fontSize: '2rem'
+                                        }}>
+                                            {stat.value}
+                                        </Typography>
+                                        <Typography variant="body1" color="text.secondary" sx={{
+                                            fontWeight: '500'
+                                        }}>
+                                            {stat.title}
+                                        </Typography>
+                                    </Paper>
+                                </Grid>
+                            ))}
+                        </Grid>
 
-                {/* Estadísticas */}
+                        {/* Botones de Acción */}
+                        <Box sx={{ 
+                            display: 'flex', 
+                            gap: 3, 
+                            flexWrap: 'wrap',
+                            justifyContent: 'center',
+                            mt: 2
+                        }}>
+                            <Button
+                                variant="contained"
+                                startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <RefreshIcon />}
+                                onClick={fetchInvoices}
+                                disabled={loading}
+                                sx={{
+                                    background: 'linear-gradient(45deg, #667eea 30%, #764ba2 90%)',
+                                    borderRadius: 3,
+                                    px: 4,
+                                    py: 1.5,
+                                    fontSize: '1.1rem',
+                                    fontWeight: 'bold',
+                                    minWidth: 180,
+                                    boxShadow: '0 4px 15px rgba(102, 126, 234, 0.3)',
+                                    '&:hover': {
+                                        background: 'linear-gradient(45deg, #5a6fd8 30%, #6a4190 90%)',
+                                        transform: 'translateY(-2px)',
+                                        boxShadow: '0 6px 20px rgba(102, 126, 234, 0.4)'
+                                    },
+                                    '&:disabled': {
+                                        background: 'linear-gradient(45deg, #ccc 30%, #aaa 90%)'
+                                    }
+                                }}
+                            >
+                                {loading ? 'Cargando...' : 'CARGAR FACTURAS'}
+                            </Button>
+                            <Button
+                                variant="contained"
+                                startIcon={<AddIcon />}
+                                onClick={() => handleOpenDialog()}
+                                sx={{
+                                    background: 'linear-gradient(45deg, #4CAF50 30%, #45A049 90%)',
+                                    borderRadius: 3,
+                                    px: 4,
+                                    py: 1.5,
+                                    fontSize: '1.1rem',
+                                    fontWeight: 'bold',
+                                    minWidth: 180,
+                                    boxShadow: '0 4px 15px rgba(76, 175, 80, 0.3)',
+                                    '&:hover': {
+                                        background: 'linear-gradient(45deg, #45A049 30%, #388E3C 90%)',
+                                        transform: 'translateY(-2px)',
+                                        boxShadow: '0 6px 20px rgba(76, 175, 80, 0.4)'
+                                    }
+                                }}
+                            >
+                                NUEVA FACTURA
+                            </Button>
+                        </Box>
+                    </>
+                )}
+
+                {showTable && (
+                    <>
+                        {/* Estadísticas */}
                         <Grid container spacing={3}>
                             {[
                                 { title: 'Total Facturas', value: stats.total, icon: <ReceiptIcon />, gradient: 'linear-gradient(135deg, #2196F3, #1976D2)' },
@@ -740,20 +815,77 @@ const Invoices = () => {
                                     </TableBody>
                                 </Table>
                             </TableContainer>
-                            <TablePagination
-                                component="div"
-                                count={filteredInvoices.length}
-                                page={page}
-                                onPageChange={(e, newPage) => setPage(newPage)}
-                                rowsPerPage={rowsPerPage}
-                                onRowsPerPageChange={(e) => setRowsPerPage(parseInt(e.target.value, 10))}
-                                labelRowsPerPage="Filas por página:"
-                                sx={{ 
-                                    background: 'linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.8) 100%)',
-                                    backdropFilter: 'blur(10px)'
-                                }}
-                            />
+                            <Box sx={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                                p: 2,
+                                background: 'rgba(255,255,255,0.95)',
+                                borderTop: '1px solid #e0e0e0'
+                            }}>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                    <Typography variant="body2" color="text.secondary">
+                                        Filas por página:
+                                    </Typography>
+                                    <FormControl size="small" sx={{ minWidth: 60 }}>
+                                        <Select
+                                            value={rowsPerPage}
+                                            onChange={(e) => {
+                                                setRowsPerPage(e.target.value);
+                                                setPage(0);
+                                            }}
+                                            variant="standard"
+                                            sx={{ 
+                                                fontSize: '0.875rem',
+                                                '& .MuiSelect-select': {
+                                                    paddingRight: '20px !important'
+                                                }
+                                            }}
+                                        >
+                                            <MenuItem value={5}>5</MenuItem>
+                                            <MenuItem value={10}>10</MenuItem>
+                                            <MenuItem value={25}>25</MenuItem>
+                                            <MenuItem value={50}>50</MenuItem>
+                                        </Select>
+                                    </FormControl>
+                                </Box>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                    <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.875rem' }}>
+                                        {filteredInvoices.length === 0 ? '0–0 of 0' : `${page * rowsPerPage + 1}–${Math.min((page + 1) * rowsPerPage, filteredInvoices.length)} of ${filteredInvoices.length}`}
+                                    </Typography>
+                                    <Box sx={{ display: 'flex' }}>
+                                        <IconButton
+                                            onClick={() => setPage(page - 1)}
+                                            disabled={page === 0}
+                                            size="small"
+                                            sx={{
+                                                color: page === 0 ? '#ccc' : '#666',
+                                                '&:hover': {
+                                                    backgroundColor: 'rgba(0,0,0,0.04)'
+                                                }
+                                            }}
+                                        >
+                                            ‹
+                                        </IconButton>
+                                        <IconButton
+                                            onClick={() => setPage(page + 1)}
+                                            disabled={page >= Math.ceil(filteredInvoices.length / rowsPerPage) - 1}
+                                            size="small"
+                                            sx={{
+                                                color: page >= Math.ceil(filteredInvoices.length / rowsPerPage) - 1 ? '#ccc' : '#666',
+                                                '&:hover': {
+                                                    backgroundColor: 'rgba(0,0,0,0.04)'
+                                                }
+                                            }}
+                                        >
+                                            ›
+                                        </IconButton>
+                                    </Box>
+                                </Box>
+                            </Box>
                         </Paper>
+                    </>
+                )}
             </Box>
 
             {/* FAB para móvil */}
@@ -798,3 +930,4 @@ const Invoices = () => {
 };
 
 export default Invoices;
+
