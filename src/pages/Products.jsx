@@ -244,7 +244,7 @@ const Products = () => {
         <Box sx={{ 
             height: '100vh',
             width: '100vw',
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            background: 'linear-gradient(135deg, #2D3748 0%, #4A5568 25%, #6A4C93 70%, #8B5FBF 100%)',
             overflow: 'hidden',
             display: 'flex',
             flexDirection: 'column',
@@ -266,7 +266,7 @@ const Products = () => {
             }}>
                 <Typography variant="h5" sx={{ 
                     fontWeight: 'bold',
-                    background: 'linear-gradient(45deg, #667eea, #764ba2)',
+                    background: 'linear-gradient(45deg, #8B5FBF, #B794F6)',
                     backgroundClip: 'text',
                     WebkitBackgroundClip: 'text',
                     WebkitTextFillColor: 'transparent'
@@ -280,11 +280,11 @@ const Products = () => {
                         onClick={handleBack}
                         startIcon={<ArrowBackIcon />}
                         sx={{ 
-                            borderColor: '#667eea',
-                            color: '#667eea',
+                            borderColor: '#8B5FBF',
+                            color: '#8B5FBF',
                             '&:hover': { 
-                                borderColor: '#5a6fd8', 
-                                background: 'rgba(102, 126, 234, 0.1)' 
+                                borderColor: '#6A4C93', 
+                                background: 'rgba(139, 95, 191, 0.1)' 
                             }
                         }}
                     >
@@ -439,8 +439,8 @@ const Products = () => {
                         startIcon={loading ? <CircularProgress size={20} sx={{ color: 'white' }} /> : <RefreshIcon />}
                         disabled={loading}
                         sx={{
-                            background: 'linear-gradient(45deg, #667eea, #764ba2)',
-                            '&:hover': { background: 'linear-gradient(45deg, #5a6fd8, #6a42a0)' }
+                            background: 'linear-gradient(45deg, #8B5FBF, #6A4C93)',
+                            '&:hover': { background: 'linear-gradient(45deg, #7A52A8, #6a42a0)' }
                         }}
                     >
                         {loading ? 'Cargando...' : 'Cargar Productos'}
@@ -471,7 +471,7 @@ const Products = () => {
                     <TableContainer>
                         <Table>
                             <TableHead>
-                                <TableRow sx={{ background: 'linear-gradient(45deg, #667eea, #764ba2)' }}>
+                                <TableRow sx={{ background: 'linear-gradient(45deg, #8B5FBF, #6A4C93)' }}>
                                     <TableCell sx={{ 
                                         color: 'white', 
                                         fontWeight: 'bold',
@@ -579,7 +579,7 @@ const Products = () => {
                 PaperProps={{
                     sx: {
                         borderRadius: 4,
-                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                        background: 'linear-gradient(135deg, #8B5FBF 0%, #6A4C93 100%)',
                         backdropFilter: 'blur(20px)',
                         border: '1px solid rgba(255, 255, 255, 0.2)',
                         overflow: 'visible'
@@ -641,7 +641,7 @@ const Products = () => {
                             boxShadow: '0 8px 32px rgba(102, 126, 234, 0.12)',
                             transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                             '&:hover': {
-                                border: '2px solid #667eea',
+                                border: '2px solid #8B5FBF',
                                 boxShadow: '0 12px 40px rgba(102, 126, 234, 0.2)',
                                 transform: 'translateY(-2px)'
                             }
@@ -658,7 +658,7 @@ const Products = () => {
                                     width: 48,
                                     height: 48,
                                     borderRadius: 3,
-                                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                    background: 'linear-gradient(135deg, #8B5FBF 0%, #6A4C93 100%)',
                                     display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'center',
@@ -668,7 +668,7 @@ const Products = () => {
                                     📝
                                 </Box>
                                 <Typography variant="h6" sx={{ 
-                                    color: '#667eea', 
+                                    color: '#8B5FBF', 
                                     fontWeight: 'bold',
                                     fontSize: '1.2rem'
                                 }}>
@@ -682,7 +682,7 @@ const Products = () => {
                                     <Typography variant="body2" sx={{ 
                                         mb: 1, 
                                         fontWeight: '700',
-                                        color: '#667eea',
+                                        color: '#8B5FBF',
                                         fontSize: '0.95rem'
                                     }}>
                                         Nombre del Producto *
@@ -705,7 +705,7 @@ const Products = () => {
                                                     boxShadow: '0 2px 8px rgba(102, 126, 234, 0.1)'
                                                 },
                                                 '&.Mui-focused': {
-                                                    border: '2px solid #667eea',
+                                                    border: '2px solid #8B5FBF',
                                                     boxShadow: '0 0 0 4px rgba(102, 126, 234, 0.15)',
                                                     backgroundColor: '#fafbff'
                                                 },
@@ -727,7 +727,7 @@ const Products = () => {
                                     <Typography variant="body2" sx={{ 
                                         mb: 1, 
                                         fontWeight: '700',
-                                        color: '#667eea',
+                                        color: '#8B5FBF',
                                         fontSize: '0.95rem'
                                     }}>
                                         Descripción del producto (opcional)
@@ -750,7 +750,7 @@ const Products = () => {
                                                     boxShadow: '0 2px 8px rgba(102, 126, 234, 0.1)'
                                                 },
                                                 '&.Mui-focused': {
-                                                    border: '2px solid #667eea',
+                                                    border: '2px solid #8B5FBF',
                                                     boxShadow: '0 0 0 4px rgba(102, 126, 234, 0.15)',
                                                     backgroundColor: '#fafbff'
                                                 },
@@ -1053,14 +1053,14 @@ const Products = () => {
                         onClick={handleCloseDialog}
                         variant="outlined"
                         sx={{
-                            borderColor: '#667eea',
-                            color: '#667eea',
+                            borderColor: '#8B5FBF',
+                            color: '#8B5FBF',
                             borderRadius: 3,
                             px: 4,
                             py: 1.5,
                             fontWeight: 'bold',
                             '&:hover': {
-                                borderColor: '#5a6fd8',
+                                borderColor: '#7A52A8',
                                 background: 'rgba(102, 126, 234, 0.1)'
                             }
                         }}
@@ -1071,14 +1071,14 @@ const Products = () => {
                         onClick={handleSubmit} 
                         variant="contained"
                         sx={{
-                            background: 'linear-gradient(45deg, #667eea, #764ba2)',
+                            background: 'linear-gradient(45deg, #8B5FBF, #6A4C93)',
                             borderRadius: 3,
                             px: 4,
                             py: 1.5,
                             fontWeight: 'bold',
                             boxShadow: '0 4px 15px rgba(102, 126, 234, 0.4)',
                             '&:hover': {
-                                background: 'linear-gradient(45deg, #5a6fd8, #6a42a0)',
+                                background: 'linear-gradient(45deg, #7A52A8, #6a42a0)',
                                 transform: 'translateY(-2px)',
                                 boxShadow: '0 6px 20px rgba(102, 126, 234, 0.6)'
                             }

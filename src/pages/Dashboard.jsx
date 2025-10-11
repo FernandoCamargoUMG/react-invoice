@@ -14,7 +14,9 @@ import {
     Inventory as InventoryIcon,
     Receipt as ReceiptIcon,
     AttachMoney as MoneyIcon,
-    Add as AddIcon
+    Add as AddIcon,
+    Logout as LogoutIcon,
+    Settings as SettingsIcon
 } from '@mui/icons-material';
 import NavigationBar from '../components/NavigationBar';
 import { apiGet, API_CONFIG } from '../config/api';
@@ -38,6 +40,38 @@ const Dashboard = () => {
         ventasHoy: 2500.75
     });
 
+    // Usuario logueado
+    const [currentUser, setCurrentUser] = useState({
+        name: 'Cargando...',
+        email: '',
+        role: ''
+    });
+
+    // Cargar datos del usuario logueado
+    const loadUserData = async () => {
+        try {
+            const userId = localStorage.getItem('user_id');
+            if (userId) {
+                const response = await apiGet(`${API_CONFIG.ENDPOINTS.USERS}/${userId}`);
+                if (response.ok) {
+                    const userData = await response.json();
+                    setCurrentUser({
+                        name: userData.data?.name || 'Usuario',
+                        email: userData.data?.email || '',
+                        role: userData.data?.role || 'user'
+                    });
+                }
+            }
+        } catch (error) {
+            console.error('Error loading user data:', error);
+            setCurrentUser({
+                name: 'Usuario',
+                email: '',
+                role: 'user'
+            });
+        }
+    };
+
     // Cargar datos reales
     useEffect(() => {
         const loadMetrics = async () => {
@@ -56,42 +90,18 @@ const Dashboard = () => {
                 const products = productsData.data || [];
                 const invoices = invoicesData.data || [];
 
-                // Comparar fechas directamente sin conversión de zona horaria
+                // Calcular ventas del día actual
                 const today = new Date();
                 const todayISO = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-                
-                console.log('=== DEBUG VENTAS HOY (CORREGIDO) ===');
-                console.log('Fecha de hoy ISO:', todayISO);
-                console.log('Total facturas:', invoices.length);
                 
                 const ventasHoy = invoices
                     .filter(invoice => {
                         const isPaid = invoice.status === 'paid';
-                        // Extraer solo la fecha de la cadena ISO sin conversión de zona horaria
                         const invoiceDateISO = invoice.invoice_date ? invoice.invoice_date.split('T')[0] : null;
                         const isToday = invoiceDateISO === todayISO;
-                        
-                        console.log(`Factura #${invoice.id}:`, {
-                            status: invoice.status,
-                            invoice_date: invoice.invoice_date,
-                            fecha_ISO: invoiceDateISO,
-                            hoy_ISO: todayISO,
-                            es_hoy: isToday,
-                            total: invoice.total,
-                            es_pagada: isPaid
-                        });
-                        
-                        const shouldInclude = isPaid && isToday;
-                        if (shouldInclude) {
-                            console.log(`✅ Incluida factura #${invoice.id}: Q${invoice.total}`);
-                        }
-                        
-                        return shouldInclude;
+                        return isPaid && isToday;
                     })
                     .reduce((sum, invoice) => sum + parseFloat(invoice.total || 0), 0);
-                    
-                console.log('Ventas Hoy calculadas:', ventasHoy);
-                console.log('=== FIN DEBUG ===');
 
                 setMetrics({
                     totalClientes: customers.length,
@@ -105,6 +115,7 @@ const Dashboard = () => {
         };
 
         loadMetrics();
+        loadUserData(); // Cargar datos del usuario
     }, []);
 
     // Refrescar datos cuando se enfoca la ventana
@@ -161,22 +172,22 @@ const Dashboard = () => {
         { 
             title: 'Nueva Factura', 
             action: () => navigate('/invoices'), 
-            color: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)'
+            color: 'linear-gradient(45deg, #4C6EF5 30%, #667EEA 90%)'
         },
         { 
             title: 'Nuevo Producto', 
             action: () => navigate('/products'), 
-            color: 'linear-gradient(45deg, #FF6B6B 30%, #FF8E53 90%)'
+            color: 'linear-gradient(45deg, #8B5FBF 30%, #B794F6 90%)'
         },
         { 
             title: 'Nuevo Cliente', 
             action: () => navigate('/customers'), 
-            color: 'linear-gradient(45deg, #4CAF50 30%, #45A049 90%)'
+            color: 'linear-gradient(45deg, #6A4C93 30%, #8B5FBF 90%)'
         },
         { 
             title: 'Ver Usuarios', 
             action: () => navigate('/users'), 
-            color: 'linear-gradient(45deg, #9C27B0 30%, #673AB7 90%)'
+            color: 'linear-gradient(45deg, #553C9A 30%, #6A4C93 90%)'
         }
     ];
 
@@ -184,7 +195,7 @@ const Dashboard = () => {
         <Box sx={{ 
             height: '100vh',
             width: '100vw',
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            background: 'linear-gradient(135deg, #2D3748 0%, #4A5568 25%, #6A4C93 70%, #8B5FBF 100%)',
             overflow: 'hidden',
             display: 'flex',
             flexDirection: 'column',
@@ -196,19 +207,207 @@ const Dashboard = () => {
             <Box sx={{ 
                 flex: 1,
                 overflow: 'auto',
-                p: { xs: 2, md: 4 }
+                p: 0
             }}>
-                {/* Barra de Navegación Integrada */}
-                <NavigationBar
-                    title="📊 ERP Dashboard - Sistema de Gestión Integral"
-                    showBackButton={false}
-                    showHomeButton={false}
-                    showLogoutButton={true}
-                />
+                {/* Header Empresarial */}
+                <Paper sx={{
+                    background: 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.9) 100%)',
+                    backdropFilter: 'blur(20px)',
+                    borderRadius: 0,
+                    boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
+                    p: 3,
+                    mb: 0
+                }}>
+                    <Box sx={{ 
+                        display: 'flex', 
+                        justifyContent: 'space-between', 
+                        alignItems: 'center',
+                        flexWrap: 'wrap',
+                        gap: 2
+                    }}>
+                        {/* Logo y Título */}
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+                            <Avatar sx={{ 
+                                width: 60, 
+                                height: 60,
+                                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                fontSize: '1.8rem',
+                                boxShadow: '0 8px 25px rgba(102, 126, 234, 0.4)'
+                            }}>
+                                🏢
+                            </Avatar>
+                            <Box>
+                                <Typography variant="h4" sx={{ 
+                                    fontWeight: 'bold',
+                                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                    backgroundClip: 'text',
+                                    WebkitBackgroundClip: 'text',
+                                    color: 'transparent',
+                                    mb: 0.5,
+                                    fontSize: { xs: '1.8rem', md: '2.2rem' }
+                                }}>
+                                    Dashboard Empresarial
+                                </Typography>
+                                <Typography variant="body1" color="text.secondary" sx={{ 
+                                    fontSize: '1.1rem',
+                                    fontWeight: '500'
+                                }}>
+                                    Sistema de Gestión Integral ERP
+                                </Typography>
+                            </Box>
+                        </Box>
+
+                        {/* Información del Usuario */}
+                        <Box sx={{ 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            gap: 2
+                        }}>
+                            <Box sx={{ 
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                gap: 4,
+                                background: 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(248,250,255,0.9) 100%)',
+                                backdropFilter: 'blur(20px)',
+                                borderRadius: 6,
+                                p: 3,
+                                border: '2px solid rgba(139, 95, 191, 0.15)',
+                                boxShadow: '0 10px 40px rgba(139, 95, 191, 0.15)',
+                                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                                '&:hover': {
+                                    transform: 'translateY(-2px)',
+                                    boxShadow: '0 15px 50px rgba(139, 95, 191, 0.2)',
+                                    border: '2px solid rgba(139, 95, 191, 0.25)'
+                                }
+                            }}>
+                                <Box sx={{ position: 'relative' }}>
+                                    <Avatar sx={{ 
+                                        width: 60, 
+                                        height: 60,
+                                        background: 'linear-gradient(135deg, #8B5FBF 0%, #6A4C93 100%)',
+                                        fontSize: '1.5rem',
+                                        fontWeight: 'bold',
+                                        color: 'white',
+                                        boxShadow: '0 8px 25px rgba(139, 95, 191, 0.4)',
+                                        border: '3px solid rgba(255, 255, 255, 0.9)',
+                                        transition: 'all 0.3s ease'
+                                    }}>
+                                        {currentUser.name.charAt(0).toUpperCase()}
+                                    </Avatar>
+                                    <Box sx={{
+                                        position: 'absolute',
+                                        bottom: -2,
+                                        right: -2,
+                                        width: 18,
+                                        height: 18,
+                                        borderRadius: '50%',
+                                        background: 'linear-gradient(135deg, #B794F6 0%, #8B5FBF 100%)',
+                                        border: '2px solid white',
+                                        boxShadow: '0 2px 8px rgba(183, 148, 246, 0.5)'
+                                    }} />
+                                </Box>
+                                <Box>
+                                    <Typography variant="h5" sx={{ 
+                                        fontWeight: 'bold',
+                                        background: 'linear-gradient(135deg, #8B5FBF 0%, #B794F6 100%)',
+                                        backgroundClip: 'text',
+                                        WebkitBackgroundClip: 'text',
+                                        color: 'transparent',
+                                        fontSize: '1.3rem',
+                                        mb: 0.5,
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: 1
+                                    }}>
+                                        <span style={{ fontSize: '1.5rem' }}>👋</span>
+                                        Bienvenido, {currentUser.name}
+                                    </Typography>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                        <Typography variant="body1" sx={{
+                                            fontSize: '1rem',
+                                            fontWeight: '600',
+                                            color: '#8B5FBF',
+                                            textTransform: 'capitalize',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: 1
+                                        }}>
+                                            <span style={{ fontSize: '1.2rem' }}>👑</span>
+                                            Rol: {currentUser.role}
+                                        </Typography>
+                                        <Box sx={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: 0.5,
+                                            background: 'linear-gradient(135deg, #B794F6 0%, #8B5FBF 100%)',
+                                            color: 'white',
+                                            px: 2,
+                                            py: 0.5,
+                                            borderRadius: 20,
+                                            fontSize: '0.85rem',
+                                            fontWeight: 'bold',
+                                            boxShadow: '0 2px 10px rgba(183, 148, 246, 0.4)'
+                                        }}>
+                                            <span style={{ 
+                                                width: 8, 
+                                                height: 8, 
+                                                borderRadius: '50%', 
+                                                backgroundColor: '#E9D5FF',
+                                                display: 'inline-block',
+                                                animation: 'pulse 2s infinite'
+                                            }} />
+                                            Sesión Activa
+                                        </Box>
+                                    </Box>
+                                </Box>
+                            </Box>
+                            
+                            {/* Botón de Logout */}
+                            <Button
+                                variant="contained"
+                                startIcon={<LogoutIcon sx={{ fontSize: '1.3rem' }} />}
+                                onClick={() => {
+                                    // Limpiar todo el localStorage
+                                    localStorage.clear();
+                                    
+                                    // Limpiar también sessionStorage
+                                    sessionStorage.clear();
+                                    
+                                    // Forzar recarga completa de la página
+                                    window.location.href = '/login';
+                                }}
+                                sx={{
+                                    background: 'linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%)',
+                                    borderRadius: 4,
+                                    px: 4,
+                                    py: 2,
+                                    fontSize: '1.1rem',
+                                    fontWeight: 'bold',
+                                    textTransform: 'none',
+                                    minWidth: 140,
+                                    boxShadow: '0 8px 25px rgba(255, 107, 107, 0.4)',
+                                    border: '2px solid rgba(255, 255, 255, 0.2)',
+                                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                                    '&:hover': {
+                                        background: 'linear-gradient(135deg, #ee5a24 0%, #d63031 100%)',
+                                        transform: 'translateY(-3px) scale(1.02)',
+                                        boxShadow: '0 12px 35px rgba(238, 90, 36, 0.5)',
+                                        border: '2px solid rgba(255, 255, 255, 0.3)'
+                                    },
+                                    '&:active': {
+                                        transform: 'translateY(-1px) scale(0.98)'
+                                    }
+                                }}
+                            >
+                                🚪 Cerrar Sesión
+                            </Button>
+                        </Box>
+                    </Box>
+                </Paper>
 
                 {/* Main Content */}
                 <Box sx={{ 
-                    mt: 3,
+                    p: { xs: 2, md: 4 },
                     display: 'flex',
                     flexDirection: 'column',
                     gap: 4
@@ -305,16 +504,17 @@ const Dashboard = () => {
                             }}>
                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, width: '100%' }}>
                                     <Avatar sx={{ 
-                                        background: 'linear-gradient(45deg, #4CAF50, #45A049)',
+                                        background: 'linear-gradient(45deg, #2E8B57, #228B22)',
                                         width: 60,
-                                        height: 60
+                                        height: 60,
+                                        boxShadow: '0 4px 15px rgba(46, 139, 87, 0.3)'
                                     }}>
                                         <ReceiptIcon fontSize="large" />
                                     </Avatar>
                                     <Box>
                                         <Typography variant="h3" sx={{ 
                                             fontWeight: 'bold',
-                                            background: 'linear-gradient(45deg, #4CAF50, #45A049)',
+                                            background: 'linear-gradient(45deg, #2E8B57, #228B22)',
                                             backgroundClip: 'text',
                                             WebkitBackgroundClip: 'text',
                                             color: 'transparent'
@@ -343,16 +543,17 @@ const Dashboard = () => {
                             }}>
                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, width: '100%' }}>
                                     <Avatar sx={{ 
-                                        background: 'linear-gradient(45deg, #9C27B0, #673AB7)',
+                                        background: 'linear-gradient(45deg, #2E8B57, #228B22)',
                                         width: 60,
-                                        height: 60
+                                        height: 60,
+                                        boxShadow: '0 4px 15px rgba(46, 139, 87, 0.3)'
                                     }}>
                                         <MoneyIcon fontSize="large" />
                                     </Avatar>
                                     <Box>
                                         <Typography variant="h3" sx={{ 
                                             fontWeight: 'bold',
-                                            background: 'linear-gradient(45deg, #9C27B0, #673AB7)',
+                                            background: 'linear-gradient(45deg, #2E8B57, #228B22)',
                                             backgroundClip: 'text',
                                             WebkitBackgroundClip: 'text',
                                             color: 'transparent'

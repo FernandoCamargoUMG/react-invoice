@@ -208,7 +208,7 @@ const Customers = () => {
         <Box sx={{ 
             height: '100vh',
             width: '100vw',
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            background: 'linear-gradient(135deg, #2D3748 0%, #4A5568 25%, #6A4C93 70%, #8B5FBF 100%)',
             overflow: 'hidden',
             display: 'flex',
             flexDirection: 'column',
@@ -230,7 +230,7 @@ const Customers = () => {
             }}>
                 <Typography variant="h5" sx={{ 
                     fontWeight: 'bold',
-                    background: 'linear-gradient(45deg, #667eea, #764ba2)',
+                    background: 'linear-gradient(45deg, #8B5FBF, #B794F6)',
                     backgroundClip: 'text',
                     WebkitBackgroundClip: 'text',
                     WebkitTextFillColor: 'transparent'
@@ -244,11 +244,11 @@ const Customers = () => {
                         onClick={handleBack}
                         startIcon={<ArrowBackIcon />}
                         sx={{ 
-                            borderColor: '#667eea',
-                            color: '#667eea',
+                            borderColor: '#8B5FBF',
+                            color: '#8B5FBF',
                             '&:hover': { 
-                                borderColor: '#5a6fd8', 
-                                background: 'rgba(102, 126, 234, 0.1)' 
+                                borderColor: '#6A4C93', 
+                                background: 'rgba(139, 95, 191, 0.1)' 
                             }
                         }}
                     >
@@ -307,21 +307,21 @@ const Customers = () => {
                             title: 'Total Clientes', 
                             value: stats.total, 
                             icon: <PeopleIcon />, 
-                            gradient: 'linear-gradient(135deg, #2196F3, #1976D2)',
+                            gradient: 'linear-gradient(135deg, #8B5FBF, #6A4C93)',
                             emoji: '👥'
                         },
                         { 
                             title: 'Con Teléfono', 
                             value: stats.withPhone, 
                             icon: <PhoneIcon />, 
-                            gradient: 'linear-gradient(135deg, #4CAF50, #45A049)',
+                            gradient: 'linear-gradient(135deg, #B794F6, #8B5FBF)',
                             emoji: '📱'
                         },
                         { 
                             title: 'Con Dirección', 
                             value: stats.withAddress, 
                             icon: <LocationIcon />, 
-                            gradient: 'linear-gradient(135deg, #FF9800, #F57C00)',
+                            gradient: 'linear-gradient(135deg, #B794F6, #8B5FBF)',
                             emoji: '📍'
                         }
                     ].map((stat, index) => (
@@ -400,8 +400,8 @@ const Customers = () => {
                         startIcon={loading ? <CircularProgress size={20} sx={{ color: 'white' }} /> : <RefreshIcon />}
                         disabled={loading}
                         sx={{
-                            background: 'linear-gradient(45deg, #667eea, #764ba2)',
-                            '&:hover': { background: 'linear-gradient(45deg, #5a6fd8, #6a42a0)' }
+                            background: 'linear-gradient(45deg, #8B5FBF, #6A4C93)',
+                            '&:hover': { background: 'linear-gradient(45deg, #6A4C93, #553C9A)' }
                         }}
                     >
                         {loading ? 'Cargando...' : 'Cargar Clientes'}
@@ -411,8 +411,8 @@ const Customers = () => {
                         onClick={() => handleOpenDialog()}
                         startIcon={<AddIcon />}
                         sx={{
-                            background: 'linear-gradient(45deg, #4CAF50, #45A049)',
-                            '&:hover': { background: 'linear-gradient(45deg, #45A049, #388E3C)' }
+                            background: 'linear-gradient(45deg, #2E8B57, #228B22)',
+                            '&:hover': { background: 'linear-gradient(45deg, #228B22, #006400)' }
                         }}
                     >
                         Nuevo Cliente
@@ -432,7 +432,7 @@ const Customers = () => {
                     <TableContainer>
                         <Table>
                             <TableHead>
-                                <TableRow sx={{ background: 'linear-gradient(45deg, #667eea, #764ba2)' }}>
+                                <TableRow sx={{ background: 'linear-gradient(45deg, #8B5FBF, #6A4C93)' }}>
                                     <TableCell sx={{ 
                                         color: 'white', 
                                         fontWeight: 'bold',
@@ -483,7 +483,7 @@ const Customers = () => {
                                             }}>
                                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                                                     <Avatar sx={{ 
-                                                        background: 'linear-gradient(45deg, #667eea, #764ba2)',
+                                                        background: 'linear-gradient(45deg, #8B5FBF, #6A4C93)',
                                                         width: 35,
                                                         height: 35,
                                                         fontSize: '0.9rem'
@@ -495,7 +495,7 @@ const Customers = () => {
                                             </TableCell>
                                             <TableCell sx={{ py: 2 }}>
                                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                                    <EmailIcon sx={{ color: '#667eea', fontSize: 16 }} />
+                                                                                                        <EmailIcon sx={{ color: '#8B5FBF', fontSize: 16 }} />
                                                     {customer.email}
                                                 </Box>
                                             </TableCell>
@@ -599,7 +599,7 @@ const Customers = () => {
                 PaperProps={{
                     sx: {
                         borderRadius: 4,
-                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                        background: 'linear-gradient(135deg, #8B5FBF 0%, #6A4C93 100%)',
                         backdropFilter: 'blur(20px)',
                         border: '1px solid rgba(255, 255, 255, 0.2)',
                         overflow: 'visible'
@@ -661,8 +661,8 @@ const Customers = () => {
                             boxShadow: '0 8px 32px rgba(102, 126, 234, 0.12)',
                             transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                             '&:hover': {
-                                border: '2px solid #667eea',
-                                boxShadow: '0 12px 40px rgba(102, 126, 234, 0.2)',
+                                border: '2px solid #8B5FBF',
+                                boxShadow: '0 12px 40px rgba(139, 95, 191, 0.2)',
                                 transform: 'translateY(-2px)'
                             }
                         }}>
@@ -672,23 +672,23 @@ const Customers = () => {
                                 gap: 2, 
                                 mb: 3,
                                 pb: 2,
-                                borderBottom: '2px solid rgba(102, 126, 234, 0.1)'
+                                borderBottom: '2px solid rgba(139, 95, 191, 0.1)'
                             }}>
                                 <Box sx={{
                                     width: 48,
                                     height: 48,
                                     borderRadius: 3,
-                                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                    background: 'linear-gradient(135deg, #8B5FBF 0%, #6A4C93 100%)',
                                     display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'center',
                                     fontSize: '1.5rem',
-                                    boxShadow: '0 4px 16px rgba(102, 126, 234, 0.3)'
+                                    boxShadow: '0 4px 16px rgba(139, 95, 191, 0.3)'
                                 }}>
                                     👤
                                 </Box>
                                 <Typography variant="h6" sx={{ 
-                                    color: '#667eea', 
+                                    color: '#8B5FBF', 
                                     fontWeight: 'bold',
                                     fontSize: '1.2rem'
                                 }}>
@@ -703,7 +703,7 @@ const Customers = () => {
                                             <Typography variant="body2" sx={{ 
                                                 mb: 1, 
                                                 fontWeight: '700',
-                                                color: '#667eea',
+                                                color: '#8B5FBF',
                                                 fontSize: '0.95rem'
                                             }}>
                                                 Nombre completo *
@@ -726,7 +726,7 @@ const Customers = () => {
                                                             boxShadow: '0 2px 8px rgba(102, 126, 234, 0.1)'
                                                         },
                                                         '&.Mui-focused': {
-                                                            border: '2px solid #667eea',
+                                                            border: '2px solid #8B5FBF',
                                                             boxShadow: '0 0 0 4px rgba(102, 126, 234, 0.15)',
                                                             backgroundColor: '#fafbff'
                                                         },
@@ -749,7 +749,7 @@ const Customers = () => {
                                             <Typography variant="body2" sx={{ 
                                                 mb: 1, 
                                                 fontWeight: '700',
-                                                color: '#667eea',
+                                                color: '#8B5FBF',
                                                 fontSize: '0.95rem'
                                             }}>
                                                 📧 Correo electrónico *
@@ -773,7 +773,7 @@ const Customers = () => {
                                                             boxShadow: '0 2px 8px rgba(102, 126, 234, 0.1)'
                                                         },
                                                         '&.Mui-focused': {
-                                                            border: '2px solid #667eea',
+                                                            border: '2px solid #8B5FBF',
                                                             boxShadow: '0 0 0 4px rgba(102, 126, 234, 0.15)',
                                                             backgroundColor: '#fafbff'
                                                         },
@@ -970,14 +970,14 @@ const Customers = () => {
                         onClick={handleCloseDialog}
                         variant="outlined"
                         sx={{
-                            borderColor: '#667eea',
-                            color: '#667eea',
+                            borderColor: '#8B5FBF',
+                            color: '#8B5FBF',
                             borderRadius: 3,
                             px: 4,
                             py: 1.5,
                             fontWeight: 'bold',
                             '&:hover': {
-                                borderColor: '#5a6fd8',
+                                borderColor: '#7A52A8',
                                 background: 'rgba(102, 126, 234, 0.1)'
                             }
                         }}
@@ -988,16 +988,16 @@ const Customers = () => {
                         onClick={handleSubmit} 
                         variant="contained"
                         sx={{
-                            background: 'linear-gradient(45deg, #667eea, #764ba2)',
+                            background: 'linear-gradient(45deg, #8B5FBF, #6A4C93)',
                             borderRadius: 3,
                             px: 4,
                             py: 1.5,
                             fontWeight: 'bold',
-                            boxShadow: '0 4px 15px rgba(102, 126, 234, 0.4)',
+                            boxShadow: '0 4px 15px rgba(139, 95, 191, 0.4)',
                             '&:hover': {
-                                background: 'linear-gradient(45deg, #5a6fd8, #6a42a0)',
+                                background: 'linear-gradient(45deg, #7A52A8, #5A3E7B)',
                                 transform: 'translateY(-2px)',
-                                boxShadow: '0 6px 20px rgba(102, 126, 234, 0.6)'
+                                boxShadow: '0 6px 20px rgba(139, 95, 191, 0.6)'
                             }
                         }}
                     >

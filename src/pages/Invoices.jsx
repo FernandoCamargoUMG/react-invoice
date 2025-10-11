@@ -327,7 +327,7 @@ const Invoices = () => {
         <Box sx={{ 
             height: '100vh',
             width: '100vw',
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            background: 'linear-gradient(135deg, #2D3748 0%, #4A5568 25%, #6A4C93 70%, #8B5FBF 100%)',
             overflow: 'hidden',
             display: 'flex',
             flexDirection: 'column',
@@ -350,7 +350,7 @@ const Invoices = () => {
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
                         <Avatar sx={{ 
-                            background: 'linear-gradient(45deg, #667eea, #764ba2)',
+                            background: 'linear-gradient(45deg, #8B5FBF, #6A4C93)',
                             width: 50,
                             height: 50
                         }}>
@@ -359,7 +359,7 @@ const Invoices = () => {
                         <Box>
                             <Typography variant="h5" sx={{ 
                                 fontWeight: 'bold', 
-                                background: 'linear-gradient(45deg, #667eea, #764ba2)',
+                                background: 'linear-gradient(45deg, #8B5FBF, #B794F6)',
                                 backgroundClip: 'text',
                                 WebkitBackgroundClip: 'text',
                                 color: 'transparent'
@@ -377,11 +377,11 @@ const Invoices = () => {
                             startIcon={<ArrowBackIcon />}
                             onClick={handleBack}
                             sx={{
-                                borderColor: '#667eea',
-                                color: '#667eea',
+                                borderColor: '#8B5FBF',
+                                color: '#8B5FBF',
                                 '&:hover': {
-                                    borderColor: '#764ba2',
-                                    background: 'rgba(102, 126, 234, 0.1)'
+                                    borderColor: '#6A4C93',
+                                    background: 'rgba(139, 95, 191, 0.1)'
                                 }
                             }}
                         >
@@ -392,11 +392,11 @@ const Invoices = () => {
                             startIcon={<HomeIcon />}
                             onClick={handleHome}
                             sx={{
-                                borderColor: '#667eea',
-                                color: '#667eea',
+                                borderColor: '#8B5FBF',
+                                color: '#8B5FBF',
                                 '&:hover': {
-                                    borderColor: '#764ba2',
-                                    background: 'rgba(102, 126, 234, 0.1)'
+                                    borderColor: '#6A4C93',
+                                    background: 'rgba(139, 95, 191, 0.1)'
                                 }
                             }}
                         >
@@ -485,10 +485,10 @@ const Invoices = () => {
                         {/* Tarjetas de Estadísticas */}
                         <Grid container spacing={3}>
                             {[
-                                { title: 'Total Facturas', value: stats.total, icon: <ReceiptIcon />, color: '#2196F3' },
-                                { title: 'Pendientes', value: stats.pending, icon: <ReceiptIcon />, color: '#ff9800' },
-                                { title: 'Pagadas', value: stats.paid, icon: <ReceiptIcon />, color: '#4CAF50' },
-                                { title: 'Total Ingresos', value: formatAmount(stats.totalAmount), icon: <MoneyIcon />, color: '#9C27B0' }
+                                { title: 'Total Facturas', value: stats.total, icon: <ReceiptIcon />, color: '#8B5FBF' },
+                                { title: 'Pendientes', value: stats.pending, icon: <ReceiptIcon />, color: '#B794F6' },
+                                { title: 'Pagadas', value: stats.paid, icon: <ReceiptIcon />, color: '#2E8B57' },
+                                { title: 'Total Ingresos', value: formatAmount(stats.totalAmount), icon: <MoneyIcon />, color: '#2E8B57' }
                             ].map((stat, index) => (
                                 <Grid item xs={12} sm={6} md={3} key={index}>
                                     <Paper sx={{
@@ -553,18 +553,18 @@ const Invoices = () => {
                                 onClick={fetchInvoices}
                                 disabled={loading}
                                 sx={{
-                                    background: 'linear-gradient(45deg, #667eea 30%, #764ba2 90%)',
+                                    background: 'linear-gradient(45deg, #8B5FBF 30%, #6A4C93 90%)',
                                     borderRadius: 3,
                                     px: 4,
                                     py: 1.5,
                                     fontSize: '1.1rem',
                                     fontWeight: 'bold',
                                     minWidth: 180,
-                                    boxShadow: '0 4px 15px rgba(102, 126, 234, 0.3)',
+                                    boxShadow: '0 4px 15px rgba(139, 95, 191, 0.3)',
                                     '&:hover': {
-                                        background: 'linear-gradient(45deg, #5a6fd8 30%, #6a4190 90%)',
+                                        background: 'linear-gradient(45deg, #6A4C93 30%, #553C9A 90%)',
                                         transform: 'translateY(-2px)',
-                                        boxShadow: '0 6px 20px rgba(102, 126, 234, 0.4)'
+                                        boxShadow: '0 6px 20px rgba(139, 95, 191, 0.4)'
                                     },
                                     '&:disabled': {
                                         background: 'linear-gradient(45deg, #ccc 30%, #aaa 90%)'
@@ -578,18 +578,18 @@ const Invoices = () => {
                                 startIcon={<AddIcon />}
                                 onClick={() => handleOpenDialog()}
                                 sx={{
-                                    background: 'linear-gradient(45deg, #4CAF50 30%, #45A049 90%)',
+                                    background: 'linear-gradient(45deg, #2E8B57 30%, #228B22 90%)',
                                     borderRadius: 3,
                                     px: 4,
                                     py: 1.5,
                                     fontSize: '1.1rem',
                                     fontWeight: 'bold',
                                     minWidth: 180,
-                                    boxShadow: '0 4px 15px rgba(76, 175, 80, 0.3)',
+                                    boxShadow: '0 4px 15px rgba(46, 139, 87, 0.3)',
                                     '&:hover': {
-                                        background: 'linear-gradient(45deg, #45A049 30%, #388E3C 90%)',
+                                        background: 'linear-gradient(45deg, #228B22 30%, #006400 90%)',
                                         transform: 'translateY(-2px)',
-                                        boxShadow: '0 6px 20px rgba(76, 175, 80, 0.4)'
+                                        boxShadow: '0 6px 20px rgba(46, 139, 87, 0.4)'
                                     }
                                 }}
                             >
@@ -604,10 +604,10 @@ const Invoices = () => {
                         {/* Estadísticas */}
                         <Grid container spacing={3}>
                             {[
-                                { title: 'Total Facturas', value: stats.total, icon: <ReceiptIcon />, gradient: 'linear-gradient(135deg, #2196F3, #1976D2)' },
-                                { title: 'Pendientes', value: stats.pending, icon: <ReceiptIcon />, gradient: 'linear-gradient(135deg, #ff9800, #f57c00)' },
-                                { title: 'Pagadas', value: stats.paid, icon: <ReceiptIcon />, gradient: 'linear-gradient(135deg, #4CAF50, #45A049)' },
-                                { title: 'Total Ingresos', value: formatAmount(stats.totalAmount), icon: <MoneyIcon />, gradient: 'linear-gradient(135deg, #9C27B0, #7B1FA2)' }
+                                { title: 'Total Facturas', value: stats.total, icon: <ReceiptIcon />, gradient: 'linear-gradient(135deg, #8B5FBF, #6A4C93)' },
+                                { title: 'Pendientes', value: stats.pending, icon: <ReceiptIcon />, gradient: 'linear-gradient(135deg, #B794F6, #8B5FBF)' },
+                                { title: 'Pagadas', value: stats.paid, icon: <ReceiptIcon />, gradient: 'linear-gradient(135deg, #2E8B57, #228B22)' },
+                                { title: 'Total Ingresos', value: formatAmount(stats.totalAmount), icon: <MoneyIcon />, gradient: 'linear-gradient(135deg, #2E8B57, #228B22)' }
                             ].map((stat, index) => (
                                 <Grid item xs={12} sm={6} md={3} key={index}>
                                     <Card sx={{
@@ -688,7 +688,7 @@ const Invoices = () => {
                                         value={searchTerm}
                                         onChange={(e) => setSearchTerm(e.target.value)}
                                         InputProps={{
-                                            startAdornment: <SearchIcon sx={{ mr: 1, color: '#667eea' }} />
+                                            startAdornment: <SearchIcon sx={{ mr: 1, color: '#8B5FBF' }} />
                                         }}
                                         sx={{
                                             '& .MuiOutlinedInput-root': {
@@ -738,19 +738,19 @@ const Invoices = () => {
                                 <Table stickyHeader>
                                     <TableHead>
                                         <TableRow>
-                                            <TableCell sx={{ fontWeight: 'bold', background: 'linear-gradient(45deg, #667eea, #764ba2)', color: 'white' }}>ID</TableCell>
-                                            <TableCell sx={{ fontWeight: 'bold', background: 'linear-gradient(45deg, #667eea, #764ba2)', color: 'white' }}>Cliente</TableCell>
-                                            <TableCell sx={{ fontWeight: 'bold', background: 'linear-gradient(45deg, #667eea, #764ba2)', color: 'white' }}>Fecha</TableCell>
-                                            <TableCell sx={{ fontWeight: 'bold', background: 'linear-gradient(45deg, #667eea, #764ba2)', color: 'white' }}>Estado</TableCell>
-                                            <TableCell sx={{ fontWeight: 'bold', background: 'linear-gradient(45deg, #667eea, #764ba2)', color: 'white' }}>Total</TableCell>
-                                            <TableCell sx={{ fontWeight: 'bold', background: 'linear-gradient(45deg, #667eea, #764ba2)', color: 'white' }}>Acciones</TableCell>
+                                            <TableCell sx={{ fontWeight: 'bold', background: 'linear-gradient(45deg, #8B5FBF, #6A4C93)', color: 'white' }}>ID</TableCell>
+                                            <TableCell sx={{ fontWeight: 'bold', background: 'linear-gradient(45deg, #8B5FBF, #6A4C93)', color: 'white' }}>Cliente</TableCell>
+                                            <TableCell sx={{ fontWeight: 'bold', background: 'linear-gradient(45deg, #8B5FBF, #6A4C93)', color: 'white' }}>Fecha</TableCell>
+                                            <TableCell sx={{ fontWeight: 'bold', background: 'linear-gradient(45deg, #8B5FBF, #6A4C93)', color: 'white' }}>Estado</TableCell>
+                                            <TableCell sx={{ fontWeight: 'bold', background: 'linear-gradient(45deg, #8B5FBF, #6A4C93)', color: 'white' }}>Total</TableCell>
+                                            <TableCell sx={{ fontWeight: 'bold', background: 'linear-gradient(45deg, #8B5FBF, #6A4C93)', color: 'white' }}>Acciones</TableCell>
                                         </TableRow>
                                     </TableHead>
                                     <TableBody>
                                         {paginatedInvoices.map((invoice) => (
                                             <TableRow key={invoice.id} sx={{ 
                                                 '&:hover': { 
-                                                    background: 'rgba(102, 126, 234, 0.1)',
+                                                    background: 'rgba(139, 95, 191, 0.1)',
                                                     transform: 'scale(1.01)'
                                                 },
                                                 transition: 'all 0.2s ease'
@@ -787,7 +787,7 @@ const Invoices = () => {
                                                     />
                                                 </TableCell>
                                                 <TableCell>
-                                                    <Typography variant="body1" sx={{ fontWeight: 'bold', color: '#667eea' }}>
+                                                    <Typography variant="body1" sx={{ fontWeight: 'bold', color: '#2E8B57' }}>
                                                         {formatAmount(invoice.total)}
                                                     </Typography>
                                                 </TableCell>
@@ -933,13 +933,13 @@ const Invoices = () => {
                     position: 'fixed',
                     bottom: 20,
                     right: 20,
-                    background: 'linear-gradient(45deg, #667eea 30%, #764ba2 90%)',
+                    background: 'linear-gradient(45deg, #8B5FBF 30%, #6A4C93 90%)',
                     display: { xs: 'flex', md: 'none' },
-                    boxShadow: '0 8px 20px rgba(102, 126, 234, 0.4)',
+                    boxShadow: '0 8px 20px rgba(139, 95, 191, 0.4)',
                     '&:hover': {
-                        background: 'linear-gradient(45deg, #667eea 30%, #764ba2 90%)',
+                        background: 'linear-gradient(45deg, #8B5FBF 30%, #6A4C93 90%)',
                         transform: 'scale(1.1)',
-                        boxShadow: '0 12px 30px rgba(102, 126, 234, 0.6)'
+                        boxShadow: '0 12px 30px rgba(139, 95, 191, 0.6)'
                     }
                 }}
                 onClick={() => handleOpenDialog()}
