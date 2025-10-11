@@ -342,64 +342,97 @@ const Products = () => {
 
                 {/* Stats */}
                 <Grid container spacing={3} sx={{ mb: 3 }}>
-                    <Grid item xs={12} sm={3}>
-                        <Card sx={{ p: 3 }}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                                <InventoryIcon sx={{ fontSize: 40, color: '#2196F3' }} />
-                                <Box>
-                                    <Typography variant="h4" sx={{ fontWeight: 'bold', color: '#2196F3' }}>
-                                        {stats.total}
-                                    </Typography>
-                                    <Typography variant="body2" color="text.secondary">
-                                        Total Productos
-                                    </Typography>
+                    {[
+                        { 
+                            title: 'Total Productos', 
+                            value: stats.total, 
+                            gradient: 'linear-gradient(135deg, #2196F3, #1976D2)',
+                            emoji: '📦'
+                        },
+                        { 
+                            title: 'Valor Inventario', 
+                            value: formatCurrency(stats.totalValue), 
+                            gradient: 'linear-gradient(135deg, #4CAF50, #45A049)',
+                            emoji: '💰'
+                        },
+                        { 
+                            title: 'Sin Stock', 
+                            value: stats.outOfStock, 
+                            gradient: 'linear-gradient(135deg, #f44336, #d32f2f)',
+                            emoji: '❌'
+                        },
+                        { 
+                            title: 'Stock Bajo', 
+                            value: stats.lowStock, 
+                            gradient: 'linear-gradient(135deg, #FF9800, #F57C00)',
+                            emoji: '⚠️'
+                        }
+                    ].map((stat, index) => (
+                        <Grid item xs={12} sm={6} md={3} key={index}>
+                            <Card sx={{
+                                background: 'linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.8) 100%)',
+                                backdropFilter: 'blur(20px)',
+                                borderRadius: 4,
+                                textAlign: 'center',
+                                p: 3,
+                                height: 140,
+                                display: 'flex',
+                                flexDirection: 'column',
+                                justifyContent: 'center',
+                                boxShadow: '0 8px 32px rgba(31, 38, 135, 0.2)',
+                                border: '1px solid rgba(255, 255, 255, 0.3)',
+                                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                                position: 'relative',
+                                overflow: 'hidden',
+                                '&:hover': {
+                                    transform: 'translateY(-8px) scale(1.02)',
+                                    boxShadow: '0 20px 40px rgba(31, 38, 135, 0.4)'
+                                },
+                                '&::before': {
+                                    content: '""',
+                                    position: 'absolute',
+                                    top: 0,
+                                    left: 0,
+                                    right: 0,
+                                    height: '4px',
+                                    background: stat.gradient,
+                                    borderRadius: '16px 16px 0 0'
+                                }
+                            }}>
+                                <Box sx={{ 
+                                    fontSize: '2rem', 
+                                    mb: 1,
+                                    background: stat.gradient,
+                                    borderRadius: '50%',
+                                    width: 60,
+                                    height: 60,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    mx: 'auto',
+                                    boxShadow: '0 4px 15px rgba(0,0,0,0.2)'
+                                }}>
+                                    {stat.emoji}
                                 </Box>
-                            </Box>
-                        </Card>
-                    </Grid>
-                    <Grid item xs={12} sm={3}>
-                        <Card sx={{ p: 3 }}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                                <MoneyIcon sx={{ fontSize: 40, color: '#4CAF50' }} />
-                                <Box>
-                                    <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#4CAF50' }}>
-                                        {formatCurrency(stats.totalValue)}
-                                    </Typography>
-                                    <Typography variant="body2" color="text.secondary">
-                                        Valor Total Inventario
-                                    </Typography>
-                                </Box>
-                            </Box>
-                        </Card>
-                    </Grid>
-                    <Grid item xs={12} sm={3}>
-                        <Card sx={{ p: 3 }}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                                <Typography variant="h4" sx={{ fontWeight: 'bold', color: '#f44336' }}>
-                                    {stats.outOfStock}
+                                <Typography variant="h4" sx={{ 
+                                    fontWeight: 'bold', 
+                                    background: stat.gradient,
+                                    backgroundClip: 'text',
+                                    WebkitBackgroundClip: 'text',
+                                    color: 'transparent',
+                                    mb: 0.5,
+                                    fontSize: { xs: '1rem', md: '1.25rem' }
+                                }}>
+                                    {stat.value}
                                 </Typography>
-                                <Box>
-                                    <Typography variant="body2" color="text.secondary">
-                                        Sin Stock
-                                    </Typography>
-                                </Box>
-                            </Box>
-                        </Card>
-                    </Grid>
-                    <Grid item xs={12} sm={3}>
-                        <Card sx={{ p: 3 }}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                                <Typography variant="h4" sx={{ fontWeight: 'bold', color: '#FF9800' }}>
-                                    {stats.lowStock}
+                                <Typography variant="body2" color="text.secondary" sx={{
+                                    fontWeight: 'medium'
+                                }}>
+                                    {stat.title}
                                 </Typography>
-                                <Box>
-                                    <Typography variant="body2" color="text.secondary">
-                                        Stock Bajo
-                                    </Typography>
-                                </Box>
-                            </Box>
-                        </Card>
-                    </Grid>
+                            </Card>
+                        </Grid>
+                    ))}
                 </Grid>
 
                 {/* Botones de Acción */}
@@ -429,18 +462,57 @@ const Products = () => {
                     </Button>
                 </Box>
 
-                {/* Tabla */}
-                <Paper sx={{ width: '100%', overflow: 'hidden' }}>
+                {/* Tabla Bonita */}
+                <Paper sx={{ 
+                    width: '100%', 
+                    overflow: 'hidden',
+                    background: 'linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.8) 100%)',
+                    backdropFilter: 'blur(20px)',
+                    borderRadius: 4,
+                    border: '1px solid rgba(255, 255, 255, 0.3)',
+                    boxShadow: '0 8px 32px rgba(31, 38, 135, 0.2)'
+                }}>
                     <TableContainer>
                         <Table>
                             <TableHead>
                                 <TableRow sx={{ background: 'linear-gradient(45deg, #667eea, #764ba2)' }}>
-                                    <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Nombre</TableCell>
-                                    <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Descripción</TableCell>
-                                    <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Precio</TableCell>
-                                    <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Categoría</TableCell>
-                                    <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Stock</TableCell>
-                                    <TableCell sx={{ color: 'white', fontWeight: 'bold', textAlign: 'center' }}>Acciones</TableCell>
+                                    <TableCell sx={{ 
+                                        color: 'white', 
+                                        fontWeight: 'bold',
+                                        fontSize: '1rem',
+                                        py: 2
+                                    }}>📦 Producto</TableCell>
+                                    <TableCell sx={{ 
+                                        color: 'white', 
+                                        fontWeight: 'bold',
+                                        fontSize: '1rem',
+                                        py: 2
+                                    }}>📝 Descripción</TableCell>
+                                    <TableCell sx={{ 
+                                        color: 'white', 
+                                        fontWeight: 'bold',
+                                        fontSize: '1rem',
+                                        py: 2
+                                    }}>💰 Precio</TableCell>
+                                    <TableCell sx={{ 
+                                        color: 'white', 
+                                        fontWeight: 'bold',
+                                        fontSize: '1rem',
+                                        py: 2
+                                    }}>🏷️ Tipo</TableCell>
+                                    <TableCell sx={{ 
+                                        color: 'white', 
+                                        fontWeight: 'bold',
+                                        fontSize: '1rem',
+                                        py: 2
+                                    }}>📊 Stock</TableCell>
+                                    <TableCell sx={{ 
+                                        color: 'white', 
+                                        fontWeight: 'bold', 
+                                        textAlign: 'center',
+                                        fontSize: '1rem',
+                                        py: 2
+                                    }}>⚙️ Acciones</TableCell>
                                 </TableRow>
                             </TableHead>
                             <TableBody>
@@ -502,76 +574,277 @@ const Products = () => {
                 </Paper>
             </Box>
 
-            {/* Modal Simple */}
-            <Dialog open={open} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
-                <DialogTitle>
-                    {editMode ? 'Editar Producto' : 'Nuevo Producto'}
+            {/* Modal Bonito */}
+            <Dialog 
+                open={open} 
+                onClose={handleCloseDialog} 
+                maxWidth="md" 
+                fullWidth
+                PaperProps={{
+                    sx: {
+                        borderRadius: 4,
+                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                        backdropFilter: 'blur(20px)',
+                        border: '1px solid rgba(255, 255, 255, 0.2)',
+                        overflow: 'visible'
+                    }
+                }}
+            >
+                <DialogTitle sx={{ 
+                    color: 'white', 
+                    fontWeight: 'bold', 
+                    fontSize: '1.5rem',
+                    textAlign: 'center',
+                    py: 3,
+                    background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)',
+                    borderBottom: '1px solid rgba(255,255,255,0.2)'
+                }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 2 }}>
+                        <Box sx={{
+                            width: 50,
+                            height: 50,
+                            borderRadius: '50%',
+                            background: 'linear-gradient(135deg, #ffffff 0%, rgba(255,255,255,0.8) 100%)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: '1.5rem',
+                            boxShadow: '0 4px 20px rgba(0,0,0,0.2)'
+                        }}>
+                            📦
+                        </Box>
+                        <Typography variant="h5" sx={{ color: 'white', fontWeight: 'bold' }}>
+                            {editMode ? '✏️ Editar Producto' : '➕ Nuevo Producto'}
+                        </Typography>
+                    </Box>
                 </DialogTitle>
-                <DialogContent>
+                <DialogContent sx={{ 
+                    background: 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.9) 100%)',
+                    p: 4
+                }}>
                     {error && (
-                        <Alert severity="error" sx={{ mb: 2 }}>
+                        <Alert 
+                            severity="error" 
+                            sx={{ 
+                                mb: 3,
+                                borderRadius: 3,
+                                boxShadow: '0 4px 15px rgba(244, 67, 54, 0.2)'
+                            }}
+                        >
                             {error}
                         </Alert>
                     )}
                     <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
-                        <TextField
-                            fullWidth
-                            label="Nombre del Producto"
-                            value={formData.name}
-                            onChange={(e) => setFormData({...formData, name: e.target.value})}
-                            required
-                            sx={{ mb: 2 }}
-                        />
-                        <TextField
-                            fullWidth
-                            label="Descripción (opcional)"
-                            multiline
-                            rows={3}
-                            value={formData.description}
-                            onChange={(e) => setFormData({...formData, description: e.target.value})}
-                            sx={{ mb: 2 }}
-                        />
-                        <Grid container spacing={2} sx={{ mb: 2 }}>
-                            <Grid item xs={6}>
-                                <TextField
-                                    fullWidth
-                                    label="Precio"
-                                    type="number"
-                                    inputProps={{ min: 0, step: 0.01 }}
-                                    value={formData.price}
-                                    onChange={(e) => setFormData({...formData, price: e.target.value})}
-                                    required
-                                />
+                        <Grid container spacing={3}>
+                            {/* Información Básica */}
+                            <Grid item xs={12}>
+                                <Box sx={{
+                                    background: 'linear-gradient(145deg, #ffffff 0%, #f8faff 100%)',
+                                    borderRadius: 3,
+                                    p: 3,
+                                    border: '2px solid #e3f2fd',
+                                    boxShadow: '0 4px 20px rgba(102, 126, 234, 0.08)',
+                                    transition: 'all 0.3s ease',
+                                    '&:hover': {
+                                        border: '2px solid #667eea',
+                                        boxShadow: '0 8px 25px rgba(102, 126, 234, 0.15)'
+                                    }
+                                }}>
+                                    <Typography variant="h6" sx={{ 
+                                        mb: 2, 
+                                        color: '#667eea', 
+                                        fontWeight: 'bold',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: 1
+                                    }}>
+                                        📝 Información del Producto
+                                    </Typography>
+                                    <Grid container spacing={2}>
+                                        <Grid item xs={12}>
+                                            <TextField
+                                                fullWidth
+                                                label="Nombre del Producto"
+                                                value={formData.name}
+                                                onChange={(e) => setFormData({...formData, name: e.target.value})}
+                                                required
+                                                sx={{
+                                                    '& .MuiOutlinedInput-root': {
+                                                        backgroundColor: 'white',
+                                                        borderRadius: 2,
+                                                        '&.Mui-focused': {
+                                                            boxShadow: '0 0 0 2px rgba(102, 126, 234, 0.2)'
+                                                        }
+                                                    }
+                                                }}
+                                            />
+                                        </Grid>
+                                        <Grid item xs={12}>
+                                            <TextField
+                                                fullWidth
+                                                label="Descripción del producto (opcional)"
+                                                multiline
+                                                rows={3}
+                                                value={formData.description}
+                                                onChange={(e) => setFormData({...formData, description: e.target.value})}
+                                                sx={{
+                                                    '& .MuiOutlinedInput-root': {
+                                                        backgroundColor: 'white',
+                                                        borderRadius: 2,
+                                                        '&.Mui-focused': {
+                                                            boxShadow: '0 0 0 2px rgba(102, 126, 234, 0.2)'
+                                                        }
+                                                    }
+                                                }}
+                                            />
+                                        </Grid>
+                                    </Grid>
+                                </Box>
                             </Grid>
-                            <Grid item xs={6}>
-                                <TextField
-                                    fullWidth
-                                    label="Stock"
-                                    type="number"
-                                    inputProps={{ min: 0 }}
-                                    value={formData.stock}
-                                    onChange={(e) => setFormData({...formData, stock: e.target.value})}
-                                />
+                            
+                            {/* Información Comercial */}
+                            <Grid item xs={12}>
+                                <Box sx={{
+                                    background: 'linear-gradient(145deg, #ffffff 0%, #f0fff4 100%)',
+                                    borderRadius: 3,
+                                    p: 3,
+                                    border: '2px solid #e8f5e8',
+                                    boxShadow: '0 4px 20px rgba(76, 175, 80, 0.08)',
+                                    transition: 'all 0.3s ease',
+                                    '&:hover': {
+                                        border: '2px solid #4CAF50',
+                                        boxShadow: '0 8px 25px rgba(76, 175, 80, 0.15)'
+                                    }
+                                }}>
+                                    <Typography variant="h6" sx={{ 
+                                        mb: 2, 
+                                        color: '#4CAF50', 
+                                        fontWeight: 'bold',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: 1
+                                    }}>
+                                        💰 Información Comercial
+                                    </Typography>
+                                    <Grid container spacing={2}>
+                                        <Grid item xs={12} sm={4}>
+                                            <TextField
+                                                fullWidth
+                                                label="Precio ($)"
+                                                type="number"
+                                                inputProps={{ min: 0, step: 0.01 }}
+                                                value={formData.price}
+                                                onChange={(e) => setFormData({...formData, price: e.target.value})}
+                                                required
+                                                sx={{
+                                                    '& .MuiOutlinedInput-root': {
+                                                        backgroundColor: 'white',
+                                                        borderRadius: 2,
+                                                        '&.Mui-focused': {
+                                                            boxShadow: '0 0 0 2px rgba(76, 175, 80, 0.2)'
+                                                        }
+                                                    }
+                                                }}
+                                            />
+                                        </Grid>
+                                        <Grid item xs={12} sm={4}>
+                                            <TextField
+                                                fullWidth
+                                                label="Stock disponible"
+                                                type="number"
+                                                inputProps={{ min: 0 }}
+                                                value={formData.stock}
+                                                onChange={(e) => setFormData({...formData, stock: e.target.value})}
+                                                sx={{
+                                                    '& .MuiOutlinedInput-root': {
+                                                        backgroundColor: 'white',
+                                                        borderRadius: 2,
+                                                        '&.Mui-focused': {
+                                                            boxShadow: '0 0 0 2px rgba(76, 175, 80, 0.2)'
+                                                        }
+                                                    }
+                                                }}
+                                            />
+                                        </Grid>
+                                        <Grid item xs={12} sm={4}>
+                                            <FormControl fullWidth>
+                                                <InputLabel>Categoría del producto</InputLabel>
+                                                <Select
+                                                    value={formData.category}
+                                                    label="Categoría del producto"
+                                                    onChange={(e) => setFormData({...formData, category: e.target.value})}
+                                                    sx={{
+                                                        backgroundColor: 'white',
+                                                        borderRadius: 2,
+                                                        '&.Mui-focused': {
+                                                            boxShadow: '0 0 0 2px rgba(76, 175, 80, 0.2)'
+                                                        }
+                                                    }}
+                                                >
+                                                    {categories.map((cat) => (
+                                                        <MenuItem key={cat} value={cat}>
+                                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                                <Box sx={{ 
+                                                                    width: 8, 
+                                                                    height: 8, 
+                                                                    borderRadius: '50%', 
+                                                                    background: 'linear-gradient(45deg, #4CAF50, #45A049)' 
+                                                                }} />
+                                                                {cat}
+                                                            </Box>
+                                                        </MenuItem>
+                                                    ))}
+                                                </Select>
+                                            </FormControl>
+                                        </Grid>
+                                    </Grid>
+                                </Box>
                             </Grid>
                         </Grid>
-                        <FormControl fullWidth>
-                            <InputLabel>Categoría</InputLabel>
-                            <Select
-                                value={formData.category}
-                                label="Categoría"
-                                onChange={(e) => setFormData({...formData, category: e.target.value})}
-                            >
-                                {categories.map((cat) => (
-                                    <MenuItem key={cat} value={cat}>{cat}</MenuItem>
-                                ))}
-                            </Select>
-                        </FormControl>
                     </Box>
                 </DialogContent>
-                <DialogActions>
-                    <Button onClick={handleCloseDialog}>Cancelar</Button>
-                    <Button onClick={handleSubmit} variant="contained">
-                        {editMode ? 'Actualizar' : 'Crear'}
+                <DialogActions sx={{ 
+                    background: 'linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.8) 100%)',
+                    p: 3,
+                    gap: 2,
+                    borderTop: '1px solid rgba(102, 126, 234, 0.1)'
+                }}>
+                    <Button 
+                        onClick={handleCloseDialog}
+                        variant="outlined"
+                        sx={{
+                            borderColor: '#667eea',
+                            color: '#667eea',
+                            borderRadius: 3,
+                            px: 4,
+                            py: 1.5,
+                            fontWeight: 'bold',
+                            '&:hover': {
+                                borderColor: '#5a6fd8',
+                                background: 'rgba(102, 126, 234, 0.1)'
+                            }
+                        }}
+                    >
+                        ❌ Cancelar
+                    </Button>
+                    <Button 
+                        onClick={handleSubmit} 
+                        variant="contained"
+                        sx={{
+                            background: 'linear-gradient(45deg, #667eea, #764ba2)',
+                            borderRadius: 3,
+                            px: 4,
+                            py: 1.5,
+                            fontWeight: 'bold',
+                            boxShadow: '0 4px 15px rgba(102, 126, 234, 0.4)',
+                            '&:hover': {
+                                background: 'linear-gradient(45deg, #5a6fd8, #6a42a0)',
+                                transform: 'translateY(-2px)',
+                                boxShadow: '0 6px 20px rgba(102, 126, 234, 0.6)'
+                            }
+                        }}
+                    >
+                        ✨ {editMode ? 'Actualizar Producto' : 'Crear Producto'}
                     </Button>
                 </DialogActions>
             </Dialog>

@@ -300,57 +300,94 @@ const Customers = () => {
 
                 {/* Stats */}
                 <Grid container spacing={3} sx={{ mb: 3 }}>
-                    <Grid item xs={12} sm={4}>
-                        <Card sx={{ p: 3 }}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                                <Avatar sx={{ background: 'linear-gradient(45deg, #2196F3, #21CBF3)' }}>
-                                    <PeopleIcon />
-                                </Avatar>
-                                <Box>
-                                    <Typography variant="h4" sx={{ fontWeight: 'bold', color: '#2196F3' }}>
-                                        {stats.total}
-                                    </Typography>
-                                    <Typography variant="body2" color="text.secondary">
-                                        Total Clientes
-                                    </Typography>
+                    {[
+                        { 
+                            title: 'Total Clientes', 
+                            value: stats.total, 
+                            icon: <PeopleIcon />, 
+                            gradient: 'linear-gradient(135deg, #2196F3, #1976D2)',
+                            emoji: '👥'
+                        },
+                        { 
+                            title: 'Con Teléfono', 
+                            value: stats.withPhone, 
+                            icon: <PhoneIcon />, 
+                            gradient: 'linear-gradient(135deg, #4CAF50, #45A049)',
+                            emoji: '📱'
+                        },
+                        { 
+                            title: 'Con Dirección', 
+                            value: stats.withAddress, 
+                            icon: <LocationIcon />, 
+                            gradient: 'linear-gradient(135deg, #FF9800, #F57C00)',
+                            emoji: '📍'
+                        }
+                    ].map((stat, index) => (
+                        <Grid item xs={12} sm={4} key={index}>
+                            <Card sx={{
+                                background: 'linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.8) 100%)',
+                                backdropFilter: 'blur(20px)',
+                                borderRadius: 4,
+                                textAlign: 'center',
+                                p: 3,
+                                height: 140,
+                                display: 'flex',
+                                flexDirection: 'column',
+                                justifyContent: 'center',
+                                boxShadow: '0 8px 32px rgba(31, 38, 135, 0.2)',
+                                border: '1px solid rgba(255, 255, 255, 0.3)',
+                                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                                position: 'relative',
+                                overflow: 'hidden',
+                                '&:hover': {
+                                    transform: 'translateY(-8px) scale(1.02)',
+                                    boxShadow: '0 20px 40px rgba(31, 38, 135, 0.4)'
+                                },
+                                '&::before': {
+                                    content: '""',
+                                    position: 'absolute',
+                                    top: 0,
+                                    left: 0,
+                                    right: 0,
+                                    height: '4px',
+                                    background: stat.gradient,
+                                    borderRadius: '16px 16px 0 0'
+                                }
+                            }}>
+                                <Box sx={{ 
+                                    fontSize: '2rem', 
+                                    mb: 1,
+                                    background: stat.gradient,
+                                    borderRadius: '50%',
+                                    width: 60,
+                                    height: 60,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    mx: 'auto',
+                                    boxShadow: '0 4px 15px rgba(0,0,0,0.2)'
+                                }}>
+                                    {stat.emoji}
                                 </Box>
-                            </Box>
-                        </Card>
-                    </Grid>
-                    <Grid item xs={12} sm={4}>
-                        <Card sx={{ p: 3 }}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                                <Avatar sx={{ background: 'linear-gradient(45deg, #4CAF50, #45A049)' }}>
-                                    <PhoneIcon />
-                                </Avatar>
-                                <Box>
-                                    <Typography variant="h4" sx={{ fontWeight: 'bold', color: '#4CAF50' }}>
-                                        {stats.withPhone}
-                                    </Typography>
-                                    <Typography variant="body2" color="text.secondary">
-                                        Con Teléfono
-                                    </Typography>
-                                </Box>
-                            </Box>
-                        </Card>
-                    </Grid>
-                    <Grid item xs={12} sm={4}>
-                        <Card sx={{ p: 3 }}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                                <Avatar sx={{ background: 'linear-gradient(45deg, #FF9800, #F57C00)' }}>
-                                    <LocationIcon />
-                                </Avatar>
-                                <Box>
-                                    <Typography variant="h4" sx={{ fontWeight: 'bold', color: '#FF9800' }}>
-                                        {stats.withAddress}
-                                    </Typography>
-                                    <Typography variant="body2" color="text.secondary">
-                                        Con Dirección
-                                    </Typography>
-                                </Box>
-                            </Box>
-                        </Card>
-                    </Grid>
+                                <Typography variant="h4" sx={{ 
+                                    fontWeight: 'bold', 
+                                    background: stat.gradient,
+                                    backgroundClip: 'text',
+                                    WebkitBackgroundClip: 'text',
+                                    color: 'transparent',
+                                    mb: 0.5,
+                                    fontSize: { xs: '1.25rem', md: '1.5rem' }
+                                }}>
+                                    {stat.value}
+                                </Typography>
+                                <Typography variant="body2" color="text.secondary" sx={{
+                                    fontWeight: 'medium'
+                                }}>
+                                    {stat.title}
+                                </Typography>
+                            </Card>
+                        </Grid>
+                    ))}
                 </Grid>
 
                 {/* Botones de Acción */}
@@ -380,45 +417,147 @@ const Customers = () => {
                     </Button>
                 </Box>
 
-                {/* Tabla */}
-                <Paper sx={{ width: '100%', overflow: 'hidden' }}>
+                {/* Tabla Bonita */}
+                <Paper sx={{ 
+                    width: '100%', 
+                    overflow: 'hidden',
+                    background: 'linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.8) 100%)',
+                    backdropFilter: 'blur(20px)',
+                    borderRadius: 4,
+                    border: '1px solid rgba(255, 255, 255, 0.3)',
+                    boxShadow: '0 8px 32px rgba(31, 38, 135, 0.2)'
+                }}>
                     <TableContainer>
                         <Table>
                             <TableHead>
                                 <TableRow sx={{ background: 'linear-gradient(45deg, #667eea, #764ba2)' }}>
-                                    <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Nombre</TableCell>
-                                    <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Email</TableCell>
-                                    <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Teléfono</TableCell>
-                                    <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Dirección</TableCell>
-                                    <TableCell sx={{ color: 'white', fontWeight: 'bold', textAlign: 'center' }}>Acciones</TableCell>
+                                    <TableCell sx={{ 
+                                        color: 'white', 
+                                        fontWeight: 'bold',
+                                        fontSize: '1rem',
+                                        py: 2
+                                    }}>👤 Nombre</TableCell>
+                                    <TableCell sx={{ 
+                                        color: 'white', 
+                                        fontWeight: 'bold',
+                                        fontSize: '1rem',
+                                        py: 2
+                                    }}>📧 Email</TableCell>
+                                    <TableCell sx={{ 
+                                        color: 'white', 
+                                        fontWeight: 'bold',
+                                        fontSize: '1rem',
+                                        py: 2
+                                    }}>📱 Teléfono</TableCell>
+                                    <TableCell sx={{ 
+                                        color: 'white', 
+                                        fontWeight: 'bold',
+                                        fontSize: '1rem',
+                                        py: 2
+                                    }}>📍 Dirección</TableCell>
+                                    <TableCell sx={{ 
+                                        color: 'white', 
+                                        fontWeight: 'bold', 
+                                        textAlign: 'center',
+                                        fontSize: '1rem',
+                                        py: 2
+                                    }}>⚙️ Acciones</TableCell>
                                 </TableRow>
                             </TableHead>
                             <TableBody>
                                 {paginatedCustomers.length > 0 ? (
                                     paginatedCustomers.map((customer) => (
-                                        <TableRow key={customer.id}>
-                                            <TableCell>{customer.name}</TableCell>
-                                            <TableCell>{customer.email}</TableCell>
-                                            <TableCell>
+                                        <TableRow key={customer.id} sx={{ 
+                                            '&:hover': { 
+                                                background: 'rgba(102, 126, 234, 0.1)',
+                                                transform: 'scale(1.01)'
+                                            },
+                                            transition: 'all 0.2s ease'
+                                        }}>
+                                            <TableCell sx={{ 
+                                                fontWeight: '600',
+                                                color: '#2d3748',
+                                                py: 2
+                                            }}>
+                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                                    <Avatar sx={{ 
+                                                        background: 'linear-gradient(45deg, #667eea, #764ba2)',
+                                                        width: 35,
+                                                        height: 35,
+                                                        fontSize: '0.9rem'
+                                                    }}>
+                                                        {customer.name.charAt(0).toUpperCase()}
+                                                    </Avatar>
+                                                    {customer.name}
+                                                </Box>
+                                            </TableCell>
+                                            <TableCell sx={{ py: 2 }}>
+                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                    <EmailIcon sx={{ color: '#667eea', fontSize: 16 }} />
+                                                    {customer.email}
+                                                </Box>
+                                            </TableCell>
+                                            <TableCell sx={{ py: 2 }}>
                                                 {customer.phone ? (
-                                                    <Chip label={customer.phone} size="small" color="primary" />
+                                                    <Chip 
+                                                        label={customer.phone} 
+                                                        size="small" 
+                                                        sx={{
+                                                            background: 'linear-gradient(45deg, #4CAF50, #45A049)',
+                                                            color: 'white',
+                                                            fontWeight: 'bold'
+                                                        }}
+                                                        icon={<PhoneIcon sx={{ color: 'white !important' }} />}
+                                                    />
                                                 ) : (
-                                                    <Chip label="Sin teléfono" size="small" variant="outlined" />
+                                                    <Chip 
+                                                        label="Sin teléfono" 
+                                                        size="small" 
+                                                        variant="outlined"
+                                                        sx={{ color: '#9e9e9e' }}
+                                                    />
                                                 )}
                                             </TableCell>
-                                            <TableCell>
-                                                {customer.address || 'Sin dirección'}
+                                            <TableCell sx={{ py: 2, maxWidth: 200 }}>
+                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                    <LocationIcon sx={{ color: '#FF9800', fontSize: 16 }} />
+                                                    <Typography 
+                                                        variant="body2" 
+                                                        sx={{ 
+                                                            overflow: 'hidden',
+                                                            textOverflow: 'ellipsis',
+                                                            whiteSpace: 'nowrap'
+                                                        }}
+                                                    >
+                                                        {customer.address || 'Sin dirección'}
+                                                    </Typography>
+                                                </Box>
                                             </TableCell>
-                                            <TableCell sx={{ textAlign: 'center' }}>
+                                            <TableCell sx={{ textAlign: 'center', py: 2 }}>
                                                 <IconButton
                                                     onClick={() => handleOpenDialog(customer)}
-                                                    sx={{ color: '#2196F3', mr: 1 }}
+                                                    sx={{ 
+                                                        background: 'linear-gradient(45deg, #2196F3, #1976D2)',
+                                                        color: 'white',
+                                                        mr: 1,
+                                                        '&:hover': {
+                                                            background: 'linear-gradient(45deg, #1976D2, #1565C0)',
+                                                            transform: 'scale(1.1)'
+                                                        }
+                                                    }}
                                                 >
                                                     <EditIcon />
                                                 </IconButton>
                                                 <IconButton
                                                     onClick={() => handleDelete(customer.id)}
-                                                    sx={{ color: '#f44336' }}
+                                                    sx={{ 
+                                                        background: 'linear-gradient(45deg, #f44336, #d32f2f)',
+                                                        color: 'white',
+                                                        '&:hover': {
+                                                            background: 'linear-gradient(45deg, #d32f2f, #c62828)',
+                                                            transform: 'scale(1.1)'
+                                                        }
+                                                    }}
                                                 >
                                                     <DeleteIcon />
                                                 </IconButton>
@@ -449,56 +588,241 @@ const Customers = () => {
                 </Paper>
             </Box>
 
-            {/* Modal Simple */}
-            <Dialog open={open} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
-                <DialogTitle>
-                    {editMode ? 'Editar Cliente' : 'Nuevo Cliente'}
+            {/* Modal Bonito */}
+            <Dialog 
+                open={open} 
+                onClose={handleCloseDialog} 
+                maxWidth="md" 
+                fullWidth
+                PaperProps={{
+                    sx: {
+                        borderRadius: 4,
+                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                        backdropFilter: 'blur(20px)',
+                        border: '1px solid rgba(255, 255, 255, 0.2)',
+                        overflow: 'visible'
+                    }
+                }}
+            >
+                <DialogTitle sx={{ 
+                    color: 'white', 
+                    fontWeight: 'bold', 
+                    fontSize: '1.5rem',
+                    textAlign: 'center',
+                    py: 3,
+                    background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)',
+                    borderBottom: '1px solid rgba(255,255,255,0.2)'
+                }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 2 }}>
+                        <Box sx={{
+                            width: 50,
+                            height: 50,
+                            borderRadius: '50%',
+                            background: 'linear-gradient(135deg, #ffffff 0%, rgba(255,255,255,0.8) 100%)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: '1.5rem',
+                            boxShadow: '0 4px 20px rgba(0,0,0,0.2)'
+                        }}>
+                            👤
+                        </Box>
+                        <Typography variant="h5" sx={{ color: 'white', fontWeight: 'bold' }}>
+                            {editMode ? '✏️ Editar Cliente' : '➕ Nuevo Cliente'}
+                        </Typography>
+                    </Box>
                 </DialogTitle>
-                <DialogContent>
+                <DialogContent sx={{ 
+                    background: 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.9) 100%)',
+                    p: 4
+                }}>
                     {error && (
-                        <Alert severity="error" sx={{ mb: 2 }}>
+                        <Alert 
+                            severity="error" 
+                            sx={{ 
+                                mb: 3,
+                                borderRadius: 3,
+                                boxShadow: '0 4px 15px rgba(244, 67, 54, 0.2)'
+                            }}
+                        >
                             {error}
                         </Alert>
                     )}
                     <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
-                        <TextField
-                            fullWidth
-                            label="Nombre"
-                            value={formData.name}
-                            onChange={(e) => setFormData({...formData, name: e.target.value})}
-                            required
-                            sx={{ mb: 2 }}
-                        />
-                        <TextField
-                            fullWidth
-                            label="Email"
-                            type="email"
-                            value={formData.email}
-                            onChange={(e) => setFormData({...formData, email: e.target.value})}
-                            required
-                            sx={{ mb: 2 }}
-                        />
-                        <TextField
-                            fullWidth
-                            label="Teléfono (opcional)"
-                            value={formData.phone}
-                            onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                            sx={{ mb: 2 }}
-                        />
-                        <TextField
-                            fullWidth
-                            label="Dirección (opcional)"
-                            multiline
-                            rows={3}
-                            value={formData.address}
-                            onChange={(e) => setFormData({...formData, address: e.target.value})}
-                        />
+                        <Grid container spacing={3}>
+                            <Grid item xs={12}>
+                                <Box sx={{
+                                    background: 'linear-gradient(145deg, #ffffff 0%, #f8faff 100%)',
+                                    borderRadius: 3,
+                                    p: 3,
+                                    border: '2px solid #e3f2fd',
+                                    boxShadow: '0 4px 20px rgba(102, 126, 234, 0.08)',
+                                    transition: 'all 0.3s ease',
+                                    '&:hover': {
+                                        border: '2px solid #667eea',
+                                        boxShadow: '0 8px 25px rgba(102, 126, 234, 0.15)'
+                                    }
+                                }}>
+                                    <Typography variant="h6" sx={{ 
+                                        mb: 2, 
+                                        color: '#667eea', 
+                                        fontWeight: 'bold',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: 1
+                                    }}>
+                                        📝 Información Personal
+                                    </Typography>
+                                    <Grid container spacing={2}>
+                                        <Grid item xs={12} sm={6}>
+                                            <TextField
+                                                fullWidth
+                                                label="Nombre completo"
+                                                value={formData.name}
+                                                onChange={(e) => setFormData({...formData, name: e.target.value})}
+                                                required
+                                                sx={{
+                                                    '& .MuiOutlinedInput-root': {
+                                                        backgroundColor: 'white',
+                                                        borderRadius: 2,
+                                                        '&.Mui-focused': {
+                                                            boxShadow: '0 0 0 2px rgba(102, 126, 234, 0.2)'
+                                                        }
+                                                    }
+                                                }}
+                                            />
+                                        </Grid>
+                                        <Grid item xs={12} sm={6}>
+                                            <TextField
+                                                fullWidth
+                                                label="Correo electrónico"
+                                                type="email"
+                                                value={formData.email}
+                                                onChange={(e) => setFormData({...formData, email: e.target.value})}
+                                                required
+                                                sx={{
+                                                    '& .MuiOutlinedInput-root': {
+                                                        backgroundColor: 'white',
+                                                        borderRadius: 2,
+                                                        '&.Mui-focused': {
+                                                            boxShadow: '0 0 0 2px rgba(102, 126, 234, 0.2)'
+                                                        }
+                                                    }
+                                                }}
+                                            />
+                                        </Grid>
+                                    </Grid>
+                                </Box>
+                            </Grid>
+                            
+                            <Grid item xs={12}>
+                                <Box sx={{
+                                    background: 'linear-gradient(145deg, #ffffff 0%, #f0fff4 100%)',
+                                    borderRadius: 3,
+                                    p: 3,
+                                    border: '2px solid #e8f5e8',
+                                    boxShadow: '0 4px 20px rgba(76, 175, 80, 0.08)',
+                                    transition: 'all 0.3s ease',
+                                    '&:hover': {
+                                        border: '2px solid #4CAF50',
+                                        boxShadow: '0 8px 25px rgba(76, 175, 80, 0.15)'
+                                    }
+                                }}>
+                                    <Typography variant="h6" sx={{ 
+                                        mb: 2, 
+                                        color: '#4CAF50', 
+                                        fontWeight: 'bold',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: 1
+                                    }}>
+                                        📞 Información de Contacto (Opcional)
+                                    </Typography>
+                                    <Grid container spacing={2}>
+                                        <Grid item xs={12} sm={6}>
+                                            <TextField
+                                                fullWidth
+                                                label="Número de teléfono"
+                                                value={formData.phone}
+                                                onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                                                sx={{
+                                                    '& .MuiOutlinedInput-root': {
+                                                        backgroundColor: 'white',
+                                                        borderRadius: 2,
+                                                        '&.Mui-focused': {
+                                                            boxShadow: '0 0 0 2px rgba(76, 175, 80, 0.2)'
+                                                        }
+                                                    }
+                                                }}
+                                            />
+                                        </Grid>
+                                        <Grid item xs={12} sm={6}>
+                                            <TextField
+                                                fullWidth
+                                                label="Dirección completa"
+                                                multiline
+                                                rows={2}
+                                                value={formData.address}
+                                                onChange={(e) => setFormData({...formData, address: e.target.value})}
+                                                sx={{
+                                                    '& .MuiOutlinedInput-root': {
+                                                        backgroundColor: 'white',
+                                                        borderRadius: 2,
+                                                        '&.Mui-focused': {
+                                                            boxShadow: '0 0 0 2px rgba(76, 175, 80, 0.2)'
+                                                        }
+                                                    }
+                                                }}
+                                            />
+                                        </Grid>
+                                    </Grid>
+                                </Box>
+                            </Grid>
+                        </Grid>
                     </Box>
                 </DialogContent>
-                <DialogActions>
-                    <Button onClick={handleCloseDialog}>Cancelar</Button>
-                    <Button onClick={handleSubmit} variant="contained">
-                        {editMode ? 'Actualizar' : 'Crear'}
+                <DialogActions sx={{ 
+                    background: 'linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.8) 100%)',
+                    p: 3,
+                    gap: 2,
+                    borderTop: '1px solid rgba(102, 126, 234, 0.1)'
+                }}>
+                    <Button 
+                        onClick={handleCloseDialog}
+                        variant="outlined"
+                        sx={{
+                            borderColor: '#667eea',
+                            color: '#667eea',
+                            borderRadius: 3,
+                            px: 4,
+                            py: 1.5,
+                            fontWeight: 'bold',
+                            '&:hover': {
+                                borderColor: '#5a6fd8',
+                                background: 'rgba(102, 126, 234, 0.1)'
+                            }
+                        }}
+                    >
+                        ❌ Cancelar
+                    </Button>
+                    <Button 
+                        onClick={handleSubmit} 
+                        variant="contained"
+                        sx={{
+                            background: 'linear-gradient(45deg, #667eea, #764ba2)',
+                            borderRadius: 3,
+                            px: 4,
+                            py: 1.5,
+                            fontWeight: 'bold',
+                            boxShadow: '0 4px 15px rgba(102, 126, 234, 0.4)',
+                            '&:hover': {
+                                background: 'linear-gradient(45deg, #5a6fd8, #6a42a0)',
+                                transform: 'translateY(-2px)',
+                                boxShadow: '0 6px 20px rgba(102, 126, 234, 0.6)'
+                            }
+                        }}
+                    >
+                        ✨ {editMode ? 'Actualizar Cliente' : 'Crear Cliente'}
                     </Button>
                 </DialogActions>
             </Dialog>
