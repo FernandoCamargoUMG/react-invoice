@@ -43,7 +43,10 @@ import {
     Save as SaveIcon,
     Cancel as CancelIcon,
     Payment as PaymentIcon,
-    Refresh as RefreshIcon
+    Refresh as RefreshIcon,
+    ArrowBack as ArrowBackIcon,
+    Home as HomeIcon,
+    ExitToApp as LogoutIcon
 } from '@mui/icons-material';
 import { apiGet, apiPost, apiPut, apiDelete, apiPatch, API_CONFIG } from '../config/api';
 import { useCurrency } from '../utils/currency';
@@ -76,6 +79,17 @@ const Invoices = () => {
         notes: ''
     });
     const [total, setTotal] = useState(0);
+
+    // Navegación
+    const handleBack = () => window.history.back();
+    const handleHome = () => window.location.href = '/';
+    const handleLogout = () => {
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
+        localStorage.removeItem('user_id');
+        sessionStorage.removeItem('user');
+        window.location.href = '/';
+    };
 
     // Cargar clientes y productos para selects
     useEffect(() => {
@@ -334,6 +348,51 @@ const Invoices = () => {
                         </Box>
                     </Box>
                     <Box sx={{ display: 'flex', gap: 2 }}>
+                        <Button
+                            variant="outlined"
+                            startIcon={<ArrowBackIcon />}
+                            onClick={handleBack}
+                            sx={{
+                                borderColor: '#667eea',
+                                color: '#667eea',
+                                '&:hover': {
+                                    borderColor: '#764ba2',
+                                    background: 'rgba(102, 126, 234, 0.1)'
+                                }
+                            }}
+                        >
+                            ATRÁS
+                        </Button>
+                        <Button
+                            variant="outlined"
+                            startIcon={<HomeIcon />}
+                            onClick={handleHome}
+                            sx={{
+                                borderColor: '#667eea',
+                                color: '#667eea',
+                                '&:hover': {
+                                    borderColor: '#764ba2',
+                                    background: 'rgba(102, 126, 234, 0.1)'
+                                }
+                            }}
+                        >
+                            INICIO
+                        </Button>
+                        <Button
+                            variant="outlined"
+                            startIcon={<LogoutIcon />}
+                            onClick={handleLogout}
+                            sx={{
+                                borderColor: '#f44336',
+                                color: '#f44336',
+                                '&:hover': {
+                                    borderColor: '#d32f2f',
+                                    background: 'rgba(244, 67, 54, 0.1)'
+                                }
+                            }}
+                        >
+                            CERRAR SESIÓN
+                        </Button>
                         {!showTable && (
                             <Button
                                 variant="outlined"

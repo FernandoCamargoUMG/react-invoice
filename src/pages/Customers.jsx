@@ -649,136 +649,313 @@ const Customers = () => {
                         </Alert>
                     )}
                     <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
-                        <Grid container spacing={3}>
-                            <Grid item xs={12}>
+                        {/* Información Personal */}
+                        <Box sx={{
+                            background: 'linear-gradient(145deg, #ffffff 0%, #f8faff 100%)',
+                            borderRadius: 4,
+                            p: 4,
+                            mb: 3,
+                            border: '2px solid #e3f2fd',
+                            boxShadow: '0 8px 32px rgba(102, 126, 234, 0.12)',
+                            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                            '&:hover': {
+                                border: '2px solid #667eea',
+                                boxShadow: '0 12px 40px rgba(102, 126, 234, 0.2)',
+                                transform: 'translateY(-2px)'
+                            }
+                        }}>
+                            <Box sx={{ 
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                gap: 2, 
+                                mb: 3,
+                                pb: 2,
+                                borderBottom: '2px solid rgba(102, 126, 234, 0.1)'
+                            }}>
                                 <Box sx={{
-                                    background: 'linear-gradient(145deg, #ffffff 0%, #f8faff 100%)',
+                                    width: 48,
+                                    height: 48,
                                     borderRadius: 3,
-                                    p: 3,
-                                    border: '2px solid #e3f2fd',
-                                    boxShadow: '0 4px 20px rgba(102, 126, 234, 0.08)',
-                                    transition: 'all 0.3s ease',
-                                    '&:hover': {
-                                        border: '2px solid #667eea',
-                                        boxShadow: '0 8px 25px rgba(102, 126, 234, 0.15)'
-                                    }
+                                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    fontSize: '1.5rem',
+                                    boxShadow: '0 4px 16px rgba(102, 126, 234, 0.3)'
                                 }}>
-                                    <Typography variant="h6" sx={{ 
-                                        mb: 2, 
-                                        color: '#667eea', 
-                                        fontWeight: 'bold',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: 1
-                                    }}>
-                                        📝 Información Personal
-                                    </Typography>
-                                    <Grid container spacing={2}>
-                                        <Grid item xs={12} sm={6}>
+                                    👤
+                                </Box>
+                                <Typography variant="h6" sx={{ 
+                                    color: '#667eea', 
+                                    fontWeight: 'bold',
+                                    fontSize: '1.2rem'
+                                }}>
+                                    Información Personal
+                                </Typography>
+                            </Box>
+                            
+                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                                <Grid container spacing={3}>
+                                    <Grid item xs={12} md={6}>
+                                        <Box>
+                                            <Typography variant="body2" sx={{ 
+                                                mb: 1, 
+                                                fontWeight: '700',
+                                                color: '#667eea',
+                                                fontSize: '0.95rem'
+                                            }}>
+                                                Nombre completo *
+                                            </Typography>
                                             <TextField
                                                 fullWidth
-                                                label="Nombre completo"
+                                                placeholder="Ej: Juan Carlos Pérez"
                                                 value={formData.name}
                                                 onChange={(e) => setFormData({...formData, name: e.target.value})}
                                                 required
                                                 sx={{
                                                     '& .MuiOutlinedInput-root': {
                                                         backgroundColor: 'white',
-                                                        borderRadius: 2,
+                                                        borderRadius: 3,
+                                                        fontSize: '1.1rem',
+                                                        border: '2px solid #e3f2fd',
+                                                        transition: 'all 0.2s ease',
+                                                        '&:hover': {
+                                                            border: '2px solid #bbdefb',
+                                                            boxShadow: '0 2px 8px rgba(102, 126, 234, 0.1)'
+                                                        },
                                                         '&.Mui-focused': {
-                                                            boxShadow: '0 0 0 2px rgba(102, 126, 234, 0.2)'
+                                                            border: '2px solid #667eea',
+                                                            boxShadow: '0 0 0 4px rgba(102, 126, 234, 0.15)',
+                                                            backgroundColor: '#fafbff'
+                                                        },
+                                                        '& fieldset': {
+                                                            border: 'none'
                                                         }
+                                                    },
+                                                    '& .MuiInputBase-input': {
+                                                        padding: '18px 16px',
+                                                        fontSize: '1.1rem',
+                                                        fontWeight: '500'
                                                     }
                                                 }}
                                             />
-                                        </Grid>
-                                        <Grid item xs={12} sm={6}>
+                                        </Box>
+                                    </Grid>
+                                    
+                                    <Grid item xs={12} md={6}>
+                                        <Box>
+                                            <Typography variant="body2" sx={{ 
+                                                mb: 1, 
+                                                fontWeight: '700',
+                                                color: '#667eea',
+                                                fontSize: '0.95rem'
+                                            }}>
+                                                📧 Correo electrónico *
+                                            </Typography>
                                             <TextField
                                                 fullWidth
-                                                label="Correo electrónico"
                                                 type="email"
+                                                placeholder="ejemplo@correo.com"
                                                 value={formData.email}
                                                 onChange={(e) => setFormData({...formData, email: e.target.value})}
                                                 required
                                                 sx={{
                                                     '& .MuiOutlinedInput-root': {
                                                         backgroundColor: 'white',
-                                                        borderRadius: 2,
+                                                        borderRadius: 3,
+                                                        fontSize: '1.1rem',
+                                                        border: '2px solid #e3f2fd',
+                                                        transition: 'all 0.2s ease',
+                                                        '&:hover': {
+                                                            border: '2px solid #bbdefb',
+                                                            boxShadow: '0 2px 8px rgba(102, 126, 234, 0.1)'
+                                                        },
                                                         '&.Mui-focused': {
-                                                            boxShadow: '0 0 0 2px rgba(102, 126, 234, 0.2)'
+                                                            border: '2px solid #667eea',
+                                                            boxShadow: '0 0 0 4px rgba(102, 126, 234, 0.15)',
+                                                            backgroundColor: '#fafbff'
+                                                        },
+                                                        '& fieldset': {
+                                                            border: 'none'
                                                         }
+                                                    },
+                                                    '& .MuiInputBase-input': {
+                                                        padding: '18px 16px',
+                                                        fontSize: '1.1rem',
+                                                        fontWeight: '500'
                                                     }
                                                 }}
                                             />
-                                        </Grid>
+                                        </Box>
                                     </Grid>
-                                </Box>
-                            </Grid>
-                            
-                            <Grid item xs={12}>
+                                </Grid>
+                            </Box>
+                        </Box>
+
+                        {/* Información de Contacto */}
+                        <Box sx={{
+                            background: 'linear-gradient(145deg, #ffffff 0%, #f0fff4 100%)',
+                            borderRadius: 4,
+                            p: 4,
+                            border: '2px solid #e8f5e8',
+                            boxShadow: '0 8px 32px rgba(76, 175, 80, 0.12)',
+                            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                            '&:hover': {
+                                border: '2px solid #4CAF50',
+                                boxShadow: '0 12px 40px rgba(76, 175, 80, 0.2)',
+                                transform: 'translateY(-2px)'
+                            }
+                        }}>
+                            <Box sx={{ 
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                gap: 2, 
+                                mb: 3,
+                                pb: 2,
+                                borderBottom: '2px solid rgba(76, 175, 80, 0.1)'
+                            }}>
                                 <Box sx={{
-                                    background: 'linear-gradient(145deg, #ffffff 0%, #f0fff4 100%)',
+                                    width: 48,
+                                    height: 48,
                                     borderRadius: 3,
-                                    p: 3,
-                                    border: '2px solid #e8f5e8',
-                                    boxShadow: '0 4px 20px rgba(76, 175, 80, 0.08)',
-                                    transition: 'all 0.3s ease',
-                                    '&:hover': {
-                                        border: '2px solid #4CAF50',
-                                        boxShadow: '0 8px 25px rgba(76, 175, 80, 0.15)'
-                                    }
+                                    background: 'linear-gradient(135deg, #4CAF50 0%, #45A049 100%)',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    fontSize: '1.5rem',
+                                    boxShadow: '0 4px 16px rgba(76, 175, 80, 0.3)'
                                 }}>
-                                    <Typography variant="h6" sx={{ 
-                                        mb: 2, 
-                                        color: '#4CAF50', 
-                                        fontWeight: 'bold',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: 1
-                                    }}>
-                                        📞 Información de Contacto (Opcional)
-                                    </Typography>
-                                    <Grid container spacing={2}>
-                                        <Grid item xs={12} sm={6}>
-                                            <TextField
-                                                fullWidth
-                                                label="Número de teléfono"
-                                                value={formData.phone}
-                                                onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                                                sx={{
-                                                    '& .MuiOutlinedInput-root': {
-                                                        backgroundColor: 'white',
-                                                        borderRadius: 2,
-                                                        '&.Mui-focused': {
-                                                            boxShadow: '0 0 0 2px rgba(76, 175, 80, 0.2)'
-                                                        }
-                                                    }
-                                                }}
-                                            />
-                                        </Grid>
-                                        <Grid item xs={12} sm={6}>
-                                            <TextField
-                                                fullWidth
-                                                label="Dirección completa"
-                                                multiline
-                                                rows={2}
-                                                value={formData.address}
-                                                onChange={(e) => setFormData({...formData, address: e.target.value})}
-                                                sx={{
-                                                    '& .MuiOutlinedInput-root': {
-                                                        backgroundColor: 'white',
-                                                        borderRadius: 2,
-                                                        '&.Mui-focused': {
-                                                            boxShadow: '0 0 0 2px rgba(76, 175, 80, 0.2)'
-                                                        }
-                                                    }
-                                                }}
-                                            />
-                                        </Grid>
-                                    </Grid>
+                                    📞
                                 </Box>
-                            </Grid>
-                        </Grid>
+                                <Typography variant="h6" sx={{ 
+                                    color: '#4CAF50', 
+                                    fontWeight: 'bold',
+                                    fontSize: '1.2rem'
+                                }}>
+                                    Información de Contacto (Opcional)
+                                </Typography>
+                            </Box>
+                            
+                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                                <Grid container spacing={3}>
+                                    <Grid item xs={12}>
+                                        <Box>
+                                            <Typography variant="body2" sx={{ 
+                                                mb: 1, 
+                                                fontWeight: '700',
+                                                color: '#4CAF50',
+                                                fontSize: '0.95rem'
+                                            }}>
+                                                📱 Número de teléfono
+                                            </Typography>
+                                            <Box sx={{
+                                                background: 'linear-gradient(135deg, #e8f5e8 0%, #ffffff 100%)',
+                                                border: '2px solid #c8e6c9',
+                                                borderRadius: 3,
+                                                p: 2,
+                                                transition: 'all 0.2s ease',
+                                                '&:hover': {
+                                                    border: '2px solid #81c784',
+                                                    boxShadow: '0 4px 12px rgba(76, 175, 80, 0.2)'
+                                                }
+                                            }}>
+                                                <TextField
+                                                    fullWidth
+                                                    placeholder="Ej: +57 300 123 4567"
+                                                    value={formData.phone}
+                                                    onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                                                    sx={{
+                                                        '& .MuiOutlinedInput-root': {
+                                                            backgroundColor: 'white',
+                                                            borderRadius: 3,
+                                                            border: '2px solid #f1f8e9',
+                                                            transition: 'all 0.2s ease',
+                                                            '&:hover': {
+                                                                border: '2px solid #dcedc8',
+                                                                boxShadow: '0 2px 8px rgba(76, 175, 80, 0.1)'
+                                                            },
+                                                            '&.Mui-focused': {
+                                                                border: '2px solid #4CAF50',
+                                                                boxShadow: '0 0 0 4px rgba(76, 175, 80, 0.15)',
+                                                                backgroundColor: '#f9fdf9'
+                                                            },
+                                                            '& fieldset': {
+                                                                border: 'none'
+                                                            }
+                                                        },
+                                                        '& .MuiInputBase-input': {
+                                                            padding: '18px 16px',
+                                                            fontSize: '1.1rem',
+                                                            fontWeight: '500'
+                                                        }
+                                                    }}
+                                                />
+                                            </Box>
+                                        </Box>
+                                    </Grid>
+                                    
+                                    <Grid item xs={12}>
+                                        <Box>
+                                            <Typography variant="body2" sx={{ 
+                                                mb: 1, 
+                                                fontWeight: '700',
+                                                color: '#4CAF50',
+                                                fontSize: '0.95rem'
+                                            }}>
+                                                📍 Dirección completa
+                                            </Typography>
+                                            <Box sx={{
+                                                background: 'linear-gradient(135deg, #e8f5e8 0%, #ffffff 100%)',
+                                                border: '2px solid #c8e6c9',
+                                                borderRadius: 3,
+                                                p: 2,
+                                                transition: 'all 0.2s ease',
+                                                '&:hover': {
+                                                    border: '2px solid #81c784',
+                                                    boxShadow: '0 4px 12px rgba(76, 175, 80, 0.2)'
+                                                }
+                                            }}>
+                                                <TextField
+                                                    fullWidth
+                                                    multiline
+                                                    rows={3}
+                                                    placeholder="Ej: Calle 45 #12-34, Apartamento 501, Bogotá, Colombia - Código postal 110111"
+                                                    value={formData.address}
+                                                    onChange={(e) => setFormData({...formData, address: e.target.value})}
+                                                    sx={{
+                                                        '& .MuiOutlinedInput-root': {
+                                                            backgroundColor: 'white',
+                                                            borderRadius: 3,
+                                                            border: '2px solid #f1f8e9',
+                                                            transition: 'all 0.2s ease',
+                                                            minHeight: '120px',
+                                                            '&:hover': {
+                                                                border: '2px solid #dcedc8',
+                                                                boxShadow: '0 2px 8px rgba(76, 175, 80, 0.1)'
+                                                            },
+                                                            '&.Mui-focused': {
+                                                                border: '2px solid #4CAF50',
+                                                                boxShadow: '0 0 0 4px rgba(76, 175, 80, 0.15)',
+                                                                backgroundColor: '#f9fdf9'
+                                                            },
+                                                            '& fieldset': {
+                                                                border: 'none'
+                                                            }
+                                                        },
+                                                        '& .MuiInputBase-input': {
+                                                            fontSize: '1.1rem',
+                                                            fontWeight: '400',
+                                                            lineHeight: 1.6,
+                                                            padding: '18px 16px'
+                                                        }
+                                                    }}
+                                                />
+                                            </Box>
+                                        </Box>
+                                    </Grid>
+                                </Grid>
+                            </Box>
+                        </Box>
                     </Box>
                 </DialogContent>
                 <DialogActions sx={{ 

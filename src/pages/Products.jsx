@@ -635,172 +635,416 @@ const Products = () => {
                         </Alert>
                     )}
                     <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
-                        <Grid container spacing={3}>
-                            {/* Información Básica */}
-                            <Grid item xs={12}>
+                        {/* Información del Producto */}
+                        <Box sx={{
+                            background: 'linear-gradient(145deg, #ffffff 0%, #f8faff 100%)',
+                            borderRadius: 4,
+                            p: 4,
+                            mb: 3,
+                            border: '2px solid #e3f2fd',
+                            boxShadow: '0 8px 32px rgba(102, 126, 234, 0.12)',
+                            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                            '&:hover': {
+                                border: '2px solid #667eea',
+                                boxShadow: '0 12px 40px rgba(102, 126, 234, 0.2)',
+                                transform: 'translateY(-2px)'
+                            }
+                        }}>
+                            <Box sx={{ 
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                gap: 2, 
+                                mb: 3,
+                                pb: 2,
+                                borderBottom: '2px solid rgba(102, 126, 234, 0.1)'
+                            }}>
                                 <Box sx={{
-                                    background: 'linear-gradient(145deg, #ffffff 0%, #f8faff 100%)',
+                                    width: 48,
+                                    height: 48,
                                     borderRadius: 3,
-                                    p: 3,
-                                    border: '2px solid #e3f2fd',
-                                    boxShadow: '0 4px 20px rgba(102, 126, 234, 0.08)',
-                                    transition: 'all 0.3s ease',
-                                    '&:hover': {
-                                        border: '2px solid #667eea',
-                                        boxShadow: '0 8px 25px rgba(102, 126, 234, 0.15)'
-                                    }
+                                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    fontSize: '1.5rem',
+                                    boxShadow: '0 4px 16px rgba(102, 126, 234, 0.3)'
                                 }}>
-                                    <Typography variant="h6" sx={{ 
-                                        mb: 2, 
-                                        color: '#667eea', 
-                                        fontWeight: 'bold',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: 1
-                                    }}>
-                                        📝 Información del Producto
-                                    </Typography>
-                                    <Grid container spacing={2}>
-                                        <Grid item xs={12}>
-                                            <TextField
-                                                fullWidth
-                                                label="Nombre del Producto"
-                                                value={formData.name}
-                                                onChange={(e) => setFormData({...formData, name: e.target.value})}
-                                                required
-                                                sx={{
-                                                    '& .MuiOutlinedInput-root': {
-                                                        backgroundColor: 'white',
-                                                        borderRadius: 2,
-                                                        '&.Mui-focused': {
-                                                            boxShadow: '0 0 0 2px rgba(102, 126, 234, 0.2)'
-                                                        }
-                                                    }
-                                                }}
-                                            />
-                                        </Grid>
-                                        <Grid item xs={12}>
-                                            <TextField
-                                                fullWidth
-                                                label="Descripción del producto (opcional)"
-                                                multiline
-                                                rows={3}
-                                                value={formData.description}
-                                                onChange={(e) => setFormData({...formData, description: e.target.value})}
-                                                sx={{
-                                                    '& .MuiOutlinedInput-root': {
-                                                        backgroundColor: 'white',
-                                                        borderRadius: 2,
-                                                        '&.Mui-focused': {
-                                                            boxShadow: '0 0 0 2px rgba(102, 126, 234, 0.2)'
-                                                        }
-                                                    }
-                                                }}
-                                            />
-                                        </Grid>
-                                    </Grid>
+                                    📝
                                 </Box>
-                            </Grid>
-                            
-                            {/* Información Comercial */}
-                            <Grid item xs={12}>
-                                <Box sx={{
-                                    background: 'linear-gradient(145deg, #ffffff 0%, #f0fff4 100%)',
-                                    borderRadius: 3,
-                                    p: 3,
-                                    border: '2px solid #e8f5e8',
-                                    boxShadow: '0 4px 20px rgba(76, 175, 80, 0.08)',
-                                    transition: 'all 0.3s ease',
-                                    '&:hover': {
-                                        border: '2px solid #4CAF50',
-                                        boxShadow: '0 8px 25px rgba(76, 175, 80, 0.15)'
-                                    }
+                                <Typography variant="h6" sx={{ 
+                                    color: '#667eea', 
+                                    fontWeight: 'bold',
+                                    fontSize: '1.2rem'
                                 }}>
-                                    <Typography variant="h6" sx={{ 
-                                        mb: 2, 
-                                        color: '#4CAF50', 
-                                        fontWeight: 'bold',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: 1
+                                    Información del Producto
+                                </Typography>
+                            </Box>
+                            
+                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                                {/* Campo Nombre */}
+                                <Box>
+                                    <Typography variant="body2" sx={{ 
+                                        mb: 1, 
+                                        fontWeight: '700',
+                                        color: '#667eea',
+                                        fontSize: '0.95rem'
                                     }}>
-                                        💰 Información Comercial
+                                        Nombre del Producto *
                                     </Typography>
-                                    <Grid container spacing={2}>
-                                        <Grid item xs={12} sm={4}>
-                                            <TextField
-                                                fullWidth
-                                                label="Precio ($)"
-                                                type="number"
-                                                inputProps={{ min: 0, step: 0.01 }}
-                                                value={formData.price}
-                                                onChange={(e) => setFormData({...formData, price: e.target.value})}
-                                                required
-                                                sx={{
-                                                    '& .MuiOutlinedInput-root': {
-                                                        backgroundColor: 'white',
-                                                        borderRadius: 2,
-                                                        '&.Mui-focused': {
-                                                            boxShadow: '0 0 0 2px rgba(76, 175, 80, 0.2)'
-                                                        }
-                                                    }
-                                                }}
-                                            />
-                                        </Grid>
-                                        <Grid item xs={12} sm={4}>
-                                            <TextField
-                                                fullWidth
-                                                label="Stock disponible"
-                                                type="number"
-                                                inputProps={{ min: 0 }}
-                                                value={formData.stock}
-                                                onChange={(e) => setFormData({...formData, stock: e.target.value})}
-                                                sx={{
-                                                    '& .MuiOutlinedInput-root': {
-                                                        backgroundColor: 'white',
-                                                        borderRadius: 2,
-                                                        '&.Mui-focused': {
-                                                            boxShadow: '0 0 0 2px rgba(76, 175, 80, 0.2)'
-                                                        }
-                                                    }
-                                                }}
-                                            />
-                                        </Grid>
-                                        <Grid item xs={12} sm={4}>
-                                            <FormControl fullWidth>
-                                                <InputLabel>Categoría del producto</InputLabel>
-                                                <Select
-                                                    value={formData.category}
-                                                    label="Categoría del producto"
-                                                    onChange={(e) => setFormData({...formData, category: e.target.value})}
+                                    <TextField
+                                        fullWidth
+                                        placeholder="Ej: Laptop Dell Inspiron 15"
+                                        value={formData.name}
+                                        onChange={(e) => setFormData({...formData, name: e.target.value})}
+                                        required
+                                        sx={{
+                                            '& .MuiOutlinedInput-root': {
+                                                backgroundColor: 'white',
+                                                borderRadius: 3,
+                                                fontSize: '1.1rem',
+                                                border: '2px solid #e3f2fd',
+                                                transition: 'all 0.2s ease',
+                                                '&:hover': {
+                                                    border: '2px solid #bbdefb',
+                                                    boxShadow: '0 2px 8px rgba(102, 126, 234, 0.1)'
+                                                },
+                                                '&.Mui-focused': {
+                                                    border: '2px solid #667eea',
+                                                    boxShadow: '0 0 0 4px rgba(102, 126, 234, 0.15)',
+                                                    backgroundColor: '#fafbff'
+                                                },
+                                                '& fieldset': {
+                                                    border: 'none'
+                                                }
+                                            },
+                                            '& .MuiInputBase-input': {
+                                                padding: '18px 16px',
+                                                fontSize: '1.1rem',
+                                                fontWeight: '500'
+                                            }
+                                        }}
+                                    />
+                                </Box>
+
+                                {/* Campo Descripción */}
+                                <Box>
+                                    <Typography variant="body2" sx={{ 
+                                        mb: 1, 
+                                        fontWeight: '700',
+                                        color: '#667eea',
+                                        fontSize: '0.95rem'
+                                    }}>
+                                        Descripción del producto (opcional)
+                                    </Typography>
+                                    <TextField
+                                        fullWidth
+                                        placeholder="Describe las características principales del producto..."
+                                        multiline
+                                        rows={4}
+                                        value={formData.description}
+                                        onChange={(e) => setFormData({...formData, description: e.target.value})}
+                                        sx={{
+                                            '& .MuiOutlinedInput-root': {
+                                                backgroundColor: 'white',
+                                                borderRadius: 3,
+                                                border: '2px solid #e3f2fd',
+                                                transition: 'all 0.2s ease',
+                                                '&:hover': {
+                                                    border: '2px solid #bbdefb',
+                                                    boxShadow: '0 2px 8px rgba(102, 126, 234, 0.1)'
+                                                },
+                                                '&.Mui-focused': {
+                                                    border: '2px solid #667eea',
+                                                    boxShadow: '0 0 0 4px rgba(102, 126, 234, 0.15)',
+                                                    backgroundColor: '#fafbff'
+                                                },
+                                                '& fieldset': {
+                                                    border: 'none'
+                                                }
+                                            },
+                                            '& .MuiInputBase-input': {
+                                                fontSize: '1rem',
+                                                fontWeight: '400',
+                                                lineHeight: 1.6
+                                            }
+                                        }}
+                                    />
+                                </Box>
+                            </Box>
+                        </Box>
+
+                        {/* Información Comercial */}
+                        <Box sx={{
+                            background: 'linear-gradient(145deg, #ffffff 0%, #f0fff4 100%)',
+                            borderRadius: 4,
+                            p: 4,
+                            border: '2px solid #e8f5e8',
+                            boxShadow: '0 8px 32px rgba(76, 175, 80, 0.12)',
+                            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                            '&:hover': {
+                                border: '2px solid #4CAF50',
+                                boxShadow: '0 12px 40px rgba(76, 175, 80, 0.2)',
+                                transform: 'translateY(-2px)'
+                            }
+                        }}>
+                            <Box sx={{ 
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                gap: 2, 
+                                mb: 3,
+                                pb: 2,
+                                borderBottom: '2px solid rgba(76, 175, 80, 0.1)'
+                            }}>
+                                <Box sx={{
+                                    width: 48,
+                                    height: 48,
+                                    borderRadius: 3,
+                                    background: 'linear-gradient(135deg, #4CAF50 0%, #45A049 100%)',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    fontSize: '1.5rem',
+                                    boxShadow: '0 4px 16px rgba(76, 175, 80, 0.3)'
+                                }}>
+                                    💰
+                                </Box>
+                                <Typography variant="h6" sx={{ 
+                                    color: '#4CAF50', 
+                                    fontWeight: 'bold',
+                                    fontSize: '1.2rem'
+                                }}>
+                                    Información Comercial
+                                </Typography>
+                            </Box>
+                            
+                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                                {/* Precio y Stock en una fila */}
+                                <Grid container spacing={3}>
+                                    <Grid item xs={12} md={6}>
+                                        <Box>
+                                            <Typography variant="body2" sx={{ 
+                                                mb: 1, 
+                                                fontWeight: '700',
+                                                color: '#ff8f00',
+                                                fontSize: '0.95rem',
+                                                textAlign: 'center'
+                                            }}>
+                                                💵 Precio del Producto *
+                                            </Typography>
+                                            <Box sx={{
+                                                background: 'linear-gradient(135deg, #fff8e1 0%, #ffffff 100%)',
+                                                border: '2px solid #ffecb3',
+                                                borderRadius: 3,
+                                                p: 2,
+                                                textAlign: 'center',
+                                                transition: 'all 0.2s ease',
+                                                '&:hover': {
+                                                    border: '2px solid #ffcc02',
+                                                    boxShadow: '0 4px 12px rgba(255, 193, 7, 0.2)'
+                                                }
+                                            }}>
+                                                <TextField
+                                                    fullWidth
+                                                    placeholder="0.00"
+                                                    type="number"
+                                                    inputProps={{ min: 0, step: 0.01 }}
+                                                    value={formData.price}
+                                                    onChange={(e) => setFormData({...formData, price: e.target.value})}
+                                                    required
                                                     sx={{
-                                                        backgroundColor: 'white',
-                                                        borderRadius: 2,
-                                                        '&.Mui-focused': {
-                                                            boxShadow: '0 0 0 2px rgba(76, 175, 80, 0.2)'
+                                                        '& .MuiOutlinedInput-root': {
+                                                            backgroundColor: 'white',
+                                                            borderRadius: 3,
+                                                            border: '2px solid #fff3e0',
+                                                            transition: 'all 0.2s ease',
+                                                            '&:hover': {
+                                                                border: '2px solid #ffe0b2',
+                                                                boxShadow: '0 2px 8px rgba(255, 143, 0, 0.1)'
+                                                            },
+                                                            '&.Mui-focused': {
+                                                                border: '2px solid #ff8f00',
+                                                                boxShadow: '0 0 0 4px rgba(255, 143, 0, 0.15)',
+                                                                backgroundColor: '#fffbf5'
+                                                            },
+                                                            '& fieldset': {
+                                                                border: 'none'
+                                                            }
+                                                        },
+                                                        '& .MuiInputBase-input': {
+                                                            textAlign: 'center',
+                                                            fontSize: '1.4rem',
+                                                            fontWeight: 'bold',
+                                                            color: '#ff8f00',
+                                                            padding: '18px 16px'
                                                         }
                                                     }}
-                                                >
-                                                    {categories.map((cat) => (
-                                                        <MenuItem key={cat} value={cat}>
-                                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                                                <Box sx={{ 
-                                                                    width: 8, 
-                                                                    height: 8, 
-                                                                    borderRadius: '50%', 
-                                                                    background: 'linear-gradient(45deg, #4CAF50, #45A049)' 
-                                                                }} />
-                                                                {cat}
-                                                            </Box>
-                                                        </MenuItem>
-                                                    ))}
-                                                </Select>
-                                            </FormControl>
-                                        </Grid>
+                                                />
+                                            </Box>
+                                        </Box>
                                     </Grid>
+                                    
+                                    <Grid item xs={12} md={6}>
+                                        <Box>
+                                            <Typography variant="body2" sx={{ 
+                                                mb: 1, 
+                                                fontWeight: '700',
+                                                color: '#4CAF50',
+                                                fontSize: '0.95rem',
+                                                textAlign: 'center'
+                                            }}>
+                                                📦 Stock Disponible
+                                            </Typography>
+                                            <Box sx={{
+                                                background: 'linear-gradient(135deg, #e8f5e8 0%, #ffffff 100%)',
+                                                border: '2px solid #c8e6c9',
+                                                borderRadius: 3,
+                                                p: 2,
+                                                textAlign: 'center',
+                                                transition: 'all 0.2s ease',
+                                                '&:hover': {
+                                                    border: '2px solid #81c784',
+                                                    boxShadow: '0 4px 12px rgba(76, 175, 80, 0.2)'
+                                                }
+                                            }}>
+                                                <TextField
+                                                    fullWidth
+                                                    placeholder="0"
+                                                    type="number"
+                                                    inputProps={{ min: 0 }}
+                                                    value={formData.stock}
+                                                    onChange={(e) => setFormData({...formData, stock: e.target.value})}
+                                                    sx={{
+                                                        '& .MuiOutlinedInput-root': {
+                                                            backgroundColor: 'white',
+                                                            borderRadius: 3,
+                                                            border: '2px solid #f1f8e9',
+                                                            transition: 'all 0.2s ease',
+                                                            '&:hover': {
+                                                                border: '2px solid #dcedc8',
+                                                                boxShadow: '0 2px 8px rgba(76, 175, 80, 0.1)'
+                                                            },
+                                                            '&.Mui-focused': {
+                                                                border: '2px solid #4CAF50',
+                                                                boxShadow: '0 0 0 4px rgba(76, 175, 80, 0.15)',
+                                                                backgroundColor: '#f9fdf9'
+                                                            },
+                                                            '& fieldset': {
+                                                                border: 'none'
+                                                            }
+                                                        },
+                                                        '& .MuiInputBase-input': {
+                                                            textAlign: 'center',
+                                                            fontSize: '1.4rem',
+                                                            fontWeight: 'bold',
+                                                            color: '#4CAF50',
+                                                            padding: '18px 16px'
+                                                        }
+                                                    }}
+                                                />
+                                            </Box>
+                                        </Box>
+                                    </Grid>
+                                </Grid>
+                                
+                                {/* Categoría */}
+                                <Box>
+                                    <Typography variant="body2" sx={{ 
+                                        mb: 1, 
+                                        fontWeight: '700',
+                                        color: '#9c27b0',
+                                        fontSize: '0.95rem'
+                                    }}>
+                                        🏷️ Categoría del producto
+                                    </Typography>
+                                    <Box sx={{
+                                        background: 'linear-gradient(135deg, #f3e5f5 0%, #ffffff 100%)',
+                                        border: '2px solid #e1bee7',
+                                        borderRadius: 3,
+                                        p: 2,
+                                        transition: 'all 0.2s ease',
+                                        '&:hover': {
+                                            border: '2px solid #ce93d8',
+                                            boxShadow: '0 4px 12px rgba(156, 39, 176, 0.2)'
+                                        }
+                                    }}>
+                                        <FormControl fullWidth>
+                                            <Select
+                                                value={formData.category}
+                                                displayEmpty
+                                                onChange={(e) => setFormData({...formData, category: e.target.value})}
+                                                sx={{
+                                                    backgroundColor: 'white',
+                                                    borderRadius: 3,
+                                                    border: '2px solid #f8bbd9',
+                                                    fontSize: '1.1rem',
+                                                    '&:hover': {
+                                                        border: '2px solid #f48fb1',
+                                                        boxShadow: '0 2px 8px rgba(156, 39, 176, 0.1)'
+                                                    },
+                                                    '&.Mui-focused': {
+                                                        border: '2px solid #9c27b0',
+                                                        boxShadow: '0 0 0 4px rgba(156, 39, 176, 0.15)',
+                                                        backgroundColor: '#fdf7ff'
+                                                    },
+                                                    '& fieldset': {
+                                                        border: 'none'
+                                                    },
+                                                    '& .MuiSelect-select': {
+                                                        padding: '18px 16px',
+                                                        fontSize: '1.1rem',
+                                                        fontWeight: '600'
+                                                    }
+                                                }}
+                                                renderValue={(selected) => {
+                                                    if (!selected) {
+                                                        return (
+                                                            <Typography sx={{ color: '#9e9e9e', fontStyle: 'italic' }}>
+                                                                Selecciona una categoría...
+                                                            </Typography>
+                                                        );
+                                                    }
+                                                    return (
+                                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                                            <Box sx={{ 
+                                                                width: 12, 
+                                                                height: 12, 
+                                                                borderRadius: '50%', 
+                                                                background: 'linear-gradient(45deg, #9c27b0, #7b1fa2)' 
+                                                            }} />
+                                                            <Typography sx={{ fontWeight: '600', color: '#9c27b0' }}>
+                                                                {selected}
+                                                            </Typography>
+                                                        </Box>
+                                                    );
+                                                }}
+                                            >
+                                                {categories.map((cat) => (
+                                                    <MenuItem key={cat} value={cat} sx={{ 
+                                                        py: 2,
+                                                        fontSize: '1.1rem',
+                                                        '&:hover': {
+                                                            backgroundColor: 'rgba(156, 39, 176, 0.1)'
+                                                        }
+                                                    }}>
+                                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                                            <Box sx={{ 
+                                                                width: 12, 
+                                                                height: 12, 
+                                                                borderRadius: '50%', 
+                                                                background: 'linear-gradient(45deg, #9c27b0, #7b1fa2)' 
+                                                            }} />
+                                                            <Typography sx={{ fontWeight: '600' }}>
+                                                                {cat}
+                                                            </Typography>
+                                                        </Box>
+                                                    </MenuItem>
+                                                ))}
+                                            </Select>
+                                        </FormControl>
+                                    </Box>
                                 </Box>
-                            </Grid>
-                        </Grid>
+                            </Box>
+                        </Box>
                     </Box>
                 </DialogContent>
                 <DialogActions sx={{ 
