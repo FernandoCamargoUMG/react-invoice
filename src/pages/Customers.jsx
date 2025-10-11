@@ -78,8 +78,10 @@ const Customers = () => {
         try {
             const response = await apiGet(API_CONFIG.ENDPOINTS.CUSTOMERS);
             if (response.ok) {
-                const data = await response.json();
-                setCustomers(Array.isArray(data) ? data : []);
+                const result = await response.json();
+                // El servidor devuelve datos paginados con estructura: { data: [...], current_page: 1, etc }
+                const customers = result.data || result || [];
+                setCustomers(Array.isArray(customers) ? customers : []);
                 setSuccessMsg('Clientes cargados exitosamente');
                 setTimeout(() => setSuccessMsg(''), 3000);
             } else {
@@ -94,9 +96,7 @@ const Customers = () => {
         setLoading(false);
     };
 
-    useEffect(() => {
-        fetchCustomers();
-    }, []);
+
 
     // Handle form submit
     const handleSubmit = async (e) => {

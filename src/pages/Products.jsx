@@ -99,8 +99,10 @@ const Products = () => {
         try {
             const response = await apiGet(API_CONFIG.ENDPOINTS.PRODUCTS);
             if (response.ok) {
-                const data = await response.json();
-                setProducts(Array.isArray(data) ? data : []);
+                const result = await response.json();
+                // El servidor devuelve datos paginados con estructura: { data: [...], current_page: 1, etc }
+                const products = result.data || result || [];
+                setProducts(Array.isArray(products) ? products : []);
                 setSuccessMsg('Productos cargados exitosamente');
                 setTimeout(() => setSuccessMsg(''), 3000);
             } else {
@@ -115,9 +117,7 @@ const Products = () => {
         setLoading(false);
     };
 
-    useEffect(() => {
-        fetchProducts();
-    }, []);
+
 
     // Handle form submit
     const handleSubmit = async (e) => {
@@ -238,9 +238,9 @@ const Products = () => {
 
     const stats = {
         total: products.length,
-        totalValue: products.reduce((sum, product) => sum + (product.price * product.stock), 0),
-        outOfStock: products.filter(p => p.stock === 0).length,
-        lowStock: products.filter(p => p.stock > 0 && p.stock < 10).length
+        totalValue: products.reduce((sum, product) => sum + (parseFloat(product.price) * parseInt(product.stock)), 0),
+        outOfStock: products.filter(p => parseInt(p.stock) === 0).length,
+        lowStock: products.filter(p => parseInt(p.stock) > 0 && parseInt(p.stock) < 10).length
     };
 
     const paginatedProducts = products.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
@@ -249,7 +249,7 @@ const Products = () => {
         <Box sx={{ 
             height: '100vh',
             width: '100vw',
-            background: 'linear-gradient(135deg, #ff6b6b 0%, #ffa500 100%)',
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
             overflow: 'hidden',
             display: 'flex',
             flexDirection: 'column',
@@ -271,7 +271,7 @@ const Products = () => {
             }}>
                 <Typography variant="h5" sx={{ 
                     fontWeight: 'bold',
-                    background: 'linear-gradient(45deg, #ff6b6b, #ffa500)',
+                    background: 'linear-gradient(45deg, #667eea, #764ba2)',
                     backgroundClip: 'text',
                     WebkitBackgroundClip: 'text',
                     WebkitTextFillColor: 'transparent'
@@ -285,11 +285,11 @@ const Products = () => {
                         onClick={handleBack}
                         startIcon={<ArrowBackIcon />}
                         sx={{ 
-                            borderColor: '#ff6b6b',
-                            color: '#ff6b6b',
+                            borderColor: '#667eea',
+                            color: '#667eea',
                             '&:hover': { 
-                                borderColor: '#ff5252', 
-                                background: 'rgba(255, 107, 107, 0.1)' 
+                                borderColor: '#5a6fd8', 
+                                background: 'rgba(102, 126, 234, 0.1)' 
                             }
                         }}
                     >
@@ -313,11 +313,11 @@ const Products = () => {
                         onClick={handleLogout}
                         startIcon={<LogoutIcon />}
                         sx={{
-                            borderColor: '#ff3838',
-                            color: '#ff3838',
+                            borderColor: '#ff6b6b',
+                            color: '#ff6b6b',
                             '&:hover': { 
-                                borderColor: '#ee2a2a', 
-                                background: 'rgba(255, 56, 56, 0.1)' 
+                                borderColor: '#ee5a24', 
+                                background: 'rgba(255, 107, 107, 0.1)' 
                             }
                         }}
                     >
@@ -410,8 +410,8 @@ const Products = () => {
                         startIcon={loading ? <CircularProgress size={20} sx={{ color: 'white' }} /> : <RefreshIcon />}
                         disabled={loading}
                         sx={{
-                            background: 'linear-gradient(45deg, #ff6b6b, #ffa500)',
-                            '&:hover': { background: 'linear-gradient(45deg, #ff5252, #ff9100)' }
+                            background: 'linear-gradient(45deg, #667eea, #764ba2)',
+                            '&:hover': { background: 'linear-gradient(45deg, #5a6fd8, #6a42a0)' }
                         }}
                     >
                         {loading ? 'Cargando...' : 'Cargar Productos'}
@@ -434,7 +434,7 @@ const Products = () => {
                     <TableContainer>
                         <Table>
                             <TableHead>
-                                <TableRow sx={{ background: 'linear-gradient(45deg, #ff6b6b, #ffa500)' }}>
+                                <TableRow sx={{ background: 'linear-gradient(45deg, #667eea, #764ba2)' }}>
                                     <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Nombre</TableCell>
                                     <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Descripción</TableCell>
                                     <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Precio</TableCell>
@@ -450,16 +450,16 @@ const Products = () => {
                                             <TableCell>{product.name}</TableCell>
                                             <TableCell>{product.description || 'Sin descripción'}</TableCell>
                                             <TableCell sx={{ fontWeight: 'bold', color: '#4CAF50' }}>
-                                                {formatCurrency(product.price)}
+                                                {formatCurrency(parseFloat(product.price) || 0)}
                                             </TableCell>
                                             <TableCell>
-                                                <Chip label={product.category || 'Otros'} size="small" color="primary" />
+                                                <Chip label={product.category || product.type || 'Producto'} size="small" color="primary" />
                                             </TableCell>
                                             <TableCell>
                                                 <Chip 
                                                     label={product.stock} 
                                                     size="small" 
-                                                    color={product.stock === 0 ? 'error' : product.stock < 10 ? 'warning' : 'success'}
+                                                    color={parseInt(product.stock) === 0 ? 'error' : parseInt(product.stock) < 10 ? 'warning' : 'success'}
                                                 />
                                             </TableCell>
                                             <TableCell sx={{ textAlign: 'center' }}>
