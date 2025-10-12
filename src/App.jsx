@@ -8,6 +8,10 @@ import Customers from './pages/Customers';
 import Products from './pages/Products';
 import Invoices from './pages/Invoices';
 import Settings from './pages/Settings';
+import Suppliers from './pages/Suppliers';
+import Purchases from './pages/PurchasesNew';
+import Quotes from './pages/QuotesNew';
+import InventoryMovements from './pages/InventoryMovementsNew';
 
 function App() {
   const accessToken = localStorage.getItem('access_token');
@@ -24,10 +28,14 @@ function App() {
         <Route path="/customers" element={<Customers />} />
         <Route path="/products" element={<Products />} />
         <Route path="/invoices" element={<Invoices />} />
+        <Route path="/suppliers" element={<Suppliers />} />
+        <Route path="/purchases" element={<Purchases />} />
+        <Route path="/quotes" element={<Quotes />} />
+        <Route path="/inventory-movements" element={<InventoryMovements />} />
         <Route path="/settings" element={<Settings />} />
       </Routes>
     </Router>
   );
 }
 
-export default App
+export default App;

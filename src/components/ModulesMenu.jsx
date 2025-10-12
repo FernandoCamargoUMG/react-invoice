@@ -24,7 +24,11 @@ import {
     Payment as PaymentIcon,
     Backup as BackupIcon,
     Security as SecurityIcon,
-    Help as HelpIcon
+    Help as HelpIcon,
+    Business as BusinessIcon,
+    ShoppingCart as ShoppingCartIcon,
+    RequestQuote as RequestQuoteIcon,
+    History as HistoryIcon
 } from '@mui/icons-material';
 
 const ModulesMenu = () => {
@@ -58,8 +62,11 @@ const ModulesMenu = () => {
         {
             category: 'Administración',
             items: [
+                { name: 'Proveedores', icon: <BusinessIcon />, path: '/suppliers', color: '#8B5FBF' },
+                { name: 'Compras', icon: <ShoppingCartIcon />, path: '/purchases', color: '#6A4C93' },
+                { name: 'Cotizaciones', icon: <RequestQuoteIcon />, path: '/quotes', color: '#B794F6' },
+                { name: 'Mov. Inventario', icon: <HistoryIcon />, path: '/inventory-movements', color: '#8B5FBF' },
                 { name: 'Usuarios', icon: <PersonIcon />, path: '/users', color: '#6A4C93' },
-                { name: 'Reportes', icon: <AssessmentIcon />, path: '/reports', color: '#B794F6', disabled: true },
                 { name: 'Pagos', icon: <PaymentIcon />, path: '/payments', color: '#8B5FBF', disabled: true }
             ]
         },

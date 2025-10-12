@@ -93,6 +93,7 @@ export const useCurrency = () => {
     return {
         selectedCurrency,
         changeCurrency,
+        formatCurrency: formatAmount,
         formatAmount,
         currencyInfo: CURRENCIES[selectedCurrency]
     };
