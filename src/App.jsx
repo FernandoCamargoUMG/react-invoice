@@ -9,7 +9,7 @@ import Products from './pages/Products';
 import Invoices from './pages/Invoices';
 import Settings from './pages/Settings';
 import Suppliers from './pages/Suppliers';
-import Purchases from './pages/PurchasesNew';
+import Purchases from './pages/Purchases';
 import Quotes from './pages/QuotesNew';
 import InventoryMovements from './pages/InventoryMovementsNew';
 
