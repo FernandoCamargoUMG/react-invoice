@@ -352,6 +352,56 @@ const Purchases = () => {
         }
     };
 
+    const handleReceivePurchase = async (id) => {
+        if (window.confirm('¿Marcar esta compra como recibida?')) {
+            try {
+                const response = await fetch(
+                    `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.PURCHASE_RECEIVE(id)}`,
+                    {
+                        method: 'PATCH',
+                        headers: {
+                            'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
+                            'Content-Type': 'application/json'
+                        }
+                    }
+                );
+                const result = await response.json();
+                if (result.success) {
+                    await fetchPurchases();
+                } else {
+                    alert(result.message || 'Error al marcar como recibida');
+                }
+            } catch (error) {
+                alert('Error de conexión al marcar como recibida');
+            }
+        }
+    };
+
+    const handleCancelPurchase = async (id) => {
+        if (window.confirm('¿Cancelar esta compra?')) {
+            try {
+                const response = await fetch(
+                    `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.PURCHASE_CANCEL(id)}`,
+                    {
+                        method: 'PATCH',
+                        headers: {
+                            'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
+                            'Content-Type': 'application/json'
+                        }
+                    }
+                );
+                const result = await response.json();
+                if (result.success) {
+                    await fetchPurchases();
+                } else {
+                    alert(result.message || 'Error al cancelar la compra');
+                }
+            } catch (error) {
+                alert('Error de conexión al cancelar la compra');
+            }
+        }
+    };
+
     const getStatusColor = (status) => {
         switch (status) {
             case 'pending': return '#FF9800';
@@ -719,20 +769,7 @@ const Purchases = () => {
                                             </TableCell>
                                             <TableCell>
                                                 <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center' }}>
-                                                    <Tooltip title="Ver detalles">
-                                                        <IconButton
-                                                            onClick={() => handleOpenDialog(purchase)}
-                                                            sx={{
-                                                                color: '#8B5FBF',
-                                                                '&:hover': {
-                                                                    backgroundColor: 'rgba(139, 95, 191, 0.1)',
-                                                                    transform: 'scale(1.1)'
-                                                                }
-                                                            }}
-                                                        >
-                                                            <ViewIcon />
-                                                        </IconButton>
-                                                    </Tooltip>
+                                                    
                                                     <Tooltip title="Editar compra">
                                                         <IconButton
                                                             onClick={() => handleOpenDialog(purchase)}
@@ -761,6 +798,38 @@ const Purchases = () => {
                                                             <CancelIcon />
                                                         </IconButton>
                                                     </Tooltip>
+                                                    {purchase.status === 'pending' && (
+                                                        <>
+                                                            <Tooltip title="Marcar como recibida">
+                                                                <IconButton
+                                                                    onClick={() => handleReceivePurchase(purchase.id)}
+                                                                    sx={{
+                                                                        color: '#2E8B57',
+                                                                        '&:hover': {
+                                                                            backgroundColor: 'rgba(46, 139, 87, 0.1)',
+                                                                            transform: 'scale(1.1)'
+                                                                        }
+                                                                    }}
+                                                                >
+                                                                    <CheckCircleIcon />
+                                                                </IconButton>
+                                                            </Tooltip>
+                                                            <Tooltip title="Cancelar compra">
+                                                                <IconButton
+                                                                    onClick={() => handleCancelPurchase(purchase.id)}
+                                                                    sx={{
+                                                                        color: '#FF9800',
+                                                                        '&:hover': {
+                                                                            backgroundColor: 'rgba(255, 152, 0, 0.1)',
+                                                                            transform: 'scale(1.1)'
+                                                                        }
+                                                                    }}
+                                                                >
+                                                                    <CancelIcon />
+                                                                </IconButton>
+                                                            </Tooltip>
+                                                        </>
+                                                    )}
                                                 </Box>
                                             </TableCell>
                                         </TableRow>
