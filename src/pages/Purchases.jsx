@@ -94,25 +94,19 @@ const Purchases = () => {
                 ]);
                 const [dataS, dataP] = await Promise.all([resS.json(), resP.json()]);
                 
-                console.log('🔍 DEBUG - Respuesta proveedores:', dataS);
-                console.log('🔍 DEBUG - Respuesta productos:', dataP);
+                // Debug solo para proveedores
+                console.log('🔍 Estructura proveedores:', dataS);
                 
-                // Para productos funciona así
-                if (dataP.data && Array.isArray(dataP.data)) setProducts(dataP.data);
-                
-                // Para proveedores probemos diferentes estructuras
-                if (dataS.success && dataS.data) {
-                    if (Array.isArray(dataS.data)) {
-                        setSuppliers(dataS.data);
-                        console.log('✅ Proveedores cargados (directo):', dataS.data.length);
-                    } else if (dataS.data.data && Array.isArray(dataS.data.data)) {
-                        setSuppliers(dataS.data.data);
-                        console.log('✅ Proveedores cargados (data.data):', dataS.data.data.length);
-                    }
-                } else if (dataS.data && Array.isArray(dataS.data)) {
+                // Laravel devuelve los datos en 'data'
+                if (dataS.data && Array.isArray(dataS.data)) {
                     setSuppliers(dataS.data);
-                    console.log('✅ Proveedores cargados (fallback):', dataS.data.length);
+                    console.log('✅ Proveedores cargados:', dataS.data.length);
+                } else if (dataS.success && dataS.data && Array.isArray(dataS.data.data)) {
+                    setSuppliers(dataS.data.data);
+                    console.log('✅ Proveedores cargados (data.data):', dataS.data.data.length);
                 }
+                
+                if (dataP.data && Array.isArray(dataP.data)) setProducts(dataP.data);
             } catch (err) {
                 console.error('Error al cargar proveedores/productos:', err);
             }
@@ -254,21 +248,33 @@ const Purchases = () => {
                 return;
             }
 
-            // Calcular el total de la compra
-            const calculatedTotal = purchaseItems
-                .filter(item => item.product_id)
-                .reduce((sum, item) => sum + (parseInt(item.quantity) * parseFloat(item.cost_price)), 0);
+            // Validar que hay items válidos
+            const validItems = purchaseItems.filter(item => 
+                item.product_id && 
+                item.quantity > 0 && 
+                item.cost_price >= 0
+            );
+            
+            if (validItems.length === 0) {
+                setError('Debe agregar al menos un producto válido');
+                return;
+            }
+
+            // Calcular el total sumando todos los items
+            const calculatedTotal = validItems.reduce((sum, item) => {
+                const quantity = parseInt(item.quantity) || 0;
+                const cost = parseFloat(item.cost_price) || 0;
+                return sum + (quantity * cost);
+            }, 0);
 
             const purchaseData = {
                 supplier_id: parseInt(purchaseHeader.supplier_id),
                 purchase_date: purchaseHeader.purchase_date,
                 notes: purchaseHeader.notes || '',
-                total: parseFloat(calculatedTotal.toFixed(2)),
-                items: purchaseItems.filter(item => item.product_id).map(item => ({
+                items: validItems.map(item => ({
                     product_id: parseInt(item.product_id),
                     quantity: parseInt(item.quantity),
-                    cost_price: parseFloat(item.cost_price),
-                    total_cost: parseFloat((parseInt(item.quantity) * parseFloat(item.cost_price)).toFixed(2))
+                    cost_price: parseFloat(item.cost_price)
                 }))
             };
 
@@ -288,8 +294,7 @@ const Purchases = () => {
                 const result = await response.json();
                 
                 if (result.success) {
-                    // Recargar la lista de compras para mostrar los cambios
-                    await loadPurchases(page);
+                    await fetchPurchases(); // Recargar la lista de compras
                     handleCloseDialog();
                 } else {
                     setError(result.message || 'Error al actualizar la compra');
@@ -311,11 +316,9 @@ const Purchases = () => {
                 console.log('📊 Status HTTP:', response.status);
                 
                 if (result.success) {
-                    console.log('✅ Compra creada exitosamente');
-                    await loadPurchases(1); // Recargar para mostrar la nueva compra
+                    await fetchPurchases(); // Recargar la lista de compras
                     handleCloseDialog();
                 } else {
-                    console.error('❌ Error del backend:', result);
                     setError(result.message || 'Error al crear la compra');
                 }
             }
@@ -338,8 +341,7 @@ const Purchases = () => {
                 const result = await response.json();
                 
                 if (result.success) {
-                    // Recargar la lista después de eliminar
-                    await loadPurchases(page);
+                    await fetchPurchases(); // Recargar la lista después de eliminar
                 } else {
                     alert('Error al eliminar la compra: ' + (result.message || 'Error desconocido'));
                 }
