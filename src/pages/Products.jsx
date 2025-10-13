@@ -25,7 +25,8 @@ import {
     MenuItem,
     Chip,
     TablePagination,
-    CircularProgress
+    CircularProgress,
+    Snackbar
 } from '@mui/material';
 import {
     Inventory as InventoryIcon,
@@ -42,18 +43,14 @@ import {
 import { apiGet, apiPost, apiPut, apiDelete, API_CONFIG } from '../config/api';
 import { useCurrency } from '../utils/currency';
 import GlobalSettings from '../components/GlobalSettings';
+import MuiAlert from '@mui/material/Alert';
+import DialogContentText from '@mui/material/DialogContentText';
 
 // Categorías de productos
 const categories = [
-    'Electrónicos',
-    'Ropa',
-    'Hogar',
-    'Deportes',
-    'Libros',
-    'Alimentación',
-    'Salud',
-    'Automóvil',
-    'Otros'
+    'Producto',
+    'Servicio',
+    'Vehículo'
 ];
 
 const Products = () => {
@@ -75,6 +72,9 @@ const Products = () => {
         category: '',
         stock: ''
     });
+
+    const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'info' });
+    const [confirmDialog, setConfirmDialog] = useState({ open: false, id: null });
 
     // Navegación simple
     const handleBack = () => window.history.back();
@@ -98,7 +98,7 @@ const Products = () => {
                 // El servidor devuelve datos paginados con estructura: { data: [...], current_page: 1, etc }
                 const products = result.data || result || [];
                 setProducts(Array.isArray(products) ? products : []);
-                setSuccessMsg('Productos cargados exitosamente');
+                //setSuccessMsg('Productos cargados exitosamente');
                 setTimeout(() => setSuccessMsg(''), 3000);
             } else {
                 setError('Error al cargar productos');
@@ -166,21 +166,30 @@ const Products = () => {
         }
     };
 
+    // Snackbar handlers
+    const showSnackbar = (message, severity = 'info') => {
+        setSnackbar({ open: true, message, severity });
+    };
+    const closeSnackbar = () => setSnackbar({ ...snackbar, open: false });
+
     // Handle delete
-    const handleDelete = async (id) => {
-        if (window.confirm('¿Estás seguro de eliminar este producto?')) {
-            try {
-                const response = await apiDelete(`${API_CONFIG.ENDPOINTS.PRODUCTS}/${id}`);
-                if (response.ok) {
-                    fetchProducts();
-                    setSuccessMsg('Producto eliminado exitosamente');
-                    setTimeout(() => setSuccessMsg(''), 3000);
-                } else {
-                    setError('Error al eliminar producto');
-                }
-            } catch (err) {
-                setError('Error de conexión: ' + err.message);
+    const handleDelete = (id) => {
+        setConfirmDialog({ open: true, id });
+    };
+    const handleConfirmDelete = async () => {
+        const id = confirmDialog.id;
+        setConfirmDialog({ open: false, id: null });
+        try {
+            const response = await apiDelete(`${API_CONFIG.ENDPOINTS.PRODUCTS}/${id}`);
+            if (response.ok) {
+                fetchProducts();
+                showSnackbar('Producto eliminado exitosamente', 'success');
+                setTimeout(() => setSuccessMsg(''), 3000);
+            } else {
+                showSnackbar('Error al eliminar producto', 'error');
             }
+        } catch (err) {
+            showSnackbar('Error de conexión: ' + err.message, 'error');
         }
     };
 
@@ -1086,6 +1095,31 @@ const Products = () => {
                     >
                         ✨ {editMode ? 'Actualizar Producto' : 'Crear Producto'}
                     </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Snackbar y Dialog de Confirmación */}
+            <Snackbar
+                open={snackbar.open}
+                autoHideDuration={3500}
+                onClose={closeSnackbar}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+            >
+                <MuiAlert onClose={closeSnackbar} severity={snackbar.severity} sx={{ width: '100%' }}>
+                    {snackbar.message}
+                </MuiAlert>
+            </Snackbar>
+            <Dialog
+                open={confirmDialog.open}
+                onClose={() => setConfirmDialog({ open: false, id: null })}
+            >
+                <DialogTitle>Confirmar eliminación</DialogTitle>
+                <DialogContent>
+                    <DialogContentText>¿Estás seguro de eliminar este producto?</DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setConfirmDialog({ open: false, id: null })} color="inherit">Cancelar</Button>
+                    <Button onClick={handleConfirmDelete} color="primary" variant="contained" autoFocus>Aceptar</Button>
                 </DialogActions>
             </Dialog>
         </Box>

@@ -24,7 +24,8 @@ import {
     Fab,
     Divider,
     TablePagination,
-    CircularProgress
+    CircularProgress,
+    Snackbar
 } from '@mui/material';
 import {
     People as PeopleIcon,
@@ -42,6 +43,8 @@ import {
 } from '@mui/icons-material';
 import { apiGet, apiPost, apiPut, apiDelete, API_CONFIG } from '../config/api';
 import GlobalSettings from '../components/GlobalSettings';
+import MuiAlert from '@mui/material/Alert';
+import DialogContentText from '@mui/material/DialogContentText';
 
 const Customers = () => {
     const [customers, setCustomers] = useState([]);
@@ -60,6 +63,9 @@ const Customers = () => {
         phone: '',
         address: ''
     });
+
+    const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'info' });
+    const [confirmDialog, setConfirmDialog] = useState({ open: false, id: null });
 
     // Navegación simple
     const handleBack = () => window.history.back();
@@ -83,7 +89,7 @@ const Customers = () => {
                 // El servidor devuelve datos paginados con estructura: { data: [...], current_page: 1, etc }
                 const customers = result.data || result || [];
                 setCustomers(Array.isArray(customers) ? customers : []);
-                setSuccessMsg('Clientes cargados exitosamente');
+                //setSuccessMsg('Clientes cargados exitosamente');
                 setTimeout(() => setSuccessMsg(''), 3000);
             } else {
                 setError('Error al cargar clientes');
@@ -133,7 +139,7 @@ const Customers = () => {
             if (response.ok) {
                 fetchCustomers();
                 handleCloseDialog();
-                setSuccessMsg(editMode ? 'Cliente actualizado exitosamente' : 'Cliente creado exitosamente');
+                showSnackbar(editMode ? 'Cliente actualizado exitosamente' : 'Cliente creado exitosamente', 'success');
                 setTimeout(() => setSuccessMsg(''), 3000);
             } else {
                 const errorData = await response.json();
@@ -145,22 +151,31 @@ const Customers = () => {
     };
 
     // Handle delete
-    const handleDelete = async (id) => {
-        if (window.confirm('¿Estás seguro de eliminar este cliente?')) {
-            try {
-                const response = await apiDelete(`${API_CONFIG.ENDPOINTS.CUSTOMERS}/${id}`);
-                if (response.ok) {
-                    fetchCustomers();
-                    setSuccessMsg('Cliente eliminado exitosamente');
-                    setTimeout(() => setSuccessMsg(''), 3000);
-                } else {
-                    setError('Error al eliminar cliente');
-                }
-            } catch (err) {
-                setError('Error de conexión: ' + err.message);
+    const handleDelete = (id) => {
+        setConfirmDialog({ open: true, id });
+    };
+
+    const handleConfirmDelete = async () => {
+        const id = confirmDialog.id;
+        setConfirmDialog({ open: false, id: null });
+        try {
+            const response = await apiDelete(`${API_CONFIG.ENDPOINTS.CUSTOMERS}/${id}`);
+            if (response.ok) {
+                fetchCustomers();
+                showSnackbar('Cliente eliminado exitosamente', 'success');
+                setTimeout(() => setSuccessMsg(''), 3000);
+            } else {
+                showSnackbar('Error al eliminar cliente', 'error');
             }
+        } catch (err) {
+            showSnackbar('Error de conexión: ' + err.message, 'error');
         }
     };
+
+    const showSnackbar = (message, severity = 'info') => {
+        setSnackbar({ open: true, message, severity });
+    };
+    const closeSnackbar = () => setSnackbar({ ...snackbar, open: false });
 
     // Dialog handlers
     const handleOpenDialog = (customer = null) => {
@@ -1003,6 +1018,33 @@ const Customers = () => {
                     >
                         ✨ {editMode ? 'Actualizar Cliente' : 'Crear Cliente'}
                     </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Snackbar para mensajes */}
+            <Snackbar
+                open={snackbar.open}
+                autoHideDuration={3500}
+                onClose={closeSnackbar}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+            >
+                <MuiAlert onClose={closeSnackbar} severity={snackbar.severity} sx={{ width: '100%' }}>
+                    {snackbar.message}
+                </MuiAlert>
+            </Snackbar>
+
+            {/* Dialog de confirmación para eliminar */}
+            <Dialog
+                open={confirmDialog.open}
+                onClose={() => setConfirmDialog({ open: false, id: null })}
+            >
+                <DialogTitle>Confirmar eliminación</DialogTitle>
+                <DialogContent>
+                    <DialogContentText>¿Estás seguro de eliminar este cliente?</DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setConfirmDialog({ open: false, id: null })} color="inherit">Cancelar</Button>
+                    <Button onClick={handleConfirmDelete} color="primary" variant="contained" autoFocus>Aceptar</Button>
                 </DialogActions>
             </Dialog>
         </Box>

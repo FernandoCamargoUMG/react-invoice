@@ -1,4 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import Snackbar from '@mui/material/Snackbar';
+import MuiAlert from '@mui/material/Alert';
+// Componente Alert para Snackbar
+const Alert = React.forwardRef(function Alert(props, ref) {
+    return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
 import { useNavigate } from 'react-router-dom';
 import {
     Box,
@@ -16,7 +22,12 @@ import {
     IconButton,
     Chip,
     Avatar,
-    Tooltip
+    Tooltip,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogContentText,
+    DialogActions
 } from '@mui/material';
 import {
     Add as AddIcon,
@@ -38,6 +49,25 @@ import { apiGet, API_CONFIG } from '../config/api';
 const Purchases = () => {
     const navigate = useNavigate();
     const { formatCurrency } = useCurrency();
+    // Estado para Snackbar (alerta bonita)
+    // Estado para Dialog de confirmación
+    const [confirmDialog, setConfirmDialog] = useState({ open: false, action: null, purchaseId: null, message: '' });
+
+    const openConfirmDialog = (action, purchaseId, message) => {
+        setConfirmDialog({ open: true, action, purchaseId, message });
+    };
+    const closeConfirmDialog = () => {
+        setConfirmDialog({ ...confirmDialog, open: false });
+    };
+    const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'info' });
+
+    const showSnackbar = (message, severity = 'info') => {
+        setSnackbar({ open: true, message, severity });
+    };
+    const closeSnackbar = (event, reason) => {
+        if (reason === 'clickaway') return;
+        setSnackbar({ ...snackbar, open: false });
+    };
 
     // Estados principales
     const [purchases, setPurchases] = useState([]);
@@ -137,16 +167,18 @@ const Purchases = () => {
         }
     };
     
-    // Cargar compras al inicio
-    useEffect(() => {
-        fetchPurchases();
-    }, []);
+    // 1. Estado para controlar si ya se pidió cargar datos
+    const [dataLoaded, setDataLoaded] = useState(false);
 
-    // Función para cargar compras desde el backend
+    // 2. Elimina el useEffect que llama fetchPurchases() al inicio
+    // ...NO uses useEffect(() => { fetchPurchases(); }, []);
+
+    // 3. Modifica loadPurchases para marcar dataLoaded y cargar datos
     const loadPurchases = async (pageNum = 1) => {
         if (loadingData) return; // Evitar múltiples cargas simultáneas
         
         setLoadingData(true);
+        setDataLoaded(true); // Marca que el usuario ya pidió cargar
         try {
             console.log(`🛒 Cargando compras - Página ${pageNum}...`);
             const response = await apiGet(`${API_CONFIG.ENDPOINTS.PURCHASES}?page=${pageNum}`);
@@ -237,36 +269,33 @@ const Purchases = () => {
     const handleSavePurchase = async () => {
         try {
             setError('');
-            
             if (!purchaseHeader.supplier_id) {
                 setError('Debe seleccionar un proveedor');
+                showSnackbar('Debe seleccionar un proveedor', 'warning');
                 return;
             }
-            
             if (purchaseItems.length === 0 || !purchaseItems.some(item => item.product_id)) {
                 setError('Debe agregar al menos un producto');
+                showSnackbar('Debe agregar al menos un producto', 'warning');
                 return;
             }
-
             // Validar que hay items válidos
             const validItems = purchaseItems.filter(item => 
                 item.product_id && 
                 item.quantity > 0 && 
                 item.cost_price >= 0
             );
-            
             if (validItems.length === 0) {
                 setError('Debe agregar al menos un producto válido');
+                showSnackbar('Debe agregar al menos un producto válido', 'warning');
                 return;
             }
-
             // Calcular el total sumando todos los items
             const calculatedTotal = validItems.reduce((sum, item) => {
                 const quantity = parseInt(item.quantity) || 0;
                 const cost = parseFloat(item.cost_price) || 0;
                 return sum + (quantity * cost);
             }, 0);
-
             const purchaseData = {
                 supplier_id: parseInt(purchaseHeader.supplier_id),
                 purchase_date: purchaseHeader.purchase_date,
@@ -277,9 +306,7 @@ const Purchases = () => {
                     cost_price: parseFloat(item.cost_price)
                 }))
             };
-
             console.log('💾 Guardando compra - Datos enviados:', JSON.stringify(purchaseData, null, 2));
-
             if (editMode && selectedPurchase) {
                 // Actualizar compra existente en el backend
                 const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.PURCHASES}/${selectedPurchase.id}`, {
@@ -290,14 +317,14 @@ const Purchases = () => {
                     },
                     body: JSON.stringify(purchaseData)
                 });
-
                 const result = await response.json();
-                
                 if (result.success) {
                     await fetchPurchases(); // Recargar la lista de compras
                     handleCloseDialog();
+                    showSnackbar('Compra actualizada correctamente', 'success');
                 } else {
                     setError(result.message || 'Error al actualizar la compra');
+                    showSnackbar(result.message || 'Error al actualizar la compra', 'error');
                 }
             } else {
                 // Crear nueva compra en el backend
@@ -309,54 +336,62 @@ const Purchases = () => {
                     },
                     body: JSON.stringify(purchaseData)
                 });
-
                 const result = await response.json();
-                
                 console.log('📥 Respuesta del backend:', result);
                 console.log('📊 Status HTTP:', response.status);
-                
                 if (result.success) {
                     await fetchPurchases(); // Recargar la lista de compras
                     handleCloseDialog();
+                    showSnackbar('Compra creada correctamente', 'success');
                 } else {
                     setError(result.message || 'Error al crear la compra');
+                    showSnackbar(result.message || 'Error al crear la compra', 'error');
                 }
             }
         } catch (error) {
             console.error('Error al guardar compra:', error);
             setError('Error de conexión al guardar la compra');
+            showSnackbar('Error de conexión al guardar la compra', 'error');
         }
     };
 
-    const handleDelete = async (purchaseId) => {
-        if (window.confirm('¿Estás seguro de que deseas eliminar esta compra?')) {
-            try {
+    // Abrir dialog de confirmación para eliminar
+    const handleDelete = (purchaseId) => {
+        openConfirmDialog('delete', purchaseId, '¿Estás seguro de que deseas eliminar esta compra?');
+    };
+
+    // Abrir dialog de confirmación para recibir
+    const handleReceivePurchase = (id) => {
+        openConfirmDialog('receive', id, '¿Marcar esta compra como recibida?');
+    };
+
+    // Abrir dialog de confirmación para cancelar
+    const handleCancelPurchase = (id) => {
+        openConfirmDialog('cancel', id, '¿Cancelar esta compra?');
+    };
+
+    // Ejecutar acción confirmada
+    const handleConfirmAction = async () => {
+        const { action, purchaseId } = confirmDialog;
+        closeConfirmDialog();
+        try {
+            if (action === 'delete') {
                 const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.PURCHASES}/${purchaseId}`, {
                     method: 'DELETE',
                     headers: {
                         'Authorization': `Bearer ${localStorage.getItem('access_token')}`
                     }
                 });
-
                 const result = await response.json();
-                
                 if (result.success) {
-                    await fetchPurchases(); // Recargar la lista después de eliminar
+                    await fetchPurchases();
+                    showSnackbar('Compra eliminada correctamente', 'success');
                 } else {
-                    alert('Error al eliminar la compra: ' + (result.message || 'Error desconocido'));
+                    showSnackbar('Error al eliminar la compra: ' + (result.message || 'Error desconocido'), 'error');
                 }
-            } catch (error) {
-                console.error('Error al eliminar compra:', error);
-                alert('Error de conexión al eliminar la compra');
-            }
-        }
-    };
-
-    const handleReceivePurchase = async (id) => {
-        if (window.confirm('¿Marcar esta compra como recibida?')) {
-            try {
+            } else if (action === 'receive') {
                 const response = await fetch(
-                    `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.PURCHASE_RECEIVE(id)}`,
+                    `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.PURCHASE_RECEIVE(purchaseId)}`,
                     {
                         method: 'PATCH',
                         headers: {
@@ -368,20 +403,13 @@ const Purchases = () => {
                 const result = await response.json();
                 if (result.success) {
                     await fetchPurchases();
+                    showSnackbar('Compra marcada como recibida', 'success');
                 } else {
-                    alert(result.message || 'Error al marcar como recibida');
+                    showSnackbar(result.message || 'Error al marcar como recibida', 'error');
                 }
-            } catch (error) {
-                alert('Error de conexión al marcar como recibida');
-            }
-        }
-    };
-
-    const handleCancelPurchase = async (id) => {
-        if (window.confirm('¿Cancelar esta compra?')) {
-            try {
+            } else if (action === 'cancel') {
                 const response = await fetch(
-                    `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.PURCHASE_CANCEL(id)}`,
+                    `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.PURCHASE_CANCEL(purchaseId)}`,
                     {
                         method: 'PATCH',
                         headers: {
@@ -393,12 +421,15 @@ const Purchases = () => {
                 const result = await response.json();
                 if (result.success) {
                     await fetchPurchases();
+                    showSnackbar('Compra cancelada correctamente', 'success');
                 } else {
-                    alert(result.message || 'Error al cancelar la compra');
+                    showSnackbar(result.message || 'Error al cancelar la compra', 'error');
                 }
-            } catch (error) {
-                alert('Error de conexión al cancelar la compra');
             }
+        } catch (error) {
+            if (action === 'delete') showSnackbar('Error de conexión al eliminar la compra', 'error');
+            if (action === 'receive') showSnackbar('Error de conexión al marcar como recibida', 'error');
+            if (action === 'cancel') showSnackbar('Error de conexión al cancelar la compra', 'error');
         }
     };
 
@@ -682,221 +713,227 @@ const Purchases = () => {
                     </Paper>
 
                     {/* Tabla de Compras */}
-                    <Paper sx={{
-                        background: 'rgba(255,255,255,0.95)',
-                        backdropFilter: 'blur(20px)',
-                        border: '1px solid rgba(255,255,255,0.2)',
-                        borderRadius: 3,
-                        boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
-                        overflow: 'hidden'
-                    }}>
-                        <TableContainer>
-                            <Table>
-                                <TableHead sx={{ background: 'linear-gradient(135deg, #8B5FBF 0%, #B794F6 100%)' }}>
-                                    <TableRow>
-                                        <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Compra</TableCell>
-                                        <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Proveedor</TableCell>
-                                        <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Fecha</TableCell>
-                                        <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Estado</TableCell>
-                                        <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Total</TableCell>
-                                        <TableCell sx={{ color: 'white', fontWeight: 'bold', textAlign: 'center' }}>Acciones</TableCell>
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                    {purchases.map((purchase) => (
-                                        <TableRow 
-                                            key={purchase.id}
-                                            sx={{ 
-                                                '&:hover': { 
-                                                    backgroundColor: 'rgba(139, 95, 191, 0.05)' 
-                                                },
-                                                transition: 'all 0.2s ease'
-                                            }}
-                                        >
-                                            <TableCell>
-                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                                                    <Avatar sx={{ 
-                                                        background: `linear-gradient(135deg, ${getStatusColor(purchase.status)} 0%, ${getStatusColor(purchase.status)}80 100%)`,
-                                                        width: 48,
-                                                        height: 48
-                                                    }}>
-                                                        <ShoppingCartIcon />
-                                                    </Avatar>
+                    {dataLoaded ? (
+                        <Paper sx={{
+                            background: 'rgba(255,255,255,0.95)',
+                            backdropFilter: 'blur(20px)',
+                            border: '1px solid rgba(255,255,255,0.2)',
+                            borderRadius: 3,
+                            boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
+                            overflow: 'hidden'
+                        }}>
+                            <TableContainer>
+                                <Table>
+                                    <TableHead sx={{ background: 'linear-gradient(135deg, #8B5FBF 0%, #B794F6 100%)' }}>
+                                        <TableRow>
+                                            <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Compra</TableCell>
+                                            <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Proveedor</TableCell>
+                                            <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Fecha</TableCell>
+                                            <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Estado</TableCell>
+                                            <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Total</TableCell>
+                                            <TableCell sx={{ color: 'white', fontWeight: 'bold', textAlign: 'center' }}>Acciones</TableCell>
+                                        </TableRow>
+                                    </TableHead>
+                                    <TableBody>
+                                        {purchases.map((purchase) => (
+                                            <TableRow 
+                                                key={purchase.id}
+                                                sx={{ 
+                                                    '&:hover': { 
+                                                        backgroundColor: 'rgba(139, 95, 191, 0.05)' 
+                                                    },
+                                                    transition: 'all 0.2s ease'
+                                                }}
+                                            >
+                                                <TableCell>
+                                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                                        <Avatar sx={{ 
+                                                            background: `linear-gradient(135deg, ${getStatusColor(purchase.status)} 0%, ${getStatusColor(purchase.status)}80 100%)`,
+                                                            width: 48,
+                                                            height: 48
+                                                        }}>
+                                                            <ShoppingCartIcon />
+                                                        </Avatar>
+                                                        <Box>
+                                                            <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+                                                                {purchase.purchase_number}
+                                                            </Typography>
+                                                            <Typography variant="body2" color="text.secondary">
+                                                                ID: {purchase.id}
+                                                            </Typography>
+                                                        </Box>
+                                                    </Box>
+                                                </TableCell>
+                                                <TableCell>
                                                     <Box>
-                                                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-                                                            {purchase.purchase_number}
+                                                        <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>
+                                                            {purchase.supplier?.name || 'Sin proveedor'}
                                                         </Typography>
                                                         <Typography variant="body2" color="text.secondary">
-                                                            ID: {purchase.id}
+                                                            {purchase.supplier?.contact_person || ''}
                                                         </Typography>
                                                     </Box>
-                                                </Box>
-                                            </TableCell>
-                                            <TableCell>
-                                                <Box>
-                                                    <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>
-                                                        {purchase.supplier?.name || 'Sin proveedor'}
+                                                </TableCell>
+                                                <TableCell>
+                                                    <Typography variant="body2">
+                                                        {new Date(purchase.purchase_date || purchase.created_at).toLocaleDateString()}
                                                     </Typography>
-                                                    <Typography variant="body2" color="text.secondary">
-                                                        {purchase.supplier?.contact_person || ''}
-                                                    </Typography>
-                                                </Box>
-                                            </TableCell>
-                                            <TableCell>
-                                                <Typography variant="body2">
-                                                    {new Date(purchase.purchase_date || purchase.created_at).toLocaleDateString()}
-                                                </Typography>
-                                            </TableCell>
-                                            <TableCell>
-                                                <Chip
-                                                    icon={getStatusIcon(purchase.status)}
-                                                    label={getStatusText(purchase.status)}
-                                                    sx={{
-                                                        backgroundColor: `${getStatusColor(purchase.status)}20`,
-                                                        color: getStatusColor(purchase.status),
+                                                </TableCell>
+                                                <TableCell>
+                                                    <Chip
+                                                        icon={getStatusIcon(purchase.status)}
+                                                        label={getStatusText(purchase.status)}
+                                                        sx={{
+                                                            backgroundColor: `${getStatusColor(purchase.status)}20`,
+                                                            color: getStatusColor(purchase.status),
+                                                            fontWeight: 'bold',
+                                                            border: `1px solid ${getStatusColor(purchase.status)}40`
+                                                        }}
+                                                    />
+                                                </TableCell>
+                                                <TableCell>
+                                                    <Typography variant="h6" sx={{ 
                                                         fontWeight: 'bold',
-                                                        border: `1px solid ${getStatusColor(purchase.status)}40`
-                                                    }}
-                                                />
-                                            </TableCell>
-                                            <TableCell>
-                                                <Typography variant="h6" sx={{ 
-                                                    fontWeight: 'bold',
-                                                    color: '#2E8B57'
-                                                }}>
-                                                    {formatCurrency(purchase.total)}
-                                                </Typography>
-                                            </TableCell>
-                                            <TableCell>
-                                                <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center' }}>
+                                                        color: '#2E8B57'
+                                                    }}>
+                                                        {formatCurrency(purchase.total)}
+                                                    </Typography>
+                                                </TableCell>
+                                                <TableCell>
+                                                    <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center' }}>
                                                     
-                                                    <Tooltip title="Editar compra">
-                                                        <IconButton
-                                                            onClick={() => handleOpenDialog(purchase)}
-                                                            sx={{
-                                                                color: '#6A4C93',
-                                                                '&:hover': {
-                                                                    backgroundColor: 'rgba(106, 76, 147, 0.1)',
-                                                                    transform: 'scale(1.1)'
-                                                                }
-                                                            }}
-                                                        >
-                                                            <EditIcon />
-                                                        </IconButton>
-                                                    </Tooltip>
-                                                    <Tooltip title="Eliminar compra">
-                                                        <IconButton
-                                                            onClick={() => handleDelete(purchase.id)}
-                                                            sx={{
-                                                                color: '#dc3545',
-                                                                '&:hover': {
-                                                                    backgroundColor: 'rgba(220, 53, 69, 0.1)',
-                                                                    transform: 'scale(1.1)'
-                                                                }
-                                                            }}
-                                                        >
-                                                            <CancelIcon />
-                                                        </IconButton>
-                                                    </Tooltip>
-                                                    {purchase.status === 'pending' && (
-                                                        <>
-                                                            <Tooltip title="Marcar como recibida">
-                                                                <IconButton
-                                                                    onClick={() => handleReceivePurchase(purchase.id)}
-                                                                    sx={{
-                                                                        color: '#2E8B57',
-                                                                        '&:hover': {
-                                                                            backgroundColor: 'rgba(46, 139, 87, 0.1)',
-                                                                            transform: 'scale(1.1)'
-                                                                        }
-                                                                    }}
-                                                                >
-                                                                    <CheckCircleIcon />
-                                                                </IconButton>
-                                                            </Tooltip>
-                                                            <Tooltip title="Cancelar compra">
-                                                                <IconButton
-                                                                    onClick={() => handleCancelPurchase(purchase.id)}
-                                                                    sx={{
-                                                                        color: '#FF9800',
-                                                                        '&:hover': {
-                                                                            backgroundColor: 'rgba(255, 152, 0, 0.1)',
-                                                                            transform: 'scale(1.1)'
-                                                                        }
-                                                                    }}
-                                                                >
-                                                                    <CancelIcon />
-                                                                </IconButton>
-                                                            </Tooltip>
-                                                        </>
-                                                    )}
-                                                </Box>
-                                            </TableCell>
-                                        </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        </TableContainer>
-                        
-                        {/* Controles de Paginación */}
-                        <Box sx={{ 
-                            p: 2, 
-                            display: 'flex', 
-                            justifyContent: 'space-between', 
-                            alignItems: 'center',
-                            borderTop: '1px solid rgba(139, 95, 191, 0.1)'
-                        }}>
-                            <Typography variant="body2" sx={{ color: '#666' }}>
-                                Mostrando {purchases.length} de {totalRecords} registros
-                            </Typography>
+                                                        <Tooltip title="Editar compra">
+                                                            <IconButton
+                                                                onClick={() => handleOpenDialog(purchase)}
+                                                                sx={{
+                                                                    color: '#6A4C93',
+                                                                    '&:hover': {
+                                                                        backgroundColor: 'rgba(106, 76, 147, 0.1)',
+                                                                        transform: 'scale(1.1)'
+                                                                    }
+                                                                }}
+                                                            >
+                                                                <EditIcon />
+                                                            </IconButton>
+                                                        </Tooltip>
+                                                        <Tooltip title="Eliminar compra">
+                                                            <IconButton
+                                                                onClick={() => handleDelete(purchase.id)}
+                                                                sx={{
+                                                                    color: '#dc3545',
+                                                                    '&:hover': {
+                                                                        backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                                                                        transform: 'scale(1.1)'
+                                                                    }
+                                                                }}
+                                                            >
+                                                                <CancelIcon />
+                                                            </IconButton>
+                                                        </Tooltip>
+                                                        {purchase.status === 'pending' && (
+                                                            <>
+                                                                <Tooltip title="Marcar como recibida">
+                                                                    <IconButton
+                                                                        onClick={() => handleReceivePurchase(purchase.id)}
+                                                                        sx={{
+                                                                            color: '#2E8B57',
+                                                                            '&:hover': {
+                                                                                backgroundColor: 'rgba(46, 139, 87, 0.1)',
+                                                                                transform: 'scale(1.1)'
+                                                                            }
+                                                                        }}
+                                                                    >
+                                                                        <CheckCircleIcon />
+                                                                    </IconButton>
+                                                                </Tooltip>
+                                                                <Tooltip title="Cancelar compra">
+                                                                    <IconButton
+                                                                        onClick={() => handleCancelPurchase(purchase.id)}
+                                                                        sx={{
+                                                                            color: '#FF9800',
+                                                                            '&:hover': {
+                                                                                backgroundColor: 'rgba(255, 152, 0, 0.1)',
+                                                                                transform: 'scale(1.1)'
+                                                                            }
+                                                                        }}
+                                                                    >
+                                                                        <CancelIcon />
+                                                                    </IconButton>
+                                                                </Tooltip>
+                                                            </>
+                                                        )}
+                                                    </Box>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </TableContainer>
                             
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                <Button
-                                    variant="outlined"
-                                    startIcon={<ChevronLeftIcon />}
-                                    onClick={() => loadPurchases(page - 1)}
-                                    disabled={page <= 1 || loadingData}
-                                    size="small"
-                                    sx={{
-                                        color: '#8B5FBF',
-                                        borderColor: '#8B5FBF',
-                                        '&:hover': {
-                                            borderColor: '#6A4C93',
-                                            backgroundColor: 'rgba(139, 95, 191, 0.1)'
-                                        }
-                                    }}
-                                >
-                                    Anterior
-                                </Button>
-                                
-                                <Typography variant="body2" sx={{ 
-                                    mx: 2, 
-                                    color: '#8B5FBF',
-                                    fontWeight: 'bold'
-                                }}>
-                                    Página {page} de {totalPages}
+                            {/* Controles de Paginación */}
+                            <Box sx={{ 
+                                p: 2, 
+                                display: 'flex', 
+                                justifyContent: 'space-between', 
+                                alignItems: 'center',
+                                borderTop: '1px solid rgba(139, 95, 191, 0.1)'
+                            }}>
+                                <Typography variant="body2" sx={{ color: '#666' }}>
+                                    Mostrando {purchases.length} de {totalRecords} registros
                                 </Typography>
                                 
-                                <Button
-                                    variant="outlined"
-                                    endIcon={<ChevronRightIcon />}
-                                    onClick={() => loadPurchases(page + 1)}
-                                    disabled={page >= totalPages || loadingData}
-                                    size="small"
-                                    sx={{
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                    <Button
+                                        variant="outlined"
+                                        startIcon={<ChevronLeftIcon />}
+                                        onClick={() => loadPurchases(page - 1)}
+                                        disabled={page <= 1 || loadingData}
+                                        size="small"
+                                        sx={{
+                                            color: '#8B5FBF',
+                                            borderColor: '#8B5FBF',
+                                            '&:hover': {
+                                                borderColor: '#6A4C93',
+                                                backgroundColor: 'rgba(139, 95, 191, 0.1)'
+                                            }
+                                        }}
+                                    >
+                                        Anterior
+                                    </Button>
+                                    
+                                    <Typography variant="body2" sx={{ 
+                                        mx: 2, 
                                         color: '#8B5FBF',
-                                        borderColor: '#8B5FBF',
-                                        '&:hover': {
-                                            borderColor: '#6A4C93',
-                                            backgroundColor: 'rgba(139, 95, 191, 0.1)'
-                                        }
-                                    }}
-                                >
-                                    Siguiente
-                                </Button>
+                                        fontWeight: 'bold'
+                                    }}>
+                                        Página {page} de {totalPages}
+                                    </Typography>
+                                    
+                                    <Button
+                                        variant="outlined"
+                                        endIcon={<ChevronRightIcon />}
+                                        onClick={() => loadPurchases(page + 1)}
+                                        disabled={page >= totalPages || loadingData}
+                                        size="small"
+                                        sx={{
+                                            color: '#8B5FBF',
+                                            borderColor: '#8B5FBF',
+                                            '&:hover': {
+                                                borderColor: '#6A4C93',
+                                                backgroundColor: 'rgba(139, 95, 191, 0.1)'
+                                            }
+                                        }}
+                                    >
+                                        Siguiente
+                                    </Button>
+                                </Box>
                             </Box>
-                        </Box>
-                    </Paper>
+                        </Paper>
+                    ) : (
+                        <Typography variant="body1" sx={{ mt: 4, textAlign: 'center', color: '#888' }}>
+                            Presiona "Cargar Datos" para ver las compras.
+                        </Typography>
+                    )}
                 </Box>
             </Box>
 
@@ -916,6 +953,40 @@ const Purchases = () => {
                 formatAmount={formatCurrency}
                 total={total}
             />
+        {/* Snackbar de notificación */}
+        <Snackbar
+            open={snackbar.open}
+            autoHideDuration={3500}
+            onClose={closeSnackbar}
+            anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        >
+            <Alert onClose={closeSnackbar} severity={snackbar.severity} sx={{ width: '100%' }}>
+                {snackbar.message}
+            </Alert>
+        </Snackbar>
+
+        {/* Dialog de confirmación bonito */}
+        <Dialog
+            open={confirmDialog.open}
+            onClose={closeConfirmDialog}
+            aria-labelledby="confirm-dialog-title"
+            aria-describedby="confirm-dialog-description"
+        >
+            <DialogTitle id="confirm-dialog-title">Confirmar acción</DialogTitle>
+            <DialogContent>
+                <DialogContentText id="confirm-dialog-description">
+                    {confirmDialog.message}
+                </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+                <Button onClick={closeConfirmDialog} color="inherit">
+                    Cancelar
+                </Button>
+                <Button onClick={handleConfirmAction} color="primary" variant="contained" autoFocus>
+                    Aceptar
+                </Button>
+            </DialogActions>
+        </Dialog>
         </Box>
     );
 };
