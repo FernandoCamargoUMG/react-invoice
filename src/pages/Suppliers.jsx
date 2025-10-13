@@ -154,14 +154,14 @@ const Suppliers = () => {
 
     const handleSubmit = () => {
         // Simular guardado
-        console.log('Guardando proveedor:', formData);
+        // Guardando proveedor
         handleCloseDialog();
     };
 
     const toggleStatus = (supplier) => {
         // Simular cambio de estado
         const newStatus = supplier.status === 'active' ? 'inactive' : 'active';
-        console.log(`Cambiando estado de ${supplier.name} a ${newStatus}`);
+        // Cambiando estado del proveedor
     };
 
     const getStatusColor = (status) => {

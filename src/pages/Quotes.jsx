@@ -432,7 +432,7 @@ const Quotes = () => {
                     <Button
                         variant="contained"
                         startIcon={<AddIcon />}
-                        onClick={() => console.log('Nueva cotización')}
+                        onClick={() => {}} // Implementar función para nueva cotización
                         sx={{
                             background: 'linear-gradient(135deg, #8B5FBF 0%, #B794F6 100%)',
                             borderRadius: 2,
@@ -566,7 +566,7 @@ const Quotes = () => {
                                                 </Tooltip>
                                                 <Tooltip title="Editar cotización">
                                                     <IconButton
-                                                        onClick={() => console.log('Editar', quote.id)}
+                                                        onClick={() => {}} // Implementar edición de cotización
                                                         sx={{
                                                             color: '#6A4C93',
                                                             '&:hover': {
@@ -580,7 +580,7 @@ const Quotes = () => {
                                                 </Tooltip>
                                                 <Tooltip title="Descargar PDF">
                                                     <IconButton
-                                                        onClick={() => console.log('Descargar PDF', quote.id)}
+                                                        onClick={() => {}} // Implementar descarga PDF
                                                         sx={{
                                                             color: '#2E8B57',
                                                             '&:hover': {

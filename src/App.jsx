@@ -10,8 +10,8 @@ import Invoices from './pages/Invoices';
 import Settings from './pages/Settings';
 import Suppliers from './pages/Suppliers';
 import Purchases from './pages/Purchases';
-import Quotes from './pages/QuotesNew';
-import InventoryMovements from './pages/InventoryMovementsNew';
+import Quotes from './pages/Quotes';
+import InventoryMovements from './pages/InventoryMovements';
 
 function App() {
   const accessToken = localStorage.getItem('access_token');

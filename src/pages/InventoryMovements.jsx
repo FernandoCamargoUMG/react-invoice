@@ -435,7 +435,7 @@ const InventoryMovements = () => {
                     <Button
                         variant="contained"
                         startIcon={<AssessmentIcon />}
-                        onClick={() => console.log('Generar reporte')}
+                        onClick={() => {}} // Implementar generación de reporte
                         sx={{
                             background: 'linear-gradient(135deg, #8B5FBF 0%, #B794F6 100%)',
                             borderRadius: 2,
