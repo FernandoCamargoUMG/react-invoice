@@ -93,9 +93,26 @@ const Purchases = () => {
                     apiGet(API_CONFIG.ENDPOINTS.PRODUCTS)
                 ]);
                 const [dataS, dataP] = await Promise.all([resS.json(), resP.json()]);
-                // Laravel devuelve los datos en 'data'
-                if (dataS.data && Array.isArray(dataS.data)) setSuppliers(dataS.data);
+                
+                console.log('🔍 DEBUG - Respuesta proveedores:', dataS);
+                console.log('🔍 DEBUG - Respuesta productos:', dataP);
+                
+                // Para productos funciona así
                 if (dataP.data && Array.isArray(dataP.data)) setProducts(dataP.data);
+                
+                // Para proveedores probemos diferentes estructuras
+                if (dataS.success && dataS.data) {
+                    if (Array.isArray(dataS.data)) {
+                        setSuppliers(dataS.data);
+                        console.log('✅ Proveedores cargados (directo):', dataS.data.length);
+                    } else if (dataS.data.data && Array.isArray(dataS.data.data)) {
+                        setSuppliers(dataS.data.data);
+                        console.log('✅ Proveedores cargados (data.data):', dataS.data.data.length);
+                    }
+                } else if (dataS.data && Array.isArray(dataS.data)) {
+                    setSuppliers(dataS.data);
+                    console.log('✅ Proveedores cargados (fallback):', dataS.data.length);
+                }
             } catch (err) {
                 console.error('Error al cargar proveedores/productos:', err);
             }
