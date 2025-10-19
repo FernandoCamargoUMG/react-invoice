@@ -48,6 +48,8 @@ import {
 } from '@mui/icons-material';
 import NavigationBar from '../components/NavigationBar';
 import { useCurrency } from '../utils/currency';
+import { apiGet, API_CONFIG } from '../config/api';
+import { generateInventoryPdf } from '../utils/reportInventory';
 
 const InventoryMovements = () => {
     const navigate = useNavigate();
@@ -68,113 +70,74 @@ const InventoryMovements = () => {
         totalValue: 0
     });
 
-    // Datos de ejemplo (simulando la API)
-    useEffect(() => {
-        const mockMovements = [
-            {
-                id: 8,
-                product_id: 3,
-                movement_type: 'inbound',
-                quantity: 150,
-                reference_type: 'purchase',
-                reference_id: 2,
-                cost_per_unit: 12.75,
-                total_cost: 1912.50,
-                movement_date: '2025-10-05T14:30:00.000000Z',
-                notes: 'Recepción de mercancía - Orden de compra PUR-002',
-                product: {
-                    id: 3,
-                    name: 'Producto Verificación',
-                    description: 'Producto para verificar inventario',
-                    category: 'Electrónicos',
-                    current_stock: 275
-                },
-                reference: {
-                    number: 'PUR-002',
-                    supplier: 'Distribuidora ABC S.A.'
-                }
-            },
-            {
-                id: 9,
-                product_id: 4,
-                movement_type: 'outbound',
-                quantity: -75,
-                reference_type: 'sale',
-                reference_id: 8,
-                cost_per_unit: 8.90,
-                total_cost: -667.50,
-                movement_date: '2025-10-08T09:15:00.000000Z',
-                notes: 'Venta realizada - Factura INV-008',
-                product: {
-                    id: 4,
-                    name: 'Producto de Prueba BIGINT',
-                    description: 'Producto de prueba para testing',
-                    category: 'Materiales',
-                    current_stock: 185
-                },
-                reference: {
-                    number: 'INV-008',
-                    customer: 'Cliente Premium S.A.'
-                }
-            },
-            {
-                id: 10,
-                product_id: 5,
-                movement_type: 'adjustment',
-                quantity: -15,
-                reference_type: 'adjustment',
-                reference_id: null,
-                cost_per_unit: 25.00,
-                total_cost: -375.00,
-                movement_date: '2025-10-10T16:45:00.000000Z',
-                notes: 'Ajuste de inventario - productos dañados identificados en revisión',
-                product: {
-                    id: 5,
-                    name: 'Laptop HP Pavilion',
-                    description: 'Laptop HP Pavilion 15" Intel Core i5',
-                    category: 'Computadoras',
-                    current_stock: 45
-                },
-                reference: {
-                    number: 'ADJ-001',
-                    reason: 'Productos dañados'
-                }
-            },
-            {
-                id: 11,
-                product_id: 6,
-                movement_type: 'inbound',
-                quantity: 200,
-                reference_type: 'purchase',
-                reference_id: 3,
-                cost_per_unit: 7.25,
-                total_cost: 1450.00,
-                movement_date: '2025-10-12T11:20:00.000000Z',
-                notes: 'Recepción de stock - Nueva compra programada',
-                product: {
-                    id: 6,
-                    name: 'Mouse Logitech Wireless',
-                    description: 'Mouse inalámbrico Logitech M705',
-                    category: 'Accesorios',
-                    current_stock: 320
-                },
-                reference: {
-                    number: 'PUR-003',
-                    supplier: 'Importaciones XYZ Ltda.'
-                }
-            }
-        ];
+    // Cargar datos reales del backend
+    const [page, setPage] = useState(1);
+    const [lastPage, setLastPage] = useState(1);
+    const [error, setError] = useState(null);
+    const [loaded, setLoaded] = useState(false);
+    const [perPage, setPerPage] = useState(10);
 
-        setMovements(mockMovements);
-        setStats({
-            total: mockMovements.length,
-            inbound: mockMovements.filter(m => m.movement_type === 'inbound').length,
-            outbound: mockMovements.filter(m => m.movement_type === 'outbound').length,
-            adjustments: mockMovements.filter(m => m.movement_type === 'adjustment').length,
-            totalValue: Math.abs(mockMovements.reduce((sum, m) => sum + m.total_cost, 0))
-        });
-        setLoading(false);
-    }, []);
+    const mapBackendTypeToUi = (t) => {
+        if (!t) return t;
+        if (t === 'purchase') return 'inbound';
+        if (t === 'sale') return 'outbound';
+        return t; // 'adjustment' or others
+    };
+
+    const fetchMovements = async (pageNumber = 1) => {
+        setLoading(true);
+        setError(null);
+        try {
+            const res = await apiGet(`${API_CONFIG.ENDPOINTS.INVENTORY_MOVEMENTS}?page=${pageNumber}&per_page=${perPage}`);
+            if (!res.ok) {
+                const text = await res.text();
+                throw new Error(`API error: ${res.status} ${text}`);
+            }
+            const json = await res.json();
+            // Esperamos la estructura: { success: true, data: { data: [...], current_page, last_page, total, ... } }
+            const payload = json.data || json;
+            const items = payload.data || [];
+
+            // Normalizar para la UI donde sea necesario
+            const normalized = items.map((m) => ({
+                ...m,
+                movement_type: mapBackendTypeToUi(m.type || m.movement_type),
+                movement_date: m.created_at,
+                cost_per_unit: m.cost_per_unit ?? (m.product?.cost_price ?? m.product?.price ?? 0),
+                total_cost: m.total_cost ?? ((m.cost_per_unit ?? (m.product?.cost_price ?? m.product?.price ?? 0)) * (m.quantity ?? 0)),
+                reference: m.reference ?? {
+                    number: m.reference_id ? `${m.reference_type || ''} #${m.reference_id}` : null,
+                    supplier: null,
+                    customer: null,
+                    reason: null
+                },
+                product: m.product ?? null
+            }));
+
+            setMovements(normalized);
+            setStats({
+                total: payload.total ?? normalized.length,
+                inbound: normalized.filter(x => x.movement_type === 'inbound').length,
+                outbound: normalized.filter(x => x.movement_type === 'outbound').length,
+                adjustments: normalized.filter(x => x.movement_type === 'adjustment').length,
+                totalValue: Math.abs(normalized.reduce((sum, m) => sum + (Number(m.total_cost) || 0), 0))
+            });
+            setPage(payload.current_page || pageNumber);
+            setLastPage(payload.last_page || 1);
+        } catch (err) {
+            console.error('Error cargando movimientos:', err);
+            setError(err.message || String(err));
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        if (loaded) {
+            fetchMovements(page);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [page, loaded]);
 
     const handleViewMovement = (movement) => {
         setSelectedMovement(movement);
@@ -432,28 +395,60 @@ const InventoryMovements = () => {
                         <HistoryIcon />
                         Historial de Movimientos
                     </Typography>
-                    <Button
-                        variant="contained"
-                        startIcon={<AssessmentIcon />}
-                        onClick={() => {}} // Implementar generación de reporte
-                        sx={{
-                            background: 'linear-gradient(135deg, #8B5FBF 0%, #B794F6 100%)',
-                            borderRadius: 2,
-                            px: 3,
-                            py: 1.5,
-                            fontWeight: 'bold',
-                            boxShadow: '0 4px 16px rgba(139, 95, 191, 0.3)',
-                            '&:hover': {
-                                transform: 'translateY(-2px)',
-                                boxShadow: '0 6px 20px rgba(139, 95, 191, 0.4)'
-                            }
-                        }}
-                    >
-                        📊 Generar Reporte
-                    </Button>
+                    <Box sx={{ display: 'flex', gap: 2 }}>
+                        <Button
+                            variant="contained"
+                            startIcon={<InventoryIcon />}
+                            onClick={() => {
+                                // Generar PDF e iniciar descarga
+                                const doc = generateInventoryPdf({ movements, stats, company: { name: 'Mi Empresa' } });
+                                doc.save(`movimientos-inventario-${new Date().toISOString().slice(0,10)}.pdf`);
+                            }}
+                            sx={{
+                                background: 'linear-gradient(135deg, #6A4C93 0%, #8B5FBF 100%)',
+                                color: 'white',
+                                borderRadius: 2,
+                                px: 3,
+                                py: 1.5,
+                                fontWeight: 'bold'
+                            }}
+                        >
+                            📊 Generar Reporte
+                        </Button>
+
+                        <Button
+                            variant={loaded ? 'outlined' : 'contained'}
+                            startIcon={<HistoryIcon />}
+                            onClick={() => {
+                                // si ya cargó, recargar, si no, marcar loaded para iniciar carga
+                                if (loaded) {
+                                    fetchMovements(1);
+                                    setPage(1);
+                                } else {
+                                    setLoaded(true);
+                                }
+                            }}
+                            sx={{
+                                borderColor: '#8B5FBF',
+                                color: '#000000ff',
+                                borderRadius: 2,
+                                px: 3,
+                                py: 1.5,
+                                fontWeight: 'bold'
+                            }}
+                        >
+                            {loaded ? 'Recargar Movimientos' : 'Cargar Movimientos'}
+                        </Button>
+                    </Box>
                 </Paper>
 
                 {/* Tabla de Movimientos */}
+                {error && (
+                    <Box sx={{ mb: 2 }}>
+                        <Alert severity="error">{error}</Alert>
+                    </Box>
+                )}
+                {/* pagination controls moved inside the Paper below the table */}
                 <Paper sx={{
                     background: 'rgba(255,255,255,0.95)',
                     backdropFilter: 'blur(20px)',
@@ -475,14 +470,18 @@ const InventoryMovements = () => {
                                     <TableCell sx={{ color: 'white', fontWeight: 'bold', textAlign: 'center' }}>Acciones</TableCell>
                                 </TableRow>
                             </TableHead>
-                            <TableBody>
-                                {movements.map((movement) => (
+                            <TableBody>  
+                                {!loading && movements.length === 0 && (
+                                    <TableRow>
+                                        <TableCell colSpan={7} align="center">No se encontraron movimientos.</TableCell>
+                                    </TableRow>
+                                )}
+
+                                {!loading && movements.length > 0 && movements.map((movement) => (
                                     <TableRow 
                                         key={movement.id}
                                         sx={{ 
-                                            '&:hover': { 
-                                                backgroundColor: 'rgba(139, 95, 191, 0.05)' 
-                                            },
+                                            '&:hover': { backgroundColor: 'rgba(139, 95, 191, 0.05)' },
                                             transition: 'all 0.2s ease'
                                         }}
                                     >
@@ -497,11 +496,16 @@ const InventoryMovements = () => {
                                                 </Avatar>
                                                 <Box>
                                                     <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-                                                        {movement.product.name}
+                                                        {movement.product?.name || '—'}
                                                     </Typography>
                                                     <Typography variant="body2" color="text.secondary">
-                                                        Stock: {movement.product.current_stock} unidades
+                                                        Stock: {movement.product?.stock ?? movement.product?.current_stock ?? (movement.stock_after ?? '—')} unidades
                                                     </Typography>
+                                                    {(movement.stock_before !== undefined && movement.stock_after !== undefined) && (
+                                                        <Typography variant="caption" color="text.secondary">
+                                                            Antes: {movement.stock_before} → Ahora: {movement.stock_after}
+                                                        </Typography>
+                                                    )}
                                                 </Box>
                                             </Box>
                                         </TableCell>
@@ -520,10 +524,7 @@ const InventoryMovements = () => {
                                         <TableCell>
                                             <Typography 
                                                 variant="h6" 
-                                                sx={{ 
-                                                    fontWeight: 'bold',
-                                                    color: movement.quantity >= 0 ? '#2E8B57' : '#F44336'
-                                                }}
+                                                sx={{ fontWeight: 'bold', color: movement.quantity >= 0 ? '#2E8B57' : '#F44336' }}
                                             >
                                                 {movement.quantity > 0 ? '+' : ''}{movement.quantity}
                                             </Typography>
@@ -531,7 +532,7 @@ const InventoryMovements = () => {
                                         <TableCell>
                                             <Box>
                                                 <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>
-                                                    {movement.reference.number}
+                                                    {movement.reference?.number || '—'}
                                                 </Typography>
                                                 <Typography variant="body2" color="text.secondary">
                                                     {getReferenceTypeText(movement.reference_type)}
@@ -539,37 +540,18 @@ const InventoryMovements = () => {
                                             </Box>
                                         </TableCell>
                                         <TableCell>
-                                            <Typography variant="body2">
-                                                {new Date(movement.movement_date).toLocaleDateString()}
-                                            </Typography>
-                                            <Typography variant="body2" color="text.secondary">
-                                                {new Date(movement.movement_date).toLocaleTimeString()}
-                                            </Typography>
+                                            <Typography variant="body2">{new Date(movement.movement_date).toLocaleDateString()}</Typography>
+                                            <Typography variant="body2" color="text.secondary">{new Date(movement.movement_date).toLocaleTimeString()}</Typography>
                                         </TableCell>
                                         <TableCell>
-                                            <Typography 
-                                                variant="h6" 
-                                                sx={{ 
-                                                    fontWeight: 'bold',
-                                                    color: movement.total_cost >= 0 ? '#2E8B57' : '#F44336'
-                                                }}
-                                            >
+                                            <Typography variant="h6" sx={{ fontWeight: 'bold', color: movement.total_cost >= 0 ? '#2E8B57' : '#F44336' }}>
                                                 {formatCurrency(Math.abs(movement.total_cost))}
                                             </Typography>
                                         </TableCell>
                                         <TableCell>
                                             <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center' }}>
                                                 <Tooltip title="Ver detalles">
-                                                    <IconButton
-                                                        onClick={() => handleViewMovement(movement)}
-                                                        sx={{
-                                                            color: '#8B5FBF',
-                                                            '&:hover': {
-                                                                backgroundColor: 'rgba(139, 95, 191, 0.1)',
-                                                                transform: 'scale(1.1)'
-                                                            }
-                                                        }}
-                                                    >
+                                                    <IconButton onClick={() => handleViewMovement(movement)} sx={{ color: '#8B5FBF', '&:hover': { backgroundColor: 'rgba(139, 95, 191, 0.1)', transform: 'scale(1.1)' } }}>
                                                         <ViewIcon />
                                                     </IconButton>
                                                 </Tooltip>
@@ -580,6 +562,59 @@ const InventoryMovements = () => {
                             </TableBody>
                         </Table>
                     </TableContainer>
+
+                    {loaded && (
+                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2, p: 1 }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                <Typography sx={{ color: '#6A4C93', fontWeight: 'bold' }}>Filas por página:</Typography>
+                                <FormControl size="small" sx={{ minWidth: 84 }}>
+                                    <Select
+                                        value={perPage}
+                                        onChange={(e) => {
+                                            const val = Number(e.target.value);
+                                            setPerPage(val);
+                                            setPage(1);
+                                            if (loaded) fetchMovements(1);
+                                        }}
+                                        sx={{ '& .MuiSelect-select': { py: 1 } }}
+                                    >
+                                        <MenuItem value={10}>10</MenuItem>
+                                        <MenuItem value={20}>20</MenuItem>
+                                        <MenuItem value={50}>50</MenuItem>
+                                    </Select>
+                                </FormControl>
+                            </Box>
+
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                <Typography sx={{ color: '#6A4C93' }}>{(() => {
+                                    const totalItems = stats.total ?? movements.length;
+                                    if (!totalItems) return '0–0 de 0';
+                                    const from = Math.min((page - 1) * perPage + 1, totalItems);
+                                    const to = Math.min(page * perPage, totalItems);
+                                    return `${from}–${to} de ${totalItems}`;
+                                })()}</Typography>
+                            </Box>
+
+                            <Box>
+                                <Button
+                                    variant="outlined"
+                                    disabled={page <= 1 || loading}
+                                    onClick={() => setPage(p => Math.max(1, p - 1))}
+                                    sx={{ borderColor: '#8B5FBF', color: '#8B5FBF', minWidth: 44 }}
+                                >
+                                    ◀
+                                </Button>
+                                <Button
+                                    variant="outlined"
+                                    disabled={page >= lastPage || loading}
+                                    onClick={() => setPage(p => Math.min(lastPage, p + 1))}
+                                    sx={{ borderColor: '#8B5FBF', color: '#8B5FBF', ml: 1, minWidth: 44 }}
+                                >
+                                    ▶
+                                </Button>
+                            </Box>
+                        </Box>
+                    )}
                 </Paper>
                 </Box>
             </Box>
@@ -701,7 +736,7 @@ const InventoryMovements = () => {
                                         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
                                             <Box>
                                                 <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-                                                    {selectedMovement.product.name}
+                                                    {selectedMovement.product?.name || '—'}
                                                 </Typography>
                                             </Box>
                                             <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -719,9 +754,15 @@ const InventoryMovements = () => {
                                             <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                                                 <Typography variant="body2" color="text.secondary">Stock actual:</Typography>
                                                 <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#2E8B57' }}>
-                                                    {selectedMovement.product.current_stock} unidades
+                                                    {selectedMovement.product?.stock ?? selectedMovement.product?.current_stock ?? (selectedMovement.stock_after ?? '—')} unidades
                                                 </Typography>
                                             </Box>
+                                            {(selectedMovement.stock_before !== undefined && selectedMovement.stock_after !== undefined) && (
+                                                <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
+                                                    <Typography variant="body2" color="text.secondary">Cambio:</Typography>
+                                                    <Typography variant="body2">{selectedMovement.stock_before} → {selectedMovement.stock_after}</Typography>
+                                                </Box>
+                                            )}
                                         </Box>
                                     </Paper>
                                 </Grid>

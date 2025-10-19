@@ -52,6 +52,7 @@ import NavigationBar from '../components/NavigationBar';
 import { useCurrency } from '../utils/currency';
 import Snackbar from '@mui/material/Snackbar';
 import MuiAlert from '@mui/material/Alert';
+import { generateQuotePdf } from '../utils/reportQuote';
 import QuoteModal from '../components/modals/QuoteModal';
 import { apiGet, apiPost, apiPut, apiPatch, apiDelete, API_CONFIG } from '../config/api';
 
@@ -127,6 +128,25 @@ const Quotes = () => {
     const handleViewQuote = (quote) => {
         setSelectedQuote(quote);
         setOpenDialog(true);
+    };
+
+    const handleDownloadQuotePdf = (quote) => {
+        try {
+            const customer = quote.customer || {};
+            const items = (quote.items || []).map(i => ({
+                description: i.product?.name || i.description || '-',
+                quantity: i.quantity,
+                price: i.unit_price ?? i.price ?? 0,
+                total: i.total_price
+            }));
+            const quoteHeaderForPdf = { number: quote.quote_number, date: quote.quote_date, subtotal: quote.subtotal, tax: quote.tax, total: quote.total };
+            const doc = generateQuotePdf({ quote: quoteHeaderForPdf, customer, items, meta: { companyName: 'Mi Empresa' } });
+            const filename = `cotizacion-${quote.quote_number || (quote.quote_date || '').slice(0,10)}.pdf`;
+            doc.save(filename);
+        } catch (err) {
+            console.error('Error generando PDF:', err);
+            showSnackbar('Error generando PDF', 'error');
+        }
     };
 
     const handleCloseDialog = () => {
@@ -645,7 +665,7 @@ const Quotes = () => {
                                                 </Tooltip>
                                                 <Tooltip title="Descargar PDF">
                                                     <IconButton
-                                                        onClick={() => {/* TODO: implementar descarga PDF */}}
+                                                        onClick={() => handleDownloadQuotePdf(quote)}
                                                         sx={{
                                                             color: '#2E8B57',
                                                             '&:hover': {
@@ -904,6 +924,7 @@ const Quotes = () => {
                                     px: 3,
                                     fontWeight: 'bold'
                                 }}
+                                onClick={() => handleDownloadQuotePdf(selectedQuote)}
                             >
                                 📄 Descargar PDF
                             </Button>

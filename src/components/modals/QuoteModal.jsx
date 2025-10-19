@@ -1,4 +1,5 @@
 import React from 'react';
+import { applyProductDefaultsToItem, recalcItemTotal } from '../../utils/itemHelpers';
 import {
     Dialog,
     DialogTitle,
@@ -18,8 +19,11 @@ import {
 import {
     Add as AddIcon,
     Remove as RemoveIcon,
-    CalendarToday as CalendarTodayIcon
+    CalendarToday as CalendarTodayIcon,
+    MonetizationOn as MonetizationOnIcon,
+    PictureAsPdf as PictureAsPdfIcon
 } from '@mui/icons-material';
+import { generateQuotePdf } from '../../utils/reportQuote';
 
 const QuoteModal = ({
     open,
@@ -48,11 +52,9 @@ const QuoteModal = ({
 
         newItems[index] = { ...newItems[index], [field]: normalized };
 
-        // Calcular total del item (mantener compatibilidad con purchases)
+        // Recalcular total del item usando helper
         if (field === 'quantity' || field === 'price') {
-            const quantity = newItems[index].quantity || 0;
-            const price = newItems[index].price || 0;
-            newItems[index].total_price = (parseFloat(quantity) * parseFloat(price));
+            newItems[index] = recalcItemTotal(newItems[index], 'price', 'quantity', 'total_price');
         }
 
         setQuoteItems(newItems);
@@ -60,6 +62,35 @@ const QuoteModal = ({
 
     const handleAddItem = () => setQuoteItems([...(quoteItems || []), { product_id: '', quantity: 1, price: 0, total_price: 0 }]);
     const handleRemoveItem = (index) => { setQuoteItems((quoteItems || []).filter((_, i) => i !== index)); };
+
+    const handleUseProductPrice = (index) => {
+        const item = (quoteItems || [])[index] || {};
+        const prod = (products || []).find(p => p.id === item.product_id);
+        const prodPrice = prod ? Number(prod.price || prod.unit_price || prod.sale_price || 0) : 0;
+        handleItemChange(index, 'price', prodPrice);
+    };
+
+    const handleExportPdf = () => {
+        try {
+            const customer = (customers || []).find(c => c.id === quoteHeader?.customer_id) || {};
+            const itemsForPdf = (quoteItems || []).map(it => {
+                const prod = (products || []).find(p => p.id === it.product_id) || {};
+                return {
+                    description: prod.name || it.description || prod.label || '-',
+                    quantity: it.quantity ?? 1,
+                    price: it.price ?? prod.price ?? 0,
+                    total: it.total_price ?? ((it.quantity && it.price) ? it.quantity * it.price : undefined)
+                };
+            });
+
+            const quote = { ...quoteHeader, total };
+            const doc = generateQuotePdf({ quote, customer, items: itemsForPdf, meta: { companyName: 'Mi Empresa' } });
+            const filename = `cotizacion-${quote.number || quote.quote_number || (quote.quote_date || new Date().toISOString().slice(0,10))}.pdf`;
+            doc.save(filename);
+        } catch (err) {
+            console.error('Error generando PDF de cotización', err);
+        }
+    };
 
     return (
         <Dialog
@@ -327,14 +358,16 @@ const QuoteModal = ({
                                                 options={products || []}
                                                 getOptionLabel={(option) => option?.name || ''}
                                                 value={(products || []).find(p => p.id === item.product_id) || null}
-                                                onChange={(e, value) => {
-                                                    // Cuando se selecciona producto, setear product_id y autocompletar precio
-                                                    const prodId = value?.id || '';
-                                                    const prodPrice = (value && (value.price || value.unit_price || value.sale_price)) ? Number(value.price || value.unit_price || value.sale_price) : 0;
-                                                    handleItemChange(index, 'product_id', prodId);
-                                                    // Actualizar precio y total en el mismo índice
-                                                    handleItemChange(index, 'price', prodPrice);
-                                                }}
+                                            onChange={(e, value) => {
+                                                // Aplicar defaults del producto de forma atómica
+                                                setQuoteItems(prev => {
+                                                    const arr = [...(prev || [])];
+                                                    const existing = arr[index] || { product_id: '', quantity: 1, price: 0, total_price: 0 };
+                                                    const newItem = applyProductDefaultsToItem(existing, value, 'price', 'total_price', 'quantity');
+                                                    arr[index] = newItem;
+                                                    return arr;
+                                                });
+                                            }}
                                                 loading={loadingProducts}
                                                 renderInput={(params) => (
                                                     <TextField {...params} placeholder="Escriba el nombre del producto..." fullWidth variant="outlined" sx={{ '& .MuiOutlinedInput-root': { backgroundColor: 'white', borderRadius: 3, border: '1px solid #e2e8f0' }, '& .MuiInputBase-input': { padding: '12px 14px' } }} />
@@ -359,7 +392,12 @@ const QuoteModal = ({
                                                 <Box sx={{ width: 24, height: 24, borderRadius: '50%', background: 'linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem' }}>💰</Box>
                                                 <Typography variant="subtitle2" sx={{ color: '#0ea5e9', fontWeight: 700, fontSize: '0.9rem' }}>Precio *</Typography>
                                             </Box>
-                                            <TextField fullWidth type="number" value={item.price} onChange={(e) => handleItemChange(index, 'price', e.target.value)} sx={{ '& .MuiOutlinedInput-root': { backgroundColor: 'white', borderRadius: 2, '& fieldset': { border: 'none' } } }} />
+                                            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                                                <TextField fullWidth type="number" value={item.price} onChange={(e) => handleItemChange(index, 'price', e.target.value)} sx={{ '& .MuiOutlinedInput-root': { backgroundColor: 'white', borderRadius: 2, '& fieldset': { border: 'none' } } }} />
+                                                <IconButton title="Usar precio del producto" onClick={() => handleUseProductPrice(index)} sx={{ bgcolor: '#e6f6ff', color: '#0284c7' }}>
+                                                    <MonetizationOnIcon />
+                                                </IconButton>
+                                            </Box>
                                         </Box>
                                     </Grid>
 
@@ -400,6 +438,7 @@ const QuoteModal = ({
 
                     <Box sx={{ display: 'flex', gap: 2 }}>
                         <Button onClick={onClose} variant="outlined" sx={{ borderColor: 'rgba(255,255,255,0.18)', color: 'white', textTransform: 'none', px: 3 }}>CANCELAR</Button>
+                        <Button onClick={handleExportPdf} variant="outlined" startIcon={<PictureAsPdfIcon />} sx={{ borderColor: 'rgba(255,255,255,0.18)', color: 'white', textTransform: 'none', px: 3 }}>EXPORTAR PDF</Button>
                         <Button variant="contained" onClick={onSave} sx={{ background: 'linear-gradient(90deg,#16a34a,#10b981)', color: 'white', borderRadius: 2, px: 3, py: 1, textTransform: 'none', boxShadow: '0 8px 24px rgba(16,185,129,0.16)' }}>{editMode ? 'ACTUALIZAR' : 'CREAR COTIZACIÓN'}</Button>
                     </Box>
                 </Box>

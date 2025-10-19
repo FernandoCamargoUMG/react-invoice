@@ -1,4 +1,5 @@
 import React from 'react';
+import { applyProductDefaultsToItem, recalcItemTotal } from '../../utils/itemHelpers';
 import {
     Dialog,
     DialogTitle,
@@ -19,6 +20,7 @@ import {
     Add as AddIcon,
     Remove as RemoveIcon
 } from '@mui/icons-material';
+import { MonetizationOn as MonetizationOnIcon } from '@mui/icons-material';
 
 const PurchaseModal = ({ 
     open, 
@@ -37,16 +39,15 @@ const PurchaseModal = ({
 }) => {
 
     const handleItemChange = (index, field, value) => {
-        const newItems = [...purchaseItems];
-        newItems[index] = { ...newItems[index], [field]: value };
-        
-        // Calcular total del item
-        if (field === 'quantity' || field === 'cost_price') {
-            const quantity = field === 'quantity' ? value : newItems[index].quantity;
-            const cost_price = field === 'cost_price' ? value : newItems[index].cost_price;
-            newItems[index].total_cost = quantity * cost_price;
-        }
-        
+        const newItems = [...(purchaseItems || [])];
+        // Normalizar números cuando vienen de inputs
+        let normalized = value;
+        if (field === 'quantity') normalized = parseFloat(value) || 0;
+        if (field === 'cost_price') normalized = parseFloat(value) || 0;
+
+        newItems[index] = { ...newItems[index], [field]: normalized };
+        newItems[index] = recalcItemTotal(newItems[index], 'cost_price', 'quantity', 'total_cost');
+
         setPurchaseItems(newItems);
     };
 
@@ -170,7 +171,7 @@ const PurchaseModal = ({
                                         fontWeight: 700,
                                         fontSize: '1.1rem'
                                     }}>
-                                        Proveedor *
+                                        Seleccione Proveedor *
                                     </Typography>
                                 </Box>
                                 <Autocomplete
@@ -349,7 +350,16 @@ const PurchaseModal = ({
                                             options={products || []}
                                             getOptionLabel={(option) => option?.name || ''}
                                             value={products?.find(p => p.id === item.product_id) || null}
-                                            onChange={(e, value) => handleItemChange(index, 'product_id', value?.id || '')}
+                                            onChange={(e, value) => {
+                                                // Aplicar defaults del producto de forma atómica usando helper
+                                                setPurchaseItems(prev => {
+                                                    const arr = [...(prev || [])];
+                                                    const existing = arr[index] || { product_id: '', quantity: 1, cost_price: 0, total_cost: 0 };
+                                                    const newItem = applyProductDefaultsToItem(existing, value, 'cost_price', 'total_cost', 'quantity');
+                                                    arr[index] = newItem;
+                                                    return arr;
+                                                });
+                                            }}
                                             isOptionEqualToValue={(option, value) => option.id === value?.id}
                                             renderInput={(params) => (
                                                 <TextField
@@ -479,20 +489,29 @@ const PurchaseModal = ({
                                                 Precio Costo *
                                             </Typography>
                                         </Box>
-                                        <TextField
-                                            fullWidth
-                                            type="number"
-                                            value={item.cost_price}
-                                            onChange={(e) => handleItemChange(index, 'cost_price', e.target.value)}
-                                            sx={{
-                                                '& .MuiOutlinedInput-root': {
-                                                    backgroundColor: 'white',
-                                                    borderRadius: 2,
-                                                    fontSize: '1rem',
-                                                    '& fieldset': { border: 'none' }
-                                                }
-                                            }}
-                                        />
+                                        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                                            <TextField
+                                                fullWidth
+                                                type="number"
+                                                value={item.cost_price}
+                                                onChange={(e) => handleItemChange(index, 'cost_price', e.target.value)}
+                                                sx={{
+                                                    '& .MuiOutlinedInput-root': {
+                                                        backgroundColor: 'white',
+                                                        borderRadius: 2,
+                                                        fontSize: '1rem',
+                                                        '& fieldset': { border: 'none' }
+                                                    }
+                                                }}
+                                            />
+                                            <IconButton title="Usar precio del producto" onClick={() => {
+                                                const prod = (products || []).find(p => p.id === item.product_id);
+                                                const prodPrice = prod ? Number(prod.price || prod.unit_price || prod.sale_price || 0) : 0;
+                                                handleItemChange(index, 'cost_price', prodPrice);
+                                            }} sx={{ bgcolor: '#e6f6ff', color: '#0284c7' }}>
+                                                <MonetizationOnIcon />
+                                            </IconButton>
+                                        </Box>
                                     </Box>
                                 </Grid>
                                 
