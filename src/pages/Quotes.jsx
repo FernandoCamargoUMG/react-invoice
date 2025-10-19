@@ -22,7 +22,6 @@ import {
     Chip,
     Avatar,
     Tooltip,
-    Alert,
     FormControl,
     InputLabel,
     Select,
@@ -46,10 +45,19 @@ import {
     Assessment as AssessmentIcon,
     AttachMoney as AttachMoneyIcon,
     Download as DownloadIcon,
+    Delete as DeleteIcon,
     Send as SendIcon
 } from '@mui/icons-material';
 import NavigationBar from '../components/NavigationBar';
 import { useCurrency } from '../utils/currency';
+import Snackbar from '@mui/material/Snackbar';
+import MuiAlert from '@mui/material/Alert';
+import QuoteModal from '../components/modals/QuoteModal';
+import { apiGet, apiPost, apiPut, apiPatch, apiDelete, API_CONFIG } from '../config/api';
+
+const Alert = React.forwardRef(function Alert(props, ref) {
+    return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
 
 const Quotes = () => {
     const navigate = useNavigate();
@@ -57,124 +65,64 @@ const Quotes = () => {
 
     // Estados principales
     const [quotes, setQuotes] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
     const [selectedQuote, setSelectedQuote] = useState(null);
-    const [openDialog, setOpenDialog] = useState(false);
+    const [openDialog, setOpenDialog] = useState(false); // view dialog
+    const [openEditor, setOpenEditor] = useState(false); // create/edit modal
+    const [customers, setCustomers] = useState([]);
+    const [products, setProducts] = useState([]);
+    const [loadingCustomers, setLoadingCustomers] = useState(false);
+    const [loadingProducts, setLoadingProducts] = useState(false);
+    const [quoteHeader, setQuoteHeader] = useState({ customer_id: '', quote_date: new Date().toISOString().split('T')[0], valid_until: '', notes: '' });
+    const [quoteItems, setQuoteItems] = useState([{ product_id: '', quantity: 1, price: 0, total_price: 0 }]);
+    const [editMode, setEditMode] = useState(false);
+    const [selectedQuoteForEdit, setSelectedQuoteForEdit] = useState(null);
+
+    // Snackbar
+    const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'info' });
+    const showSnackbar = (message, severity = 'info') => setSnackbar({ open: true, message, severity });
+    const closeSnackbar = (e, reason) => { if (reason === 'clickaway') return; setSnackbar({ ...snackbar, open: false }); };
 
     // Estadísticas
     const [stats, setStats] = useState({
         total: 0,
-        pending: 0,
+        draft: 0,
         approved: 0,
         rejected: 0,
         totalAmount: 0
     });
 
-    // Datos de ejemplo (simulando la API)
-    useEffect(() => {
-        const mockQuotes = [
-            {
-                id: 5,
-                customer_id: 4,
-                user_id: 23,
-                quote_number: 'COT-005',
-                subtotal: 0.00,
-                tax_amount: 0.00,
-                tax_rate: 0.1200,
-                total: 2250.75,
-                status: 'approved',
-                quote_date: '2025-09-15T00:00:00.000000Z',
-                valid_until: '2025-10-15T00:00:00.000000Z',
-                notes: 'Cotización para proyecto de implementación - descuento especial incluido',
-                customer: {
-                    id: 4,
-                    name: 'TechSolutions Corp.',
-                    email: 'compras@techsolutions.com',
-                    contact_person: 'Ana María Rodríguez',
-                    address: 'Av. Principal 123, Oficina 456',
-                    city: 'Medellín',
-                    phone: '+57 4 444-5555'
-                },
-                items: [
-                    {
-                        id: 8,
-                        product: { 
-                            name: 'Sistema de Inventarios Premium', 
-                            description: 'Sistema completo de gestión de inventarios con módulos avanzados' 
-                        },
-                        quantity: 1,
-                        unit_price: 1500.00,
-                        total_price: 1500.00
-                    },
-                    {
-                        id: 9,
-                        product: { 
-                            name: 'Capacitación y Soporte',
-                            description: 'Capacitación inicial y soporte técnico por 6 meses'
-                        },
-                        quantity: 1,
-                        unit_price: 750.75,
-                        total_price: 750.75
-                    }
-                ]
-            },
-            {
-                id: 6,
-                customer_id: 5,
-                user_id: 23,
-                quote_number: 'COT-006',
-                subtotal: 0.00,
-                tax_amount: 0.00,
-                tax_rate: 0.1200,
-                total: 1825.50,
-                status: 'pending',
-                quote_date: '2025-10-01T00:00:00.000000Z',
-                valid_until: '2025-11-01T00:00:00.000000Z',
-                notes: 'Cotización urgente - cliente solicita respuesta en 48 horas',
-                customer: {
-                    id: 5,
-                    name: 'Industrias del Norte S.A.S.',
-                    email: 'ventas@industriasdelnorte.com',
-                    contact_person: 'Carlos Alberto Jiménez',
-                    address: 'Zona Industrial Norte, Bodega 78',
-                    city: 'Barranquilla',
-                    phone: '+57 5 555-6666'
-                },
-                items: [
-                    {
-                        id: 10,
-                        product: { 
-                            name: 'Consultoría Empresarial',
-                            description: 'Análisis y optimización de procesos empresariales'
-                        },
-                        quantity: 40,
-                        unit_price: 35.50,
-                        total_price: 1420.00
-                    },
-                    {
-                        id: 11,
-                        product: { 
-                            name: 'Informe de Recomendaciones',
-                            description: 'Documento detallado con recomendaciones estratégicas'
-                        },
-                        quantity: 1,
-                        unit_price: 405.50,
-                        total_price: 405.50
-                    }
-                ]
-            }
-        ];
+    // Paginación
+    const [page, setPage] = useState(1);
+    const [_totalPages, set_TotalPages] = useState(1);
+    const [_totalRecords, set_TotalRecords] = useState(0);
 
-        setQuotes(mockQuotes);
-        setStats({
-            total: mockQuotes.length,
-            pending: mockQuotes.filter(q => q.status === 'pending').length,
-            approved: mockQuotes.filter(q => q.status === 'approved').length,
-            rejected: mockQuotes.filter(q => q.status === 'rejected').length,
-            totalAmount: mockQuotes.reduce((sum, q) => sum + q.total, 0)
-        });
-        setLoading(false);
-    }, []);
+    // Inicial: no cargar mocks. El usuario debe pulsar "Cargar Datos" para obtener desde backend.
+    useEffect(() => { setLoading(false); }, []);
+
+    // Cargar catálogo de clientes y productos
+    const loadCustomers = async () => {
+        setLoadingCustomers(true);
+        try {
+            const res = await apiGet(API_CONFIG.ENDPOINTS.CUSTOMERS + '?per_page=100');
+            const json = await res.json().catch(() => null);
+            if (json && json.data) setCustomers(json.data.data || json.data || []);
+        } catch (e) { console.error('Error loading customers', e); }
+        finally { setLoadingCustomers(false); }
+    };
+
+    const loadProducts = async () => {
+        setLoadingProducts(true);
+        try {
+            const res = await apiGet(API_CONFIG.ENDPOINTS.PRODUCTS + '?per_page=100');
+            const json = await res.json().catch(() => null);
+            if (json && json.data) setProducts(json.data.data || json.data || []);
+        } catch (e) { console.error('Error loading products', e); }
+        finally { setLoadingProducts(false); }
+    };
+
+    // Precargar catálogos al montar
+    useEffect(() => { loadCustomers(); loadProducts(); }, []);
 
     const handleViewQuote = (quote) => {
         setSelectedQuote(quote);
@@ -188,19 +136,23 @@ const Quotes = () => {
 
     const getStatusColor = (status) => {
         switch (status) {
-            case 'pending': return '#FF9800';
+            case 'draft': return '#FF9800';
+            case 'sent': return '#1976d2';
             case 'approved': return '#2E8B57';
             case 'rejected': return '#F44336';
             case 'expired': return '#757575';
+            case 'converted': return '#6A4C93';
             default: return '#666';
         }
     };
 
     const getStatusText = (status) => {
         switch (status) {
-            case 'pending': return 'Pendiente';
+            case 'draft': return 'Borrador';
+            case 'sent': return 'Enviada';
             case 'approved': return 'Aprobada';
             case 'rejected': return 'Rechazada';
+            case 'converted': return 'Convertida';
             case 'expired': return 'Expirada';
             default: return status;
         }
@@ -208,16 +160,129 @@ const Quotes = () => {
 
     const getStatusIcon = (status) => {
         switch (status) {
-            case 'pending': return <ScheduleIcon />;
+            case 'draft': return <ScheduleIcon />;
+            case 'sent': return <SendIcon />;
             case 'approved': return <CheckCircleIcon />;
             case 'rejected': return <CancelIcon />;
             case 'expired': return <ScheduleIcon />;
+            case 'converted': return <ReceiptIcon />;
             default: return <ScheduleIcon />;
         }
     };
 
     const isQuoteExpired = (validUntil) => {
         return new Date(validUntil) < new Date();
+    };
+
+    // Cargar cotizaciones desde backend
+    const loadQuotes = async (pageNum = 1) => {
+        if (loading) return;
+        setLoading(true);
+        try {
+            const res = await apiGet(`${API_CONFIG.ENDPOINTS.QUOTES}?page=${pageNum}`);
+            console.log('[Quotes] HTTP status:', res.status);
+            const text = await res.text().catch(() => null);
+            console.log('[Quotes] raw response text:', text);
+            let json = null;
+            try { json = text ? JSON.parse(text) : null; } catch (e) { console.error('[Quotes] JSON parse error:', e); }
+            // if apiGet returned a Response that supports json(), prefer that
+            if (!json && res.ok) {
+                try { json = await res.json(); } catch (e) { console.error('[Quotes] fallback res.json() error:', e); }
+            }
+            if (json.success && json.data) {
+                const data = json.data;
+                const arr = data.data || [];
+                console.log('[Quotes] parsed data:', data);
+                setQuotes(arr.map(q => ({ ...q })));
+                setStats({
+                    total: data.total || arr.length,
+                    draft: arr.filter(q => q.status === 'draft').length,
+                    sent: arr.filter(q => q.status === 'sent').length,
+                    approved: arr.filter(q => q.status === 'approved').length,
+                    rejected: arr.filter(q => q.status === 'rejected').length,
+                    converted: arr.filter(q => q.status === 'converted').length,
+                    totalAmount: arr.reduce((s, q) => s + parseFloat(q.total || 0), 0)
+                });
+                setPage(data.current_page || 1);
+                set_TotalPages(data.last_page || 1);
+                set_TotalRecords(data.total || arr.length);
+            } else {
+                showSnackbar(json.message || 'No se encontraron cotizaciones', 'info');
+                setQuotes([]);
+            }
+        } catch (err) {
+            console.error('Error loading quotes:', err);
+            showSnackbar('Error cargando cotizaciones', 'error');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Abrir editor
+    const openNewQuote = () => {
+        setEditMode(false);
+        setSelectedQuoteForEdit(null);
+        setQuoteHeader({ customer_id: '', quote_date: new Date().toISOString().split('T')[0], valid_until: '', notes: '' });
+        setQuoteItems([{ product_id: '', quantity: 1, price: 0, total_price: 0 }]);
+        // Ensure catalogs are loaded
+        if (customers.length === 0) loadCustomers();
+        if (products.length === 0) loadProducts();
+        setOpenEditor(true);
+    };
+
+    const openEditQuote = (quote) => {
+        setEditMode(true);
+        setSelectedQuoteForEdit(quote);
+        setQuoteHeader({ customer_id: quote.customer_id, quote_date: quote.quote_date?.split('T')[0] || '', valid_until: quote.valid_until?.split('T')[0] || '', notes: quote.notes || '' });
+        setQuoteItems(quote.items ? quote.items.map(i => ({ product_id: i.product_id, quantity: i.quantity, price: i.price || i.unit_price, total_price: i.total_price })) : [{ product_id: '', quantity: 1, price: 0, total_price: 0 }]);
+        if (customers.length === 0) loadCustomers();
+        if (products.length === 0) loadProducts();
+        setOpenEditor(true);
+    };
+
+    const handleSaveQuote = async () => {
+        try {
+            const payload = { ...quoteHeader, items: quoteItems.map(i => ({ product_id: parseInt(i.product_id), quantity: parseInt(i.quantity), price: parseFloat(i.price) })) };
+            if (editMode && selectedQuoteForEdit) {
+                const res = await apiPut(`${API_CONFIG.ENDPOINTS.QUOTES}/${selectedQuoteForEdit.id}`, payload);
+                const json = await res.json();
+                if (json.success) { showSnackbar('Cotización actualizada', 'success'); setOpenEditor(false); await loadQuotes(page); }
+                else showSnackbar(json.message || 'Error actualizando', 'error');
+            } else {
+                const res = await apiPost(API_CONFIG.ENDPOINTS.QUOTES, payload);
+                const json = await res.json();
+                if (json.success) { showSnackbar('Cotización creada', 'success'); setOpenEditor(false); await loadQuotes(1); }
+                else showSnackbar(json.message || 'Error creando', 'error');
+            }
+        } catch (err) { console.error(err); showSnackbar('Error de conexión', 'error'); }
+    };
+
+    const handleDeleteQuote = async (id) => {
+        if (!window.confirm('¿Eliminar cotización?')) return;
+        try {
+            const res = await apiDelete(`${API_CONFIG.ENDPOINTS.QUOTES}/${id}`);
+            const json = await res.json();
+            if (json.success) { showSnackbar('Cotización eliminada', 'success'); await loadQuotes(page); }
+            else showSnackbar(json.message || 'Error eliminando', 'error');
+        } catch (err) { console.error(err); showSnackbar('Error de conexión', 'error'); }
+    };
+
+    const handleQuoteAction = async (id, action) => {
+        try {
+            let endpoint = '';
+            switch (action) {
+                case 'send': endpoint = API_CONFIG.ENDPOINTS.QUOTE_SEND(id); break;
+                case 'approve': endpoint = API_CONFIG.ENDPOINTS.QUOTE_APPROVE(id); break;
+                case 'reject': endpoint = API_CONFIG.ENDPOINTS.QUOTE_REJECT(id); break;
+                case 'convert': endpoint = API_CONFIG.ENDPOINTS.QUOTE_TO_INVOICE(id); break;
+                default: return;
+            }
+            // Use POST for convert action because backend route expects POST
+            const res = action === 'convert' ? await apiPost(endpoint) : await apiPatch(endpoint);
+            const json = await res.json();
+            if (json.success) { showSnackbar(json.message || 'Acción realizada', 'success'); await loadQuotes(page); }
+            else showSnackbar(json.message || 'Error', 'error');
+        } catch (err) { console.error(err); showSnackbar('Error de conexión', 'error'); }
     };
 
     return (
@@ -429,10 +494,12 @@ const Quotes = () => {
                         <RequestQuoteIcon />
                         Lista de Cotizaciones
                     </Typography>
-                    <Button
-                        variant="contained"
-                        startIcon={<AddIcon />}
-                        onClick={() => {}} // Implementar función para nueva cotización
+                    <Box sx={{ display: 'flex', gap: 2 }}>
+                        <Button variant="outlined" onClick={() => loadQuotes(1)} sx={{ borderColor: '#8B5FBF', color: '#8B5FBF' }}>Cargar Datos</Button>
+                        <Button
+                            variant="contained"
+                            startIcon={<AddIcon />}
+                            onClick={() => openNewQuote()}
                         sx={{
                             background: 'linear-gradient(135deg, #8B5FBF 0%, #B794F6 100%)',
                             borderRadius: 2,
@@ -448,6 +515,7 @@ const Quotes = () => {
                     >
                         Nueva Cotización
                     </Button>
+                    </Box>
                 </Paper>
 
                 {/* Tabla de Cotizaciones */}
@@ -495,9 +563,6 @@ const Quotes = () => {
                                                 <Box>
                                                     <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
                                                         {quote.quote_number}
-                                                    </Typography>
-                                                    <Typography variant="body2" color="text.secondary">
-                                                        ID: {quote.id}
                                                     </Typography>
                                                 </Box>
                                             </Box>
@@ -566,7 +631,7 @@ const Quotes = () => {
                                                 </Tooltip>
                                                 <Tooltip title="Editar cotización">
                                                     <IconButton
-                                                        onClick={() => {}} // Implementar edición de cotización
+                                                        onClick={() => openEditQuote(quote)}
                                                         sx={{
                                                             color: '#6A4C93',
                                                             '&:hover': {
@@ -580,7 +645,7 @@ const Quotes = () => {
                                                 </Tooltip>
                                                 <Tooltip title="Descargar PDF">
                                                     <IconButton
-                                                        onClick={() => {}} // Implementar descarga PDF
+                                                        onClick={() => {/* TODO: implementar descarga PDF */}}
                                                         sx={{
                                                             color: '#2E8B57',
                                                             '&:hover': {
@@ -590,6 +655,31 @@ const Quotes = () => {
                                                         }}
                                                     >
                                                         <DownloadIcon />
+                                                    </IconButton>
+                                                </Tooltip>
+                                                <Tooltip title="Eliminar cotización">
+                                                    <IconButton onClick={() => handleDeleteQuote(quote.id)} sx={{ color: '#dc3545' }}>
+                                                        <DeleteIcon />
+                                                    </IconButton>
+                                                </Tooltip>
+                                                <Tooltip title="Enviar cotización">
+                                                    <IconButton onClick={() => handleQuoteAction(quote.id, 'send')}>
+                                                        <SendIcon />
+                                                    </IconButton>
+                                                </Tooltip>
+                                                <Tooltip title="Aprobar">
+                                                    <IconButton onClick={() => handleQuoteAction(quote.id, 'approve')}>
+                                                        <CheckCircleIcon />
+                                                    </IconButton>
+                                                </Tooltip>
+                                                <Tooltip title="Rechazar">
+                                                    <IconButton onClick={() => handleQuoteAction(quote.id, 'reject')}>
+                                                        <CancelIcon />
+                                                    </IconButton>
+                                                </Tooltip>
+                                                <Tooltip title="Convertir a factura">
+                                                    <IconButton onClick={() => handleQuoteAction(quote.id, 'convert')}>
+                                                        <ReceiptIcon />
                                                     </IconButton>
                                                 </Tooltip>
                                             </Box>
@@ -817,7 +907,7 @@ const Quotes = () => {
                             >
                                 📄 Descargar PDF
                             </Button>
-                            {selectedQuote.status === 'pending' && (
+                            {selectedQuote.status === 'draft' && (
                                 <Button 
                                     variant="contained"
                                     startIcon={<SendIcon />}
@@ -835,6 +925,29 @@ const Quotes = () => {
                     </>
                 )}
             </Dialog>
+
+            {/* Editor modal for create/edit */}
+            <QuoteModal
+                open={openEditor}
+                onClose={() => setOpenEditor(false)}
+                onSave={handleSaveQuote}
+                editMode={editMode}
+                customers={customers}
+                products={products}
+                quoteHeader={quoteHeader}
+                setQuoteHeader={setQuoteHeader}
+                quoteItems={quoteItems}
+                setQuoteItems={setQuoteItems}
+                error={null}
+                formatAmount={formatCurrency}
+                total={quoteItems.reduce((s,i)=>s+parseFloat(i.total_price||0),0)}
+                loadingCustomers={loadingCustomers}
+                loadingProducts={loadingProducts}
+            />
+
+            <Snackbar open={snackbar.open} autoHideDuration={3500} onClose={closeSnackbar} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
+                <Alert onClose={closeSnackbar} severity={snackbar.severity} sx={{ width: '100%' }}>{snackbar.message}</Alert>
+            </Snackbar>
         </Box>
     );
 };

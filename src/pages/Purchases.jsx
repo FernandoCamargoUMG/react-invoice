@@ -162,8 +162,8 @@ const Purchases = () => {
                     totalAmount: purchasesArray.reduce((sum, p) => sum + parseFloat(p.total || 0), 0)
                 });
             }
-        } catch (error) {
-            console.error('Error loading purchases:', error);
+        } catch (_error) {
+            console.error('Error loading purchases:', _error);
         }
     };
     
@@ -291,7 +291,7 @@ const Purchases = () => {
                 return;
             }
             // Calcular el total sumando todos los items
-            const calculatedTotal = validItems.reduce((sum, item) => {
+            const _calculatedTotal = validItems.reduce((sum, item) => {
                 const quantity = parseInt(item.quantity) || 0;
                 const cost = parseFloat(item.cost_price) || 0;
                 return sum + (quantity * cost);
@@ -426,7 +426,7 @@ const Purchases = () => {
                     showSnackbar(result.message || 'Error al cancelar la compra', 'error');
                 }
             }
-        } catch (error) {
+        } catch (_err) {
             if (action === 'delete') showSnackbar('Error de conexión al eliminar la compra', 'error');
             if (action === 'receive') showSnackbar('Error de conexión al marcar como recibida', 'error');
             if (action === 'cancel') showSnackbar('Error de conexión al cancelar la compra', 'error');

@@ -702,7 +702,7 @@ const PurchaseModal = ({
                             }
                         }}
                     >
-                        {editMode ? '💾 ACTUALIZAR COMPRA' : '✨ CREAR COMPRA'}
+                        {editMode ? 'ACTUALIZAR COMPRA' : 'CREAR COMPRA'}
                     </Button>
                 </Box>
             </DialogActions>

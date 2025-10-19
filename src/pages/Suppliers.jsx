@@ -4,6 +4,7 @@ import {
     Box,
     Grid,
     Card,
+    TablePagination,
     Typography,
     Button,
     Paper,
@@ -41,8 +42,10 @@ import {
     Person as PersonIcon,
     Receipt as ReceiptIcon
 } from '@mui/icons-material';
+import { CircularProgress } from '@mui/material';
 import NavigationBar from '../components/NavigationBar';
 import { useCurrency } from '../utils/currency';
+import { apiGet, apiPost, apiPut, apiDelete, apiPatch, API_CONFIG } from '../config/api';
 
 const Suppliers = () => {
     const navigate = useNavigate();
@@ -70,55 +73,45 @@ const Suppliers = () => {
         inactive: 0
     });
 
-    // Datos de ejemplo (simulando la API)
-    useEffect(() => {
-        const mockSuppliers = [
-            {
-                id: 1,
-                name: 'Distribuidora ABC S.A.',
-                email: 'ventas@distribuidoraabc.com',
-                phone: '555-0123',
-                address: 'Av. Industrial 123, Zona 12, Ciudad',
-                tax_id: '1234567890',
-                contact_person: 'Juan Carlos Méndez',
-                status: 'active',
-                notes: 'Proveedor principal de productos electrónicos',
-                created_at: '2025-10-11T02:39:56.000000Z'
-            },
-            {
-                id: 2,
-                name: 'Importaciones XYZ Ltda.',
-                email: 'compras@importacionesxyz.com',
-                phone: '555-0456',
-                address: 'Calle Comercio 456, Zona 10, Ciudad',
-                tax_id: '9876543210',
-                contact_person: 'María Elena García',
-                status: 'active',
-                notes: 'Especialistas en productos importados de calidad',
-                created_at: '2025-10-11T02:39:56.000000Z'
-            },
-            {
-                id: 3,
-                name: 'Proveedor de Prueba',
-                email: 'test@test.com',
-                phone: '123456789',
-                address: null,
-                tax_id: null,
-                contact_person: null,
-                status: 'inactive',
-                notes: null,
-                created_at: '2025-10-09T02:59:43.000000Z'
-            }
-        ];
+    // Paginación
+    const [page, setPage] = useState(0); // 0-based for TablePagination
+    const [rowsPerPage, setRowsPerPage] = useState(5);
+    const [totalCount, setTotalCount] = useState(0);
+    // Track per-row updating (activate/deactivate)
+    const [updatingIds, setUpdatingIds] = useState([]);
 
-        setSuppliers(mockSuppliers);
-        setStats({
-            total: mockSuppliers.length,
-            active: mockSuppliers.filter(s => s.status === 'active').length,
-            inactive: mockSuppliers.filter(s => s.status === 'inactive').length
-        });
-        setLoading(false);
-    }, []);
+    // Función para obtener proveedores (paginada)
+    const fetchSuppliers = async (pageNumber = page, perPage = rowsPerPage) => {
+    setLoading(true);
+        try {
+            const query = `?page=${(pageNumber || 0) + 1}&per_page=${perPage}`;
+            const res = await apiGet(`${API_CONFIG.ENDPOINTS.SUPPLIERS}${query}`);
+            if (!res.ok) throw new Error(`Error al cargar proveedores: ${res.status}`);
+            const json = await res.json();
+            // Soporta varios formatos: Laravel paginación en json.data.data, o json.data como lista
+            const rawItems = json?.data?.data ?? json?.data ?? json?.items ?? json?.results ?? [];
+            // Normalizar status en cada item
+            const items = rawItems.map(it => ({ ...it, status: normalizeStatus(it.status) }));
+            // Buscar total en varios lugares (data.total, meta.total, total)
+            const total = json?.data?.total ?? json?.meta?.total ?? json?.total ?? items.length;
+            setSuppliers(items);
+            setTotalCount(Number.isFinite(total) ? total : items.length);
+            setStats({
+                total: Number.isFinite(total) ? total : items.length,
+                active: items.filter(s => s.status === 'active').length,
+                inactive: items.filter(s => s.status === 'inactive').length
+            });
+        } catch (_error) {
+            console.error(_error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchSuppliers();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [page, rowsPerPage]);
 
     const handleOpenDialog = (supplier = null) => {
         if (supplier) {
@@ -153,15 +146,113 @@ const Suppliers = () => {
     };
 
     const handleSubmit = () => {
-        // Simular guardado
-        // Guardando proveedor
-        handleCloseDialog();
+        // Crear o actualizar proveedor a través del backend
+        const save = async () => {
+                try {
+                setLoading(true);
+                if (selectedSupplier) {
+                    // actualizar
+                    const res = await apiPut(`${API_CONFIG.ENDPOINTS.SUPPLIERS}/${selectedSupplier.id}`, formData);
+                    if (!res.ok) throw new Error('Error actualizando proveedor');
+                    const json = await res.json();
+                    // actualizar en estado
+                    // refrescar lista desde backend para mantener paginación
+                    await fetchSuppliers(page, rowsPerPage);
+                } else {
+                    // crear
+                    const res = await apiPost(API_CONFIG.ENDPOINTS.SUPPLIERS, formData);
+                    if (!res.ok) throw new Error('Error creando proveedor');
+                    const json = await res.json();
+                    const newSupplier = json.data ?? json;
+                    // recargar desde backend para mantener consistencia
+                    await fetchSuppliers(0, rowsPerPage);
+                }
+                handleCloseDialog();
+                } catch (_error) {
+                console.error(_error);
+                alert('Ocurrió un error al guardar el proveedor. Revisa la consola.');
+            } finally {
+                setLoading(false);
+            }
+        };
+        save();
     };
 
     const toggleStatus = (supplier) => {
-        // Simular cambio de estado
-        const newStatus = supplier.status === 'active' ? 'inactive' : 'active';
-        // Cambiando estado del proveedor
+        const toggle = async () => {
+            try {
+                // Only block the specific row
+                setUpdatingIds(prev => [...prev, supplier.id]);
+                const res = await apiPatch(API_CONFIG.ENDPOINTS.SUPPLIER_STATUS(supplier.id));
+                if (!res.ok) {
+                    const txt = await res.text().catch(() => '');
+                    console.error('Error cambiando estado', res.status, txt);
+                    throw new Error('Error cambiando estado');
+                }
+                const json = await res.json().catch(() => null);
+                const updated = json?.data ?? json ?? null;
+
+                if (updated && updated.id) {
+                    // Determinar nuevo estado: preferir el campo status del backend si viene
+                    let newStatus = normalizeStatus(updated.status ?? updated.state ?? null);
+                    if (!newStatus) {
+                        // fallback: alternar el estado local actual
+                        newStatus = supplier.status === 'active' ? 'inactive' : 'active';
+                    }
+
+                    // Actualizar solo el proveedor modificado en el estado local
+                    setSuppliers(prev => {
+                        const next = prev.map(s => (String(s.id) === String(updated.id)) ? { ...s, ...updated, status: newStatus } : s);
+                        // Recalcular estadísticas locales basadas en next
+                        setStats({
+                            total: next.length,
+                            active: next.filter(x => x.status === 'active').length,
+                            inactive: next.filter(x => x.status === 'inactive').length
+                        });
+                        return next;
+                    });
+
+                    // Actualizar totalCount si el backend lo retorna
+                    if (json?.data?.total) setTotalCount(json.data.total);
+
+                    // Mostrar mensaje del backend si viene
+                    if (json?.message) alert(json.message);
+                } else {
+                    // Fallback: recargar la página actual si la respuesta no contiene el recurso
+                    await fetchSuppliers(page, rowsPerPage);
+                }
+                } catch (_error) {
+                console.error(_error);
+                alert('No se pudo cambiar el estado del proveedor. Revisa la consola.');
+            } finally {
+                setUpdatingIds(prev => prev.filter(id => id !== supplier.id));
+            }
+        };
+        toggle();
+    };
+
+    const handleDelete = (supplierId) => {
+        if (!window.confirm('¿Estás seguro de eliminar este proveedor? Esta acción es irreversible.')) return;
+        const remove = async () => {
+            try {
+                setLoading(true);
+                const res = await apiDelete(`${API_CONFIG.ENDPOINTS.SUPPLIERS}/${supplierId}`);
+                if (!res.ok) throw new Error('Error eliminando proveedor');
+                // eliminar del estado
+                // recargar página actual; si quedó vacía, bajar página
+                const newTotal = Math.max(0, totalCount - 1);
+                const lastPage = Math.max(0, Math.ceil(newTotal / rowsPerPage) - 1);
+                const targetPage = page > lastPage ? lastPage : page;
+                setPage(targetPage);
+                await fetchSuppliers(targetPage, rowsPerPage);
+            } catch (error) {
+                console.error(error);
+                alert('No se pudo eliminar el proveedor.');
+            } finally {
+                setLoading(false);
+            }
+        };
+        remove();
     };
 
     const getStatusColor = (status) => {
@@ -170,6 +261,17 @@ const Suppliers = () => {
             case 'inactive': return '#8B5FBF';
             default: return '#666';
         }
+    };
+
+    // Normalizar diferentes representaciones de estado a 'active'|'inactive'
+    const normalizeStatus = (raw) => {
+        if (raw === null || raw === undefined) return 'inactive';
+        const s = String(raw).trim().toLowerCase();
+        if (s === 'active' || s === 'activo' || s === '1' || s === 'true') return 'active';
+        if (s === 'inactive' || s === 'inactivo' || s === '0' || s === 'false') return 'inactive';
+        // si viene un número y es 1/0
+        if (!isNaN(Number(s))) return Number(s) === 1 ? 'active' : 'inactive';
+        return 'inactive';
     };
 
     const getStatusText = (status) => {
@@ -479,8 +581,10 @@ const Suppliers = () => {
                                                     </IconButton>
                                                 </Tooltip>
                                                 <Tooltip title={`${supplier.status === 'active' ? 'Desactivar' : 'Activar'} proveedor`}>
+                                                    {/* <span> 
                                                     <IconButton
                                                         onClick={() => toggleStatus(supplier)}
+                                                        disabled={updatingIds.includes(supplier.id)}
                                                         sx={{
                                                             color: getStatusColor(supplier.status),
                                                             '&:hover': {
@@ -489,7 +593,26 @@ const Suppliers = () => {
                                                             }
                                                         }}
                                                     >
-                                                        {supplier.status === 'active' ? <ToggleOffIcon /> : <ToggleOnIcon />}
+                                                        {updatingIds.includes(supplier.id) ? (
+                                                            <CircularProgress size={20} sx={{ color: getStatusColor(supplier.status) }} />
+                                                        ) : (
+                                                            supplier.status === 'active' ? <ToggleOnIcon /> : <ToggleOffIcon />
+                                                        )}
+                                                    </IconButton>
+                                                     </span> */}
+                                                </Tooltip>
+                                                <Tooltip title="Eliminar proveedor">
+                                                    <IconButton
+                                                        onClick={() => handleDelete(supplier.id)}
+                                                        sx={{
+                                                            color: '#dc3545',
+                                                            '&:hover': {
+                                                                backgroundColor: 'rgba(220,53,69,0.08)',
+                                                                transform: 'scale(1.1)'
+                                                            }
+                                                        }}
+                                                    >
+                                                        <DeleteIcon />
                                                     </IconButton>
                                                 </Tooltip>
                                             </Box>
@@ -499,6 +622,17 @@ const Suppliers = () => {
                             </TableBody>
                         </Table>
                     </TableContainer>
+                    <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', px: 2, py: 1 }}>
+                        <TablePagination
+                            component="div"
+                            count={totalCount}
+                            page={page}
+                            onPageChange={(e, newPage) => setPage(newPage)}
+                            rowsPerPage={rowsPerPage}
+                            onRowsPerPageChange={(e) => { setRowsPerPage(parseInt(e.target.value, 10)); setPage(0); }}
+                            rowsPerPageOptions={[5, 10, 15, 25]}
+                        />
+                    </Box>
                 </Paper>
                 </Box>
             </Box>
@@ -690,7 +824,7 @@ const Suppliers = () => {
                             fontWeight: 'bold'
                         }}
                     >
-                        ❌ Cancelar
+                        Cancelar
                     </Button>
                     <Button 
                         onClick={handleSubmit} 
@@ -702,7 +836,7 @@ const Suppliers = () => {
                             fontWeight: 'bold'
                         }}
                     >
-                        ✅ {selectedSupplier ? 'Actualizar' : 'Crear'} Proveedor
+                        {selectedSupplier ? 'Actualizar' : 'Crear'} Proveedor
                     </Button>
                 </DialogActions>
             </Dialog>
