@@ -1,6 +1,6 @@
 // Configuración de la API
 const API_CONFIG = {
-    BASE_URL: 'http://127.0.0.1:8000/api',
+    BASE_URL: import.meta.env.DEV ? '/api' : 'https://novacodefc.com/api',
     ENDPOINTS: {
         // Autenticación
         LOGIN: '/auth/login',

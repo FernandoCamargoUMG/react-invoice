@@ -72,11 +72,23 @@ const Login = () => {
         <Box
             sx={{
                 minHeight: '100vh',
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                background: 'linear-gradient(135deg, #7c3aed 0%, #a855f7 25%, #c084fc 50%, #7c3aed 100%)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                p: { xs: 2, sm: 3, md: 4 }
+                p: { xs: 2, sm: 3, md: 4 },
+                position: 'relative',
+                overflow: 'hidden',
+                '&::before': {
+                    content: '""',
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    background: 'radial-gradient(ellipse at top, rgba(124, 58, 237, 0.3) 0%, transparent 50%), radial-gradient(ellipse at bottom right, rgba(168, 85, 247, 0.3) 0%, transparent 50%)',
+                    pointerEvents: 'none'
+                }
             }}
         >
             <Container
@@ -116,7 +128,7 @@ const Login = () => {
                             variant="h4"
                             sx={{
                                 fontWeight: 'bold',
-                                background: 'linear-gradient(45deg, #667eea, #764ba2)',
+                                background: 'linear-gradient(45deg, #7c3aed, #a855f7)',
                                 backgroundClip: 'text',
                                 WebkitBackgroundClip: 'text',
                                 WebkitTextFillColor: 'transparent',
@@ -167,7 +179,7 @@ const Login = () => {
                             InputProps={{
                                 startAdornment: (
                                     <InputAdornment position="start">
-                                        <EmailIcon sx={{ color: '#667eea' }} />
+                                        <EmailIcon sx={{ color: '#7c3aed' }} />
                                     </InputAdornment>
                                 ),
                             }}
@@ -180,11 +192,11 @@ const Login = () => {
                                         borderColor: '#e0e4e7'
                                     },
                                     '&:hover fieldset': {
-                                        borderColor: '#667eea',
+                                        borderColor: '#7c3aed',
                                     },
                                     '&.Mui-focused fieldset': {
-                                        borderColor: '#667eea',
-                                        boxShadow: '0 0 0 3px rgba(102, 126, 234, 0.1)'
+                                        borderColor: '#7c3aed',
+                                        boxShadow: '0 0 0 3px rgba(124, 58, 237, 0.1)'
                                     },
                                 }
                             }}
@@ -202,7 +214,7 @@ const Login = () => {
                             InputProps={{
                                 startAdornment: (
                                     <InputAdornment position="start">
-                                        <LockIcon sx={{ color: '#667eea' }} />
+                                        <LockIcon sx={{ color: '#7c3aed' }} />
                                     </InputAdornment>
                                 ),
                                 endAdornment: (
@@ -211,7 +223,7 @@ const Login = () => {
                                             onClick={() => setShowPassword(!showPassword)}
                                             edge="end"
                                             disabled={loading}
-                                            sx={{ color: '#667eea' }}
+                                            sx={{ color: '#7c3aed' }}
                                         >
                                             {showPassword ? <VisibilityOff /> : <Visibility />}
                                         </IconButton>
@@ -227,154 +239,74 @@ const Login = () => {
                                         borderColor: '#e0e4e7'
                                     },
                                     '&:hover fieldset': {
-                                        borderColor: '#667eea',
+                                        borderColor: '#7c3aed',
                                     },
                                     '&.Mui-focused fieldset': {
-                                        borderColor: '#667eea',
-                                        boxShadow: '0 0 0 3px rgba(102, 126, 234, 0.1)'
+                                        borderColor: '#7c3aed',
+                                        boxShadow: '0 0 0 3px rgba(124, 58, 237, 0.1)'
                                     },
                                 }
                             }}
                         />
 
-                        {/* Botones de Acción */}
-                        <Box sx={{ 
-                            display: 'flex', 
-                            flexDirection: 'column', 
-                            gap: { xs: 2, md: 3 },
-                            width: '100%'
-                        }}>
-                            {/* Botón Principal - Iniciar Sesión */}
-                            <Button
-                                type="submit"
-                                fullWidth
-                                variant="contained"
-                                disabled={loading}
-                                startIcon={loading ? <CircularProgress size={20} sx={{ color: 'white' }} /> : <LoginIcon />}
-                                sx={{
-                                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                                    color: 'white',
-                                    py: { xs: 1.8, md: 2.2 },
-                                    fontSize: { xs: '1rem', md: '1.1rem' },
-                                    fontWeight: '600',
-                                    borderRadius: { xs: 2, md: 3 },
-                                    textTransform: 'none',
-                                    boxShadow: '0 8px 32px rgba(102, 126, 234, 0.25)',
-                                    border: '1px solid rgba(255, 255, 255, 0.2)',
-                                    backdropFilter: 'blur(10px)',
-                                    position: 'relative',
-                                    overflow: 'hidden',
+                        {/* Botón de Iniciar Sesión */}
+                        <Button
+                            type="submit"
+                            fullWidth
+                            variant="contained"
+                            disabled={loading}
+                            startIcon={loading ? <CircularProgress size={20} sx={{ color: 'white' }} /> : <LoginIcon />}
+                            sx={{
+                                background: 'linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)',
+                                color: 'white',
+                                py: { xs: 1.8, md: 2.2 },
+                                fontSize: { xs: '1rem', md: '1.1rem' },
+                                fontWeight: '600',
+                                borderRadius: { xs: 2, md: 3 },
+                                textTransform: 'none',
+                                boxShadow: '0 8px 32px rgba(124, 58, 237, 0.25)',
+                                border: '1px solid rgba(255, 255, 255, 0.2)',
+                                backdropFilter: 'blur(10px)',
+                                position: 'relative',
+                                overflow: 'hidden',
+                                '&::before': {
+                                    content: '""',
+                                    position: 'absolute',
+                                    top: 0,
+                                    left: 0,
+                                    right: 0,
+                                    bottom: 0,
+                                    background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)',
+                                    opacity: 0,
+                                    transition: 'opacity 0.3s ease'
+                                },
+                                '&:hover': {
+                                    background: 'linear-gradient(135deg, #6d28d9 0%, #9333ea 100%)',
+                                    boxShadow: '0 12px 40px rgba(124, 58, 237, 0.35)',
+                                    transform: 'translateY(-3px) scale(1.02)',
                                     '&::before': {
-                                        content: '""',
-                                        position: 'absolute',
-                                        top: 0,
-                                        left: 0,
-                                        right: 0,
-                                        bottom: 0,
-                                        background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)',
-                                        opacity: 0,
-                                        transition: 'opacity 0.3s ease'
-                                    },
-                                    '&:hover': {
-                                        background: 'linear-gradient(135deg, #5a6fd8 0%, #6a42a0 100%)',
-                                        boxShadow: '0 12px 40px rgba(102, 126, 234, 0.35)',
-                                        transform: 'translateY(-3px) scale(1.02)',
-                                        '&::before': {
-                                            opacity: 1
-                                        }
-                                    },
-                                    '&:active': {
-                                        transform: 'translateY(-1px) scale(1.01)',
-                                        boxShadow: '0 6px 20px rgba(102, 126, 234, 0.3)'
-                                    },
-                                    '&:disabled': {
-                                        background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.4) 0%, rgba(118, 75, 162, 0.4) 100%)',
-                                        color: 'rgba(255, 255, 255, 0.7)',
-                                        transform: 'none',
-                                        boxShadow: '0 4px 16px rgba(102, 126, 234, 0.15)',
-                                        '&::before': {
-                                            opacity: 0
-                                        }
-                                    },
-                                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
-                                }}
-                            >
-                                {loading ? 'Ingresando...' : 'Iniciar Sesión'}
-                            </Button>
-
-                            {/* Botones Secundarios */}
-                            <Box sx={{ 
-                                display: 'grid', 
-                                gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' },
-                                gap: { xs: 1.5, sm: 2 },
+                                        opacity: 1
+                                    }
+                                },
+                                '&:active': {
+                                    transform: 'translateY(-1px) scale(1.01)',
+                                    boxShadow: '0 6px 20px rgba(124, 58, 237, 0.3)'
+                                },
+                                '&:disabled': {
+                                    background: 'linear-gradient(135deg, rgba(124, 58, 237, 0.4) 0%, rgba(168, 85, 247, 0.4) 100%)',
+                                    color: 'rgba(255, 255, 255, 0.7)',
+                                    transform: 'none',
+                                    boxShadow: '0 4px 16px rgba(124, 58, 237, 0.15)',
+                                    '&::before': {
+                                        opacity: 0
+                                    }
+                                },
+                                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                                 mt: 1
-                            }}>
-                                {/* Botón Olvidé mi contraseña */}
-                                <Button
-                                    variant="text"
-                                    disabled={loading}
-                                    sx={{
-                                        color: '#667eea',
-                                        fontWeight: '500',
-                                        fontSize: { xs: '0.875rem', md: '0.9rem' },
-                                        textTransform: 'none',
-                                        borderRadius: { xs: 1.5, md: 2 },
-                                        py: { xs: 1, md: 1.2 },
-                                        px: { xs: 2, md: 2.5 },
-                                        border: '1px solid transparent',
-                                        background: 'rgba(102, 126, 234, 0.05)',
-                                        backdropFilter: 'blur(10px)',
-                                        '&:hover': {
-                                            background: 'rgba(102, 126, 234, 0.1)',
-                                            border: '1px solid rgba(102, 126, 234, 0.2)',
-                                            color: '#5a6fd8',
-                                            transform: 'translateY(-2px)',
-                                            boxShadow: '0 4px 16px rgba(102, 126, 234, 0.2)'
-                                        },
-                                        '&:disabled': {
-                                            background: 'rgba(102, 126, 234, 0.03)',
-                                            color: 'rgba(102, 126, 234, 0.5)'
-                                        },
-                                        transition: 'all 0.3s ease'
-                                    }}
-                                >
-                                    🔑 ¿Olvidaste tu contraseña?
-                                </Button>
-
-                                {/* Botón Crear cuenta */}
-                                <Button
-                                    variant="outlined"
-                                    disabled={loading}
-                                    sx={{
-                                        color: '#764ba2',
-                                        borderColor: 'rgba(118, 75, 162, 0.3)',
-                                        fontWeight: '500',
-                                        fontSize: { xs: '0.875rem', md: '0.9rem' },
-                                        textTransform: 'none',
-                                        borderRadius: { xs: 1.5, md: 2 },
-                                        py: { xs: 1, md: 1.2 },
-                                        px: { xs: 2, md: 2.5 },
-                                        background: 'rgba(118, 75, 162, 0.05)',
-                                        backdropFilter: 'blur(10px)',
-                                        '&:hover': {
-                                            borderColor: 'rgba(118, 75, 162, 0.5)',
-                                            background: 'rgba(118, 75, 162, 0.1)',
-                                            color: '#6a42a0',
-                                            transform: 'translateY(-2px)',
-                                            boxShadow: '0 4px 16px rgba(118, 75, 162, 0.2)'
-                                        },
-                                        '&:disabled': {
-                                            borderColor: 'rgba(118, 75, 162, 0.2)',
-                                            background: 'rgba(118, 75, 162, 0.03)',
-                                            color: 'rgba(118, 75, 162, 0.5)'
-                                        },
-                                        transition: 'all 0.3s ease'
-                                    }}
-                                >
-                                    👤 Crear cuenta nueva
-                                </Button>
-                            </Box>
-                        </Box>
+                            }}
+                        >
+                            {loading ? 'Ingresando...' : '🔐 Iniciar Sesión'}
+                        </Button>
                     </Box>
 
                     {/* Footer */}
