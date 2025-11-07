@@ -228,7 +228,7 @@ const Dashboard = () => {
                                     mb: 0.5,
                                     fontSize: { xs: '1.8rem', md: '2.2rem' }
                                 }}>
-                                    Sistema ERP
+                                    Sistema ERP - Importadora Norte
                                 </Typography>
                                 <Typography variant="body1" color="text.secondary" sx={{ 
                                     fontSize: '1.1rem',

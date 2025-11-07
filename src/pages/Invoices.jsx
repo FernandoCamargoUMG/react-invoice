@@ -48,6 +48,7 @@ import {
     Home as HomeIcon,
     ExitToApp as LogoutIcon,
 } from "@mui/icons-material";
+import { generateReceiptPdf } from '../utils/pdf';
 import {
     apiGet,
     apiPost,
@@ -1032,6 +1033,17 @@ const Invoices = () => {
                                                 </TableCell>
                                                 <TableCell>
                                                     <Box sx={{ display: "flex", gap: 1 }}>
+                                                        <IconButton
+                                                            onClick={() => generateReceiptPdf(invoice)}
+                                                            title="Imprimir recibo"
+                                                            sx={{
+                                                                background: 'linear-gradient(45deg, #8B5FBF, #6A4C93)',
+                                                                color: 'white',
+                                                                '&:hover': { transform: 'scale(1.1)' }
+                                                            }}
+                                                        >
+                                                            <ReceiptIcon />
+                                                        </IconButton>
                                                         {invoice.status === "pending" && (
                                                             <>
                                                                 <IconButton

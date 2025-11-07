@@ -41,6 +41,8 @@ import {
     ChevronLeft as ChevronLeftIcon,
     ChevronRight as ChevronRightIcon
 } from '@mui/icons-material';
+import { Receipt as ReceiptIcon } from '@mui/icons-material';
+import { generateReceiptPdf, generatePurchasePdf } from '../utils/pdf';
 import NavigationBar from '../components/NavigationBar';
 import PurchaseModal from '../components/modals/PurchaseModal';
 import { useCurrency } from '../utils/currency';
@@ -801,6 +803,17 @@ const Purchases = () => {
                                                 </TableCell>
                                                 <TableCell>
                                                     <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center' }}>
+                                                    <Tooltip title="Imprimir recibo">
+                                                        <IconButton
+                                                            onClick={() => {
+                                                                // Pasamos directamente el objeto purchase al generador (contiene supplier)
+                                                                generatePurchasePdf(purchase, { companyName: 'Importadora - Compra', footerText: 'Comprobante de compra' });
+                                                            }}
+                                                            sx={{ color: '#6A4C93', '&:hover': { transform: 'scale(1.05)' } }}
+                                                        >
+                                                            <ReceiptIcon />
+                                                        </IconButton>
+                                                    </Tooltip>
                                                     
                                                         <Tooltip title="Editar compra">
                                                             <IconButton
