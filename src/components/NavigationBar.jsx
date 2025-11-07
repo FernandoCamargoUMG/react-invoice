@@ -18,13 +18,13 @@ const NavigationBar = ({
 }) => {
     const defaultHandlers = {
         back: () => window.history.back(),
-        home: () => window.location.href = '/',
+    home: () => window.location.href = import.meta.env.BASE_URL || '/',
         logout: () => {
             localStorage.removeItem('access_token');
             localStorage.removeItem('refresh_token');
             localStorage.removeItem('user_id');
             sessionStorage.removeItem('user');
-            window.location.href = '/';
+            window.location.href = import.meta.env.BASE_URL || '/';
         }
     };
 

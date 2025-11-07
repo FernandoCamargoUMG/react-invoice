@@ -57,8 +57,8 @@ const Login = () => {
                     );
                     localStorage.setItem("user_id", data.user.id); // <-- para facturas y otras operaciones
                 }
-                // Redirigir al dashboard o página principal
-                window.location.href = "/";
+                // Redirigir al dashboard o página principal (respetando base path)
+                window.location.href = import.meta.env.BASE_URL || '/';
             } else {
                 setError(data.message || "Credenciales incorrectas");
             }

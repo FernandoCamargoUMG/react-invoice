@@ -361,8 +361,8 @@ const Dashboard = () => {
                                         // Limpiar sessionStorage
                                         sessionStorage.clear();
                                         
-                                        // Forzar recarga completa de la página
-                                        window.location.href = '/login';
+                                        // Forzar recarga completa de la página en el base path correcto
+                                        window.location.href = `${import.meta.env.BASE_URL || '/'}login`;
                                     }}
                                     sx={{
                                         background: 'linear-gradient(135deg, #c44569 0%, #b83d52 100%)',

@@ -49,7 +49,7 @@ import DialogContentText from '@mui/material/DialogContentText';
 // Categorías de productos
 const categories = [
     'Producto',
-    'Servicio',
+    //'Servicio',
     'Vehículo'
 ];
 
@@ -78,13 +78,13 @@ const Products = () => {
 
     // Navegación simple
     const handleBack = () => window.history.back();
-    const handleHome = () => window.location.href = '/';
+    const handleHome = () => (window.location.href = import.meta.env.BASE_URL || '/');
     const handleLogout = () => {
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
         localStorage.removeItem('user_id');
         sessionStorage.removeItem('user');
-        window.location.href = '/';
+    window.location.href = import.meta.env.BASE_URL || '/';
     };
 
     // Fetch products
@@ -470,14 +470,14 @@ const Products = () => {
                 {/* Tabla Bonita */}
                 <Paper sx={{ 
                     width: '100%', 
-                    overflow: 'hidden',
+                    overflow: 'visible',
                     background: 'linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.8) 100%)',
                     backdropFilter: 'blur(20px)',
                     borderRadius: 4,
                     border: '1px solid rgba(255, 255, 255, 0.3)',
                     boxShadow: '0 8px 32px rgba(31, 38, 135, 0.2)'
                 }}>
-                    <TableContainer>
+                    <TableContainer sx={{ maxHeight: '55vh', overflow: 'auto' }}>
                         <Table>
                             <TableHead>
                                 <TableRow sx={{ background: 'linear-gradient(45deg, #8B5FBF, #6A4C93)' }}>

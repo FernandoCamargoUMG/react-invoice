@@ -1,5 +1,5 @@
 //import { useState } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import './App.css';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
@@ -21,7 +21,7 @@ function App() {
   }
 
   return (
-    <Router>
+    <>
       <Routes>
         <Route path="/" element={<Dashboard />} />
         <Route path="/users" element={<Users />} />
@@ -34,7 +34,7 @@ function App() {
         <Route path="/inventory-movements" element={<InventoryMovements />} />
         <Route path="/settings" element={<Settings />} />
       </Routes>
-    </Router>
+    </>
   );
 }
 

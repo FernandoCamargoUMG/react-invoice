@@ -1,6 +1,6 @@
 // Configuración de la API
 const API_CONFIG = {
-    BASE_URL: import.meta.env.DEV ? '/api' : 'https://novacodefc.com/api',
+    BASE_URL: import.meta.env.DEV ? '/api' : 'https://novacodefc.com/invoice/api',
     ENDPOINTS: {
         // Autenticación
         LOGIN: '/auth/login',
@@ -98,13 +98,13 @@ export const refreshToken = async () => {
         console.log('✅ Token refrescado exitosamente');
         return data.access_token;
     } else {
-        console.log('❌ Refresh token expirado, redirigiendo al login');
+    console.log('❌ Refresh token expirado, redirigiendo al login');
         // Si el refresh token también expiró, limpiar todo y redirigir al login
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
         localStorage.removeItem('user_id');
         sessionStorage.removeItem('user');
-        window.location.href = '/';
+    window.location.href = import.meta.env.BASE_URL || '/';
         throw new Error('Refresh token expired');
     }
 };

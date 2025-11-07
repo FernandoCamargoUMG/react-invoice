@@ -116,13 +116,13 @@ const Invoices = () => {
 
     // Navegación
     const handleBack = () => window.history.back();
-    const handleHome = () => (window.location.href = "/");
+    const handleHome = () => (window.location.href = import.meta.env.BASE_URL || '/');
     const handleLogout = () => {
         localStorage.removeItem("access_token");
         localStorage.removeItem("refresh_token");
         localStorage.removeItem("user_id");
         sessionStorage.removeItem("user");
-        window.location.href = "/";
+    window.location.href = import.meta.env.BASE_URL || '/';
     };
 
     // Cargar clientes y productos para selects
@@ -893,10 +893,10 @@ const Invoices = () => {
                                 borderRadius: 4,
                                 border: "1px solid rgba(255, 255, 255, 0.3)",
                                 boxShadow: "0 8px 32px rgba(31, 38, 135, 0.2)",
-                                overflow: "hidden",
+                                overflow: "visible",
                             }}
                         >
-                            <TableContainer sx={{ maxHeight: 400 }}>
+                            <TableContainer sx={{ maxHeight: '55vh', overflow: 'auto' }}>
                                 <Table stickyHeader>
                                     <TableHead>
                                         <TableRow>

@@ -68,13 +68,13 @@ const Users = () => {
 
     // Navegación simple
     const handleBack = () => window.history.back();
-    const handleHome = () => window.location.href = '/';
+    const handleHome = () => (window.location.href = import.meta.env.BASE_URL || '/');
     const handleLogout = () => {
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
         localStorage.removeItem('user_id');
         sessionStorage.removeItem('user');
-        window.location.href = '/';
+    window.location.href = import.meta.env.BASE_URL || '/';
     };
 
     useEffect(() => {
