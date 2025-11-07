@@ -27,8 +27,11 @@ import {
     Select,
     MenuItem,
     Alert,
-    Fab
+    Fab,
+    CircularProgress,
+    Snackbar
 } from '@mui/material';
+import { apiGet, apiPost, apiPut, apiDelete, API_CONFIG } from '../config/api';
 import {
     People as PeopleIcon,
     Add as AddIcon,
@@ -39,7 +42,10 @@ import {
     Person as UserIcon,
     SupervisorAccount as SupervisorIcon,
     Search as SearchIcon,
-    FilterList as FilterIcon
+    FilterList as FilterIcon,
+    ArrowBack as ArrowBackIcon,
+    Home as HomeIcon,
+    Logout as LogoutIcon
 } from '@mui/icons-material';
 
 const Users = () => {
@@ -54,29 +60,44 @@ const Users = () => {
         name: '',
         email: '',
         password: '',
-        role: 'user'
+        role: 'cashier'
     });
     const [alert, setAlert] = useState({ open: false, message: '', type: 'success' });
+    const [errors, setErrors] = useState({});
+    const [submitting, setSubmitting] = useState(false);
 
-    // Datos de ejemplo
-    const sampleUsers = [
-        { id: 1, name: 'Admin Test', email: 'admin@test.com', role: 'admin', status: 'active', created_at: '2024-01-15' },
-        { id: 2, name: 'Juan Pérez', email: 'juan@empresa.com', role: 'user', status: 'active', created_at: '2024-02-10' },
-        { id: 3, name: 'María González', email: 'maria@empresa.com', role: 'supervisor', status: 'active', created_at: '2024-02-20' },
-        { id: 4, name: 'Carlos López', email: 'carlos@empresa.com', role: 'user', status: 'inactive', created_at: '2024-03-05' }
-    ];
+    // Navegación simple
+    const handleBack = () => window.history.back();
+    const handleHome = () => window.location.href = '/';
+    const handleLogout = () => {
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
+        localStorage.removeItem('user_id');
+        sessionStorage.removeItem('user');
+        window.location.href = '/';
+    };
 
     useEffect(() => {
         loadUsers();
     }, []);
 
-    const loadUsers = () => {
+    const loadUsers = async () => {
         setLoading(true);
-        // Simular carga de API
-        setTimeout(() => {
-            setUsers(sampleUsers);
+        try {
+            const response = await apiGet(API_CONFIG.ENDPOINTS.USERS);
+            const data = await response.json();
+            
+            if (response.ok) {
+                setUsers(data.data || []);
+            } else {
+                setAlert({ open: true, message: data.message || 'Error al cargar usuarios', type: 'error' });
+            }
+        } catch (error) {
+            console.error('Error loading users:', error);
+            setAlert({ open: true, message: 'Error de conexión al cargar usuarios', type: 'error' });
+        } finally {
             setLoading(false);
-        }, 1000);
+        }
     };
 
     const handleOpenDialog = (user = null) => {
@@ -94,9 +115,10 @@ const Users = () => {
                 name: '',
                 email: '',
                 password: '',
-                role: 'user'
+                role: 'cashier'
             });
         }
+        setErrors({});
         setOpenDialog(true);
     };
 
@@ -107,56 +129,140 @@ const Users = () => {
             name: '',
             email: '',
             password: '',
-            role: 'user'
+            role: 'cashier'
         });
+        setErrors({});
+        setSubmitting(false);
     };
 
-    const handleSaveUser = () => {
-        if (editingUser) {
-            // Actualizar usuario existente
-            setUsers(users.map(user => 
-                user.id === editingUser.id 
-                    ? { ...user, ...formData }
-                    : user
-            ));
-            setAlert({ open: true, message: 'Usuario actualizado exitosamente', type: 'success' });
-        } else {
-            // Crear nuevo usuario
-            const newUser = {
-                id: users.length + 1,
-                ...formData,
-                status: 'active',
-                created_at: new Date().toISOString().split('T')[0]
-            };
-            setUsers([...users, newUser]);
-            setAlert({ open: true, message: 'Usuario creado exitosamente', type: 'success' });
+    const handleSaveUser = async () => {
+        if (submitting) return;
+        
+        setSubmitting(true);
+        setErrors({});
+
+        // Validaciones básicas
+        if (!formData.name.trim()) {
+            setErrors({ name: 'El nombre es requerido' });
+            setSubmitting(false);
+            return;
         }
-        handleCloseDialog();
+        if (!formData.email.trim()) {
+            setErrors({ email: 'El email es requerido' });
+            setSubmitting(false);
+            return;
+        }
+        if (!editingUser && !formData.password.trim()) {
+            setErrors({ password: 'La contraseña es requerida' });
+            setSubmitting(false);
+            return;
+        }
+
+        try {
+            let response;
+            let data;
+
+            if (editingUser) {
+                // Actualizar usuario existente
+                const updateData = {
+                    name: formData.name,
+                    email: formData.email,
+                    role: formData.role
+                };
+                
+                // Solo incluir password si se proporcionó
+                if (formData.password.trim()) {
+                    updateData.password = formData.password;
+                }
+
+                response = await apiPut(`${API_CONFIG.ENDPOINTS.USERS}/${editingUser.id}`, updateData);
+                data = await response.json();
+
+                if (response.ok) {
+                    await loadUsers(); // Recargar la lista
+                    setAlert({ open: true, message: 'Usuario actualizado exitosamente', type: 'success' });
+                    handleCloseDialog();
+                } else {
+                    if (data.errors) {
+                        setErrors(data.errors);
+                    } else {
+                        setAlert({ open: true, message: data.message || 'Error al actualizar usuario', type: 'error' });
+                    }
+                }
+            } else {
+                // Crear nuevo usuario
+                response = await apiPost(API_CONFIG.ENDPOINTS.USERS, formData);
+                data = await response.json();
+
+                if (response.ok) {
+                    await loadUsers(); // Recargar la lista
+                    setAlert({ open: true, message: 'Usuario creado exitosamente', type: 'success' });
+                    handleCloseDialog();
+                } else {
+                    if (data.errors) {
+                        setErrors(data.errors);
+                    } else {
+                        setAlert({ open: true, message: data.message || 'Error al crear usuario', type: 'error' });
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('Error saving user:', error);
+            setAlert({ open: true, message: 'Error de conexión al guardar usuario', type: 'error' });
+        } finally {
+            setSubmitting(false);
+        }
     };
 
-    const handleDeleteUser = (userId) => {
-        setUsers(users.filter(user => user.id !== userId));
-        setAlert({ open: true, message: 'Usuario eliminado exitosamente', type: 'success' });
+    const handleDeleteUser = async (userId) => {
+        if (!window.confirm('¿Estás seguro de que quieres eliminar este usuario?')) {
+            return;
+        }
+
+        try {
+            const response = await apiDelete(`${API_CONFIG.ENDPOINTS.USERS}/${userId}`);
+            const data = await response.json();
+
+            if (response.ok) {
+                await loadUsers(); // Recargar la lista
+                setAlert({ open: true, message: 'Usuario eliminado exitosamente', type: 'success' });
+            } else {
+                setAlert({ open: true, message: data.message || 'Error al eliminar usuario', type: 'error' });
+            }
+        } catch (error) {
+            console.error('Error deleting user:', error);
+            setAlert({ open: true, message: 'Error de conexión al eliminar usuario', type: 'error' });
+        }
     };
 
     const getRoleIcon = (role) => {
         switch (role) {
             case 'admin': return <AdminIcon />;
-            case 'supervisor': return <SupervisorIcon />;
+            case 'cashier': return <SupervisorIcon />;
             default: return <UserIcon />;
         }
     };
 
     const getRoleColor = (role) => {
         switch (role) {
-            case 'admin': return 'linear-gradient(45deg, #f44336, #d32f2f)';
-            case 'supervisor': return 'linear-gradient(45deg, #ff9800, #f57c00)';
+            case 'admin': return 'linear-gradient(45deg, #7c3aed, #a855f7)';
+            case 'cashier': return 'linear-gradient(45deg, #6d28d9, #8b5cf6)';
             default: return 'linear-gradient(45deg, #4caf50, #388e3c)';
         }
     };
 
     const getStatusColor = (status) => {
         return status === 'active' ? 'success' : 'default';
+    };
+
+    // Formatear fecha
+    const formatDate = (dateString) => {
+        if (!dateString) return 'N/A';
+        try {
+            return new Date(dateString).toLocaleDateString('es-ES');
+        } catch {
+            return dateString;
+        }
     };
 
     const filteredUsers = users.filter(user => {
@@ -169,9 +275,8 @@ const Users = () => {
     const stats = {
         total: users.length,
         admin: users.filter(u => u.role === 'admin').length,
-        supervisor: users.filter(u => u.role === 'supervisor').length,
-        user: users.filter(u => u.role === 'user').length,
-        active: users.filter(u => u.status === 'active').length
+        cashier: users.filter(u => u.role === 'cashier').length,
+        active: users.length // Todos los usuarios se consideran activos por defecto
     };
 
     return (
@@ -222,26 +327,71 @@ const Users = () => {
                             </Typography>
                         </Box>
                     </Box>
-                    <Button
-                        variant="contained"
-                        startIcon={<PersonAddIcon />}
-                        onClick={() => handleOpenDialog()}
-                        sx={{
-                            background: 'linear-gradient(45deg, #4CAF50, #45A049)',
-                            borderRadius: 3,
-                            px: 3,
-                            py: 1.5,
-                            fontWeight: 'bold',
-                            boxShadow: '0 4px 15px rgba(76, 175, 80, 0.3)',
-                            '&:hover': {
-                                background: 'linear-gradient(45deg, #45A049, #388E3C)',
-                                transform: 'translateY(-2px)',
-                                boxShadow: '0 6px 20px rgba(76, 175, 80, 0.4)'
-                            }
-                        }}
-                    >
-                        Nuevo Usuario
-                    </Button>
+                    <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                        <Button
+                            variant="outlined"
+                            onClick={handleBack}
+                            startIcon={<ArrowBackIcon />}
+                            sx={{ 
+                                borderColor: '#8B5FBF',
+                                color: '#8B5FBF',
+                                '&:hover': { 
+                                    borderColor: '#6A4C93', 
+                                    background: 'rgba(139, 95, 191, 0.1)' 
+                                }
+                            }}
+                        >
+                            Atrás
+                        </Button>
+                        <Button
+                            variant="contained"
+                            onClick={handleHome}
+                            startIcon={<HomeIcon />}
+                            sx={{
+                                background: 'linear-gradient(45deg, #4ecdc4, #44a08d)',
+                                '&:hover': { 
+                                    background: 'linear-gradient(45deg, #26d0ce, #38a085)' 
+                                }
+                            }}
+                        >
+                            Inicio
+                        </Button>
+                        <Button
+                            variant="outlined"
+                            onClick={handleLogout}
+                            startIcon={<LogoutIcon />}
+                            sx={{
+                                borderColor: '#ff6b6b',
+                                color: '#ff6b6b',
+                                '&:hover': { 
+                                    borderColor: '#ee5a24', 
+                                    background: 'rgba(255, 107, 107, 0.1)' 
+                                }
+                            }}
+                        >
+                            Cerrar sesión
+                        </Button>
+                        <Button
+                            variant="contained"
+                            startIcon={<PersonAddIcon />}
+                            onClick={() => handleOpenDialog()}
+                            sx={{
+                                background: 'linear-gradient(45deg, #4CAF50, #45A049)',
+                                borderRadius: 3,
+                                px: 3,
+                                py: 1.5,
+                                fontWeight: 'bold',
+                                boxShadow: '0 4px 15px rgba(76, 175, 80, 0.3)',
+                                '&:hover': {
+                                    background: 'linear-gradient(45deg, #45A049, #388E3C)',
+                                    transform: 'translateY(-2px)',
+                                    boxShadow: '0 6px 20px rgba(76, 175, 80, 0.4)'
+                                }
+                            }}
+                        >
+                            Nuevo Usuario
+                        </Button>
+                    </Box>
                 </Box>
             </Paper>
 
@@ -271,10 +421,10 @@ const Users = () => {
                 {/* Estadísticas */}
                 <Grid container spacing={3}>
                     {[
-                        { title: 'Total Usuarios', value: stats.total, icon: <PeopleIcon />, gradient: 'linear-gradient(135deg, #2196F3, #1976D2)' },
-                        { title: 'Administradores', value: stats.admin, icon: <AdminIcon />, gradient: 'linear-gradient(135deg, #f44336, #d32f2f)' },
-                        { title: 'Supervisores', value: stats.supervisor, icon: <SupervisorIcon />, gradient: 'linear-gradient(135deg, #ff9800, #f57c00)' },
-                        { title: 'Activos', value: stats.active, icon: <UserIcon />, gradient: 'linear-gradient(135deg, #4CAF50, #45A049)' }
+                        { title: 'Total Usuarios', value: loading ? '...' : stats.total, icon: <PeopleIcon />, gradient: 'linear-gradient(135deg, #7c3aed, #a855f7)' },
+                        { title: 'Administradores', value: loading ? '...' : stats.admin, icon: <AdminIcon />, gradient: 'linear-gradient(135deg, #6d28d9, #8b5cf6)' },
+                        { title: 'Cajeros', value: loading ? '...' : stats.cashier, icon: <SupervisorIcon />, gradient: 'linear-gradient(135deg, #9333ea, #c084fc)' },
+                        { title: 'Total Activos', value: loading ? '...' : stats.active, icon: <UserIcon />, gradient: 'linear-gradient(135deg, #4CAF50, #45A049)' }
                     ].map((stat, index) => (
                         <Grid item xs={12} sm={6} md={3} key={index}>
                             <Card sx={{
@@ -379,8 +529,7 @@ const Users = () => {
                                 >
                                     <MenuItem value="all">Todos los roles</MenuItem>
                                     <MenuItem value="admin">Administradores</MenuItem>
-                                    <MenuItem value="supervisor">Supervisores</MenuItem>
-                                    <MenuItem value="user">Usuarios</MenuItem>
+                                    <MenuItem value="cashier">Cajeros</MenuItem>
                                 </Select>
                             </FormControl>
                         </Grid>
@@ -405,16 +554,32 @@ const Users = () => {
                         <Table stickyHeader>
                             <TableHead>
                                 <TableRow>
-                                    <TableCell sx={{ fontWeight: 'bold', background: 'linear-gradient(45deg, #667eea, #764ba2)', color: 'white' }}>Usuario</TableCell>
-                                    <TableCell sx={{ fontWeight: 'bold', background: 'linear-gradient(45deg, #667eea, #764ba2)', color: 'white' }}>Email</TableCell>
-                                    <TableCell sx={{ fontWeight: 'bold', background: 'linear-gradient(45deg, #667eea, #764ba2)', color: 'white' }}>Rol</TableCell>
-                                    <TableCell sx={{ fontWeight: 'bold', background: 'linear-gradient(45deg, #667eea, #764ba2)', color: 'white' }}>Estado</TableCell>
-                                    <TableCell sx={{ fontWeight: 'bold', background: 'linear-gradient(45deg, #667eea, #764ba2)', color: 'white' }}>Fecha Creación</TableCell>
-                                    <TableCell sx={{ fontWeight: 'bold', background: 'linear-gradient(45deg, #667eea, #764ba2)', color: 'white' }}>Acciones</TableCell>
+                                    <TableCell sx={{ fontWeight: 'bold', background: 'linear-gradient(45deg, #7c3aed, #a855f7)', color: 'white' }}>Usuario</TableCell>
+                                    <TableCell sx={{ fontWeight: 'bold', background: 'linear-gradient(45deg, #7c3aed, #a855f7)', color: 'white' }}>Email</TableCell>
+                                    <TableCell sx={{ fontWeight: 'bold', background: 'linear-gradient(45deg, #7c3aed, #a855f7)', color: 'white' }}>Rol</TableCell>
+                                    <TableCell sx={{ fontWeight: 'bold', background: 'linear-gradient(45deg, #7c3aed, #a855f7)', color: 'white' }}>Fecha Creación</TableCell>
+                                    <TableCell sx={{ fontWeight: 'bold', background: 'linear-gradient(45deg, #7c3aed, #a855f7)', color: 'white' }}>Acciones</TableCell>
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                {filteredUsers.map((user) => (
+                                {loading ? (
+                                    <TableRow>
+                                        <TableCell colSpan={5} sx={{ textAlign: 'center', py: 4 }}>
+                                            <CircularProgress sx={{ color: '#7c3aed' }} />
+                                            <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
+                                                Cargando usuarios...
+                                            </Typography>
+                                        </TableCell>
+                                    </TableRow>
+                                ) : filteredUsers.length === 0 ? (
+                                    <TableRow>
+                                        <TableCell colSpan={5} sx={{ textAlign: 'center', py: 4 }}>
+                                            <Typography variant="body2" color="text.secondary">
+                                                No se encontraron usuarios
+                                            </Typography>
+                                        </TableCell>
+                                    </TableRow>
+                                ) : filteredUsers.map((user) => (
                                     <TableRow key={user.id} sx={{ 
                                         '&:hover': { 
                                             background: 'rgba(102, 126, 234, 0.1)',
@@ -439,7 +604,7 @@ const Users = () => {
                                         <TableCell>{user.email}</TableCell>
                                         <TableCell>
                                             <Chip
-                                                label={user.role.toUpperCase()}
+                                                label={user.role === 'admin' ? 'ADMINISTRADOR' : 'CAJERO'}
                                                 sx={{
                                                     background: getRoleColor(user.role),
                                                     color: 'white',
@@ -449,24 +614,16 @@ const Users = () => {
                                                 icon={getRoleIcon(user.role)}
                                             />
                                         </TableCell>
-                                        <TableCell>
-                                            <Chip
-                                                label={user.status === 'active' ? 'Activo' : 'Inactivo'}
-                                                color={getStatusColor(user.status)}
-                                                variant="filled"
-                                                sx={{ borderRadius: 2, fontWeight: 'bold' }}
-                                            />
-                                        </TableCell>
-                                        <TableCell>{user.created_at}</TableCell>
+                                        <TableCell>{formatDate(user.created_at)}</TableCell>
                                         <TableCell>
                                             <Box sx={{ display: 'flex', gap: 1 }}>
                                                 <IconButton
                                                     onClick={() => handleOpenDialog(user)}
                                                     sx={{
-                                                        background: 'linear-gradient(45deg, #2196F3, #1976D2)',
+                                                        background: 'linear-gradient(45deg, #7c3aed, #a855f7)',
                                                         color: 'white',
                                                         '&:hover': {
-                                                            background: 'linear-gradient(45deg, #1976D2, #1565C0)',
+                                                            background: 'linear-gradient(45deg, #6d28d9, #9333ea)',
                                                             transform: 'scale(1.1)'
                                                         }
                                                     }}
@@ -476,10 +633,10 @@ const Users = () => {
                                                 <IconButton
                                                     onClick={() => handleDeleteUser(user.id)}
                                                     sx={{
-                                                        background: 'linear-gradient(45deg, #f44336, #d32f2f)',
+                                                        background: 'linear-gradient(45deg, #dc2626, #b91c1c)',
                                                         color: 'white',
                                                         '&:hover': {
-                                                            background: 'linear-gradient(45deg, #d32f2f, #c62828)',
+                                                            background: 'linear-gradient(45deg, #b91c1c, #991b1b)',
                                                             transform: 'scale(1.1)'
                                                         }
                                                     }}
@@ -503,13 +660,13 @@ const Users = () => {
                     position: 'fixed',
                     bottom: 20,
                     right: 20,
-                    background: 'linear-gradient(45deg, #667eea 30%, #764ba2 90%)',
+                    background: 'linear-gradient(45deg, #7c3aed 30%, #a855f7 90%)',
                     display: { xs: 'flex', md: 'none' },
-                    boxShadow: '0 8px 20px rgba(102, 126, 234, 0.4)',
+                    boxShadow: '0 8px 20px rgba(124, 58, 237, 0.4)',
                     '&:hover': {
-                        background: 'linear-gradient(45deg, #667eea 30%, #764ba2 90%)',
+                        background: 'linear-gradient(45deg, #6d28d9 30%, #9333ea 90%)',
                         transform: 'scale(1.1)',
-                        boxShadow: '0 12px 30px rgba(102, 126, 234, 0.6)'
+                        boxShadow: '0 12px 30px rgba(124, 58, 237, 0.6)'
                     }
                 }}
                 onClick={() => handleOpenDialog()}
@@ -534,13 +691,13 @@ const Users = () => {
                 }}
             >
                 <DialogTitle sx={{
-                    background: 'linear-gradient(45deg, #667eea, #764ba2)',
+                    background: 'linear-gradient(45deg, #7c3aed, #a855f7)',
                     color: 'white',
                     fontWeight: 'bold',
                     textAlign: 'center',
                     borderRadius: '16px 16px 0 0'
                 }}>
-                    {editingUser ? 'Editar Usuario' : 'Nuevo Usuario'}
+                    {editingUser ? '✏️ Editar Usuario' : '👤 Nuevo Usuario'}
                 </DialogTitle>
                 <DialogContent sx={{ p: 3, mt: 2 }}>
                     <Grid container spacing={3}>
@@ -550,6 +707,8 @@ const Users = () => {
                                 label="Nombre Completo"
                                 value={formData.name}
                                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                error={!!errors.name}
+                                helperText={errors.name}
                                 sx={{
                                     '& .MuiOutlinedInput-root': {
                                         borderRadius: 3,
@@ -566,6 +725,8 @@ const Users = () => {
                                 type="email"
                                 value={formData.email}
                                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                error={!!errors.email}
+                                helperText={errors.email}
                                 sx={{
                                     '& .MuiOutlinedInput-root': {
                                         borderRadius: 3,
@@ -582,6 +743,8 @@ const Users = () => {
                                 type="password"
                                 value={formData.password}
                                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                                error={!!errors.password}
+                                helperText={errors.password}
                                 sx={{
                                     '& .MuiOutlinedInput-root': {
                                         borderRadius: 3,
@@ -603,8 +766,7 @@ const Users = () => {
                                         backdropFilter: 'blur(10px)'
                                     }}
                                 >
-                                    <MenuItem value="user">Usuario</MenuItem>
-                                    <MenuItem value="supervisor">Supervisor</MenuItem>
+                                    <MenuItem value="cashier">Cajero</MenuItem>
                                     <MenuItem value="admin">Administrador</MenuItem>
                                 </Select>
                             </FormControl>
@@ -614,15 +776,20 @@ const Users = () => {
                 <DialogActions sx={{ p: 3, gap: 2 }}>
                     <Button 
                         onClick={handleCloseDialog}
+                        disabled={submitting}
                         sx={{
                             borderRadius: 3,
                             px: 3,
                             py: 1.5,
-                            color: '#667eea',
-                            border: '2px solid #667eea',
+                            color: '#7c3aed',
+                            border: '2px solid #7c3aed',
                             fontWeight: 'bold',
                             '&:hover': {
-                                background: 'rgba(102, 126, 234, 0.1)'
+                                background: 'rgba(124, 58, 237, 0.1)'
+                            },
+                            '&:disabled': {
+                                color: 'rgba(124, 58, 237, 0.5)',
+                                borderColor: 'rgba(124, 58, 237, 0.5)'
                             }
                         }}
                     >
@@ -631,22 +798,47 @@ const Users = () => {
                     <Button 
                         onClick={handleSaveUser}
                         variant="contained"
+                        disabled={submitting}
+                        startIcon={submitting ? <CircularProgress size={20} color="inherit" /> : null}
                         sx={{
-                            background: 'linear-gradient(45deg, #667eea, #764ba2)',
+                            background: 'linear-gradient(45deg, #7c3aed, #a855f7)',
                             borderRadius: 3,
                             px: 3,
                             py: 1.5,
                             fontWeight: 'bold',
                             '&:hover': {
-                                background: 'linear-gradient(45deg, #5a6fd8, #6a4190)',
+                                background: 'linear-gradient(45deg, #6d28d9, #9333ea)',
                                 transform: 'translateY(-2px)'
+                            },
+                            '&:disabled': {
+                                background: 'linear-gradient(45deg, rgba(124, 58, 237, 0.5), rgba(168, 85, 247, 0.5))',
                             }
                         }}
                     >
-                        {editingUser ? 'Actualizar' : 'Crear'}
+                        {submitting ? (editingUser ? 'Actualizando...' : 'Creando...') : (editingUser ? 'Actualizar' : 'Crear')}
                     </Button>
                 </DialogActions>
-            </Dialog>
+                </Dialog>
+
+            {/* Snackbar para mensajes */}
+            <Snackbar
+                open={alert.open}
+                autoHideDuration={6000}
+                onClose={() => setAlert({ ...alert, open: false })}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+            >
+                <Alert 
+                    onClose={() => setAlert({ ...alert, open: false })} 
+                    severity={alert.type}
+                    sx={{ 
+                        width: '100%',
+                        borderRadius: 3,
+                        boxShadow: '0 8px 25px rgba(0,0,0,0.15)'
+                    }}
+                >
+                    {alert.message}
+                </Alert>
+            </Snackbar>
         </Box>
     );
 };

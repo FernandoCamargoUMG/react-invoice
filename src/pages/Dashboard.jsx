@@ -353,10 +353,12 @@ const Dashboard = () => {
                                     variant="contained"
                                     startIcon={<LogoutIcon sx={{ fontSize: '1.3rem' }} />}
                                     onClick={() => {
-                                        // Limpiar todo el localStorage
-                                        localStorage.clear();
+                                        // Limpiar datos específicos de sesión
+                                        localStorage.removeItem('access_token');
+                                        localStorage.removeItem('refresh_token');
+                                        localStorage.removeItem('user_id');
                                         
-                                        // Limpiar también sessionStorage
+                                        // Limpiar sessionStorage
                                         sessionStorage.clear();
                                         
                                         // Forzar recarga completa de la página

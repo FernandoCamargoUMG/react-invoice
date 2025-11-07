@@ -25,7 +25,11 @@ import {
     Payment as PaymentIcon,
     Dashboard as DashboardIcon,
     Close as CloseIcon,
-    Edit as EditIcon
+    Edit as EditIcon,
+    Business as BusinessIcon,
+    ShoppingCart as ShoppingCartIcon,
+    Description as DescriptionIcon,
+    SwapVert as SwapVertIcon
 } from '@mui/icons-material';
 
 const QuickActions = () => {
@@ -69,6 +73,38 @@ const QuickActions = () => {
             description: 'Gestionar usuarios del sistema'
         },
         {
+            id: 'suppliers',
+            title: 'Proveedores',
+            action: () => navigate('/suppliers'),
+            color: 'linear-gradient(45deg, #7c3aed 30%, #a855f7 90%)',
+            icon: <BusinessIcon />,
+            description: 'Gestionar proveedores'
+        },
+        {
+            id: 'purchases',
+            title: 'Compras',
+            action: () => navigate('/purchases'),
+            color: 'linear-gradient(45deg, #6d28d9 30%, #8b5cf6 90%)',
+            icon: <ShoppingCartIcon />,
+            description: 'Gestionar compras'
+        },
+        {
+            id: 'quotes',
+            title: 'Cotizaciones',
+            action: () => navigate('/quotes'),
+            color: 'linear-gradient(45deg, #9333ea 30%, #c084fc 90%)',
+            icon: <DescriptionIcon />,
+            description: 'Gestionar cotizaciones'
+        },
+        {
+            id: 'inventory-movements',
+            title: 'Movimientos',
+            action: () => navigate('/inventory-movements'),
+            color: 'linear-gradient(45deg, #7c3aed 30%, #ddd6fe 90%)',
+            icon: <SwapVertIcon />,
+            description: 'Movimientos de inventario'
+        },
+        {
             id: 'dashboard',
             title: 'Dashboard',
             action: () => navigate('/'),
@@ -104,16 +140,50 @@ const QuickActions = () => {
         }
     ];
 
-    // Acciones rápidas guardadas (por defecto las primeras 4)
+    // Acciones rápidas guardadas por usuario
     const [quickActions, setQuickActions] = useState(() => {
-        const saved = localStorage.getItem('quickActions');
-        return saved ? JSON.parse(saved) : ['new-invoice', 'new-product', 'new-customer', 'view-users'];
+        const userId = localStorage.getItem('user_id');
+        const userKey = `quickActions_user_${userId}`;
+        const saved = localStorage.getItem(userKey);
+        
+        // Si existe configuración guardada para este usuario, usarla
+        if (saved) {
+            return JSON.parse(saved);
+        }
+        
+        // Si no existe, usar valores por defecto
+        const defaultActions = ['new-invoice', 'new-product', 'new-customer', 'view-users'];
+        if (userId) {
+            localStorage.setItem(userKey, JSON.stringify(defaultActions));
+        }
+        return defaultActions;
     });
 
-    // Guardar cambios en localStorage
+    // Guardar cambios en localStorage por usuario
     useEffect(() => {
-        localStorage.setItem('quickActions', JSON.stringify(quickActions));
+        const userId = localStorage.getItem('user_id');
+        if (userId) {
+            const userKey = `quickActions_user_${userId}`;
+            localStorage.setItem(userKey, JSON.stringify(quickActions));
+        }
     }, [quickActions]);
+
+    // Detectar cambios de usuario y recargar configuración
+    useEffect(() => {
+        const userId = localStorage.getItem('user_id');
+        if (userId) {
+            const userKey = `quickActions_user_${userId}`;
+            const saved = localStorage.getItem(userKey);
+            
+            // Solo actualizar si las acciones guardadas son diferentes a las actuales
+            if (saved) {
+                const savedActions = JSON.parse(saved);
+                if (JSON.stringify(savedActions) !== JSON.stringify(quickActions)) {
+                    setQuickActions(savedActions);
+                }
+            }
+        }
+    }, []); // Solo ejecutar al montar el componente
 
     const handleClick = (event) => {
         setAnchorEl(event.currentTarget);
